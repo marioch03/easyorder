@@ -23,8 +23,8 @@ export async function crearSesionMesa(mesaId: number) {
   await privateApi.post(`/sesiones/create/${mesaId}`);
 }
 
-export async function cerrarSesionMesa(mesaId: number) {
-  await privateApi.post(`/sesiones/close/${mesaId}`);
+export async function cerrarSesionMesa(sessionCode: string) {
+  await privateApi.post(`/sesiones/close/${sessionCode}`);
 }
 
 export async function getCuentaMesa(mesaId: number) {

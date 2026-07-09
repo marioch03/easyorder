@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.easyorder.api.backend.dto.SesionClienteDTO;
 import com.easyorder.api.backend.model.Mesa;
 import com.easyorder.api.backend.model.Sesion;
 import com.easyorder.api.backend.service.SesionService;
@@ -30,9 +31,9 @@ public class SesionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevaSesion);
     }
 
-    @PostMapping("/admin/sesiones/close/{idMesa}")
-    public ResponseEntity<Sesion> cerrarSesion(@PathVariable Long idMesa) {
-        Sesion sesion = sesionService.cerrarSesion(idMesa);
+    @PostMapping("/admin/sesiones/close/{sessionCode}")
+    public ResponseEntity<Sesion> cerrarSesion(@PathVariable String sessionCode) {
+        Sesion sesion = sesionService.cerrarSesion(sessionCode);
         return ResponseEntity.ok(sesion);
     }
 
@@ -46,6 +47,11 @@ public class SesionController {
     @GetMapping("/cliente/sesiones/mesa")
     public Mesa getMesaPorCodigo(@RequestHeader("X-Session-Code") String sessionCode) {
         return sesionService.getMesaPorCodigo(sessionCode);
+    }
+
+    @GetMapping("/cliente/sesiones/init")
+    public SesionClienteDTO getDatosCliente(@RequestHeader("X-Session-Code") String sessionCode) {
+        return sesionService.obtenerDatosSesionCliente(sessionCode);
     }
 
 }

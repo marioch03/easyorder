@@ -97,8 +97,13 @@ export default function TablesPage() {
   const cerrarSesion = async (mesa: Mesa) => {
     if (!token) return;
 
+    if (!mesa.sesionActiva) {
+      throw new Error("La mesa no tiene una sesión activa.");
+    }
+
     try {
-      await cerrarSesionMesa(mesa.id);
+      await cerrarSesionMesa(mesa.sesionActiva.qrCodeUrl);
+
       cerrarModal();
     } catch (err) {
       console.error(err);

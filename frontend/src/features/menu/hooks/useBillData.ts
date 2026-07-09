@@ -1,26 +1,22 @@
 import { useEffect, useState } from "react";
-import { getCuenta, getMesa } from "../services/billService";
+import { useSession } from "../../session/useSession";
+import { getCuenta } from "../services/billService";
 import type { Cuenta } from "../types/bill";
 
 export function useBillData(sessionCode: string | null) {
-const [cuenta, setCuenta] = useState<Cuenta | null>(null);
+  const [cuenta, setCuenta] = useState<Cuenta | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const [idMesa, setIdMesa] = useState<number | null>(null);
-  const [estadoMesa, setEstadoMesa] = useState("");
+  const sessionData = useSession();
+  const idMesa = sessionData.sessionData?.mesaId ?? null;
+  const estadoMesa = sessionData.sessionData?.estadoMesa ?? null;
 
   useEffect(() => {
     if (!sessionCode) return;
 
     const fetchData = async () => {
       try {
-        const [mesa, cuenta] = await Promise.all([
-          getMesa(),
-          getCuenta(),
-        ]);
-
-        setIdMesa(mesa.id);
-        setEstadoMesa(mesa.estado.nombre);
+        setLoading(true);
+        const [cuenta] = await Promise.all([getCuenta()]);
         setCuenta(cuenta);
       } finally {
         setLoading(false);
@@ -28,13 +24,12 @@ const [cuenta, setCuenta] = useState<Cuenta | null>(null);
     };
 
     fetchData();
-  }, [sessionCode]);
+  }, [sessionCode, estadoMesa]);
 
   return {
     cuenta,
     loading,
     idMesa,
     estadoMesa,
-    setEstadoMesa,
   };
 }

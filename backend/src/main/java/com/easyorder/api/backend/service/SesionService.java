@@ -5,9 +5,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.easyorder.api.backend.dto.MesaDTO;
+import com.easyorder.api.backend.dto.SesionClienteDTO;
 import com.easyorder.api.backend.dto.SesionDTO;
 import com.easyorder.api.backend.exception.NoEncontradoException;
 import com.easyorder.api.backend.model.Mesa;
@@ -108,16 +111,14 @@ public class SesionService {
         return nuevaSesion;
     }
 
-    public Sesion cerrarSesion(Long idMesa) {
-        Mesa mesa = mesaRepository.findById(idMesa)
-                .orElseThrow(() -> new NoEncontradoException("Mesa no encontrada. Id: " + idMesa));
+    @CacheEvict(value = "sesionClienteCache", key = "#sessionCode")
+    public Sesion cerrarSesion(String sessionCode) {
+        Sesion sesion = getSesionPorCodigo(sessionCode);
+        Mesa mesa = sesion.getMesa();
         MesaEstado estadoLibre = mesaEstadoRepository.findByNombre("LIBRE")
                 .orElseThrow(() -> new NoEncontradoException("Estado no encontrado: LIBRE"));
         mesa.setEstado(estadoLibre);
         mesa = mesaRepository.save(mesa);
-
-        Sesion sesion = sesionRepository.findByMesaAndEstado(mesa, getEstadoSesion("ACTIVA"))
-                .orElseThrow(() -> new NoEncontradoException("No hay sesión activa para la mesa con ID: " + idMesa));
 
         sesion.setHoraFin(LocalDateTime.now());
         sesion.setEstado(getEstadoSesion("FINALIZADA"));
@@ -134,10 +135,9 @@ public class SesionService {
         Optional<Sesion> sesionMesa = sesionRepository.findByMesaAndEstado(mesa, estadoActiva);
         if (sesionMesa.isPresent()) {
             Sesion sesion = sesionMesa.get();
-            SesionDTO sesionDTO = new SesionDTO();
-            sesionDTO.setId(sesion.getId());
-            sesionDTO.setQrCodeUrl(sesion.getQrCodeUrl());
-            return sesionDTO;
+            return new SesionDTO(
+                    sesion.getId(),
+                    sesion.getQrCodeUrl());
         } else {
             return null;
         }
@@ -170,11 +170,22 @@ public class SesionService {
         Optional<Sesion> sesionMesa = sesionRepository.findByMesaAndEstado(mesa, estadoActiva);
         if (sesionMesa.isPresent()) {
             Sesion sesion = sesionMesa.get();
-            SesionDTO sesionDTO = new SesionDTO();
-            sesionDTO.setId(sesion.getId());
-            sesionDTO.setQrCodeUrl(sesion.getQrCodeUrl());
-            return sesionDTO;
+            return new SesionDTO(
+                    sesion.getId(),
+                    sesion.getQrCodeUrl());
         }
         return null;
+    }
+
+    @Cacheable(value = "sesionClienteCache", key = "#sessionCode")
+    public SesionClienteDTO obtenerDatosSesionCliente(String sessionCode) {
+        Sesion sesion = getSesionPorCodigo(sessionCode);
+        Mesa mesa = sesion.getMesa();
+        return new SesionClienteDTO(
+                sesion.getId(),
+                sesion.getQrCodeUrl(),
+                mesa.getId(),
+                mesa.getNumero(),
+                mesa.getEstado().getNombre());
     }
 }

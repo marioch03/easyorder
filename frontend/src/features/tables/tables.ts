@@ -1,6 +1,6 @@
 export type SesionDTO = {
   id: number;
-  qrCodeUrl: string | null;
+  qrCodeUrl: string;
 };
 
 export type Mesa = {

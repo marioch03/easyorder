@@ -153,7 +153,7 @@ public class PedidoService {
                 Mesa mesa = mesaRepository.findById(idMesa)
                                 .orElseThrow(() -> new NoEncontradoException("Mesa no encontrada. Id: " + idMesa));
                 SesionDTO sesion = obtenerSesionActiva(mesa);
-                List<Pedido> pedidos = pedidoRepository.findBySesionId(sesion.getId());
+                List<Pedido> pedidos = pedidoRepository.findBySesionId(sesion.id());
 
                 List<PedidoItemDTO> itemsAgrupados = pedidos.stream()
                                 .flatMap(pedido -> pedidoItemRepository.findByPedidoId(pedido.getId()).stream())
@@ -195,10 +195,9 @@ public class PedidoService {
                 Optional<Sesion> sesionMesa = sesionRepository.findByMesaAndEstado(mesa, estadoActiva);
                 if (sesionMesa.isPresent()) {
                         Sesion sesion = sesionMesa.get();
-                        SesionDTO sesionDTO = new SesionDTO();
-                        sesionDTO.setId(sesion.getId());
-                        sesionDTO.setQrCodeUrl(sesion.getQrCodeUrl());
-                        return sesionDTO;
+                        return new SesionDTO(
+                                        sesion.getId(),
+                                        sesion.getQrCodeUrl());
                 }
                 return null;
         }

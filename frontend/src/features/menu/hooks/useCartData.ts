@@ -1,32 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useCart } from "../../cart/useCart";
-import { crearPedido, getEstadoMesa } from "../services/cartService";
+import { useSession } from "../../session/useSession";
+import { crearPedido } from "../services/cartService";
 import type { OrderDTO, OrderItemDTO } from "../types/menu";
 
 export function useCartData(sessionCode: string | null) {
   const { items: cart, addItem, decreaseItem, clearCart } = useCart();
 
-  const [estadoMesa, setEstadoMesa] = useState("");
-  const [loadingEstado, setLoadingEstado] = useState(true);
-
-  useEffect(() => {
-    if (!sessionCode) return;
-
-    const fetchEstado = async () => {
-      try {
-        const data = await getEstadoMesa();
-
-        setEstadoMesa(data.estado.nombre);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoadingEstado(false);
-      }
-    };
-
-    fetchEstado();
-  }, [sessionCode]);
-
+  const sessionData = useSession();
+  const estadoMesa = sessionData.sessionData?.estadoMesa;
   const mesaBloqueada = estadoMesa === "ESPERANDO_CUENTA";
 
   const total = useMemo(
@@ -72,7 +54,6 @@ export function useCartData(sessionCode: string | null) {
     cart,
     total,
     mesaBloqueada,
-    loadingEstado,
     increaseQuantity,
     decreaseQuantity,
     realizarPedido,

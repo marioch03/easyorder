@@ -53,10 +53,9 @@ public class MesaService {
         Optional<Sesion> sesionMesa = sesionRepository.findByMesaAndEstado(mesa, estadoActiva);
         if (sesionMesa.isPresent()) {
             Sesion sesion = sesionMesa.get();
-            SesionDTO sesionDTO = new SesionDTO();
-            sesionDTO.setId(sesion.getId());
-            sesionDTO.setQrCodeUrl(sesion.getQrCodeUrl());
-            return sesionDTO;
+            return new SesionDTO(
+                    sesion.getId(),
+                    sesion.getQrCodeUrl());
         }
         return null;
     }

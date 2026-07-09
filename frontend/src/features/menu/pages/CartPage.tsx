@@ -14,7 +14,6 @@ export default function CartPage() {
     cart,
     total,
     mesaBloqueada,
-    loadingEstado,
     increaseQuantity,
     decreaseQuantity,
     realizarPedido,
@@ -30,14 +29,6 @@ export default function CartPage() {
       setConfirmOpen(false);
     }
   };
-  if (loadingEstado) {
-    return <p>Cargando carrito...</p>;
-  }
-
-
-  if (loadingEstado) {
-    return <p>Cargando carrito...</p>;
-  }
 
   return (
     <div className="cart-page">

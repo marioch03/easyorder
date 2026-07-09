@@ -26,6 +26,13 @@ export const authApi = axios.create({
   },
 });
 
+export const initApi = axios.create({
+  baseURL: BASE_URL_CLIENTE,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
 export const publicApi = axios.create({
   baseURL: BASE_URL_CLIENTE,
   headers: {
