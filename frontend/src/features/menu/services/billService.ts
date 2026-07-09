@@ -28,7 +28,7 @@ export async function solicitarCuentaApi(mesaId: number) {
     
     return response.data;
   } catch (error) {
-    throw new Error("Error solicitando cuenta");
+    throw new Error("Error solicitando cuenta", { cause: error });
   }
 }
 

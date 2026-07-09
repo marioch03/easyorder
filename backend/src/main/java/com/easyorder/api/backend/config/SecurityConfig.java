@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final SessionCodeFilter sessionCodeFilter;
     private final AuthenticationProvider authenticationProvider;
     private final TokenRepository tokenRepository;
 
@@ -35,7 +36,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/login", "/auth/refresh").permitAll()
                         .requestMatchers("/auth/register").hasRole("ADMIN")
-                        .requestMatchers("/api/cliente/**").permitAll()
+                        .requestMatchers("/api/cliente/**").hasRole("CUSTOMER")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
@@ -44,6 +45,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(sessionCodeFilter, JwtAuthFilter.class)
                 .logout(logout -> logout.logoutUrl("/auth/logout")
                         .addLogoutHandler((request, response, authentication) -> {
                             final var authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);

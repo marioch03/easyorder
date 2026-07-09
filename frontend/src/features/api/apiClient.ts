@@ -50,7 +50,7 @@ publicApi.interceptors.response.use(
   (error) => {
     if (
       error.response &&
-      (error.response.status === 401 || error.response.status === 404)
+      (error.response.status === 401 || error.response.status === 403 || error.response.status === 404)
     ) {
       localStorage.removeItem("sessionCode");
       window.location.href = "/error";
