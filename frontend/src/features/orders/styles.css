@@ -1,0 +1,154 @@
+.main-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 0;
+  padding: 20px;
+  overflow-y: auto;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+  padding-bottom: 40px;
+}
+
+.orders-container{
+    display:flex; 
+    gap:20px; 
+    flex-wrap:wrap;
+}
+
+.modal-center-orders{
+  display: flex;
+  justify-content: space-between;
+  padding: 15px;}
+.pedido-card {
+    width: 330px;
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+    }
+
+.pedido-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+
+.pedido-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pedido-numero {
+    font-size: 20px;
+    font-weight: 700;
+    color: black;
+}
+
+.pedido-estado {
+    padding: 6px 12px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 600;
+    color: white;
+}
+
+.pedido-estado-en-preparacion { background: var(--color-preparing); }
+.pedido-estado-listo { background: var(--color-success); }
+.pedido-estado-pendiente { background: var(--color-danger); }
+
+
+.pedido-center {
+    margin-top: 18px;
+    color: #767e84;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.pedido-center span {
+    font-weight: 600;
+    color: black;
+}
+
+.pedido-bottom {
+    margin-top: 18px;
+    font-size: 14px;
+    color: #767e84;
+    opacity: 0.9;
+}
+
+.pedido-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 15px;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+.pedido-item {
+  padding: 12px 14px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+  font-size: 15px;
+  font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.item-nota {
+  margin-left: 4px;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.nota-label {
+  font-weight: bold;
+  margin-right: 4px;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.pedido-items::-webkit-scrollbar {
+  width: 6px;
+}
+
+.pedido-items::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 10px;
+}
+
+.modal-bottom-orders {
+  padding: 18px 20px;
+  text-align: center;
+  border-bottom-left-radius: 14px;
+  border-bottom-right-radius: 14px;
+}
+
+.servido-button {
+  width: 160px;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  background: var(--color-primary);
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 700;
+  transition: background-color 0.15s ease, transform 0.08s ease, opacity 0.12s;
+}
+
+.servido-button:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-1px);
+  opacity: 0.98;
+}
+
+.servido-button:active {
+  transform: translateY(0);
+}

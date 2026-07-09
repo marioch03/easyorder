@@ -1,0 +1,104 @@
+.sidebar-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.2rem;
+  min-width: 120px;
+  min-height: 120px;
+  background-color: var(--color-secondary);
+  color: #fff;
+  border-radius: 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background-color 0.2s ease, border 0.2s ease;
+}
+
+.sidebar-button:hover {
+  background-color: var(--color-secondary-dark);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.sidebar-button:active {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-button img {
+  width: 3.5rem;
+  height: 3.5rem;
+  margin-bottom: 0.7rem;
+  opacity: 0.9;
+  transition: opacity 0.2s ease;
+}
+
+.sidebar-button:hover img {
+  opacity: 1;
+}
+
+.sidebar-button span {
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 0.3px;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+  padding: 1.5rem;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--color-primary);
+  min-width: 100px;
+}
+.page-banner {
+  width: 100%;
+  padding: 1.5rem 2rem;
+  background-color: var(--color-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 120px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+}
+
+.page-banner h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.app-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+  overflow: hidden;
+}
+.sidebar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.app-logo img{ 
+  width: 100px;
+  height:100px;
+  margin-bottom: 0.5rem;
+}
