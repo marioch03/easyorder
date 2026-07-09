@@ -1,0 +1,85 @@
+# ==========================================
+# 1. SECRETOS, ENTORNOS Y CONFIGURACIÓN LOCAL
+# ==========================================
+# Archivos de entorno del Frontend y variables locales
+**/*.local
+.env
+.env.*
+.github/
+
+# Propiedades locales del Backend (Spring Boot)
+**/src/main/resources/application-local.properties
+**/src/main/resources/application-dev.properties
+**/src/main/resources/application.properties
+
+# ==========================================
+# 2. NODE / REACT (FRONTEND)
+# ==========================================
+**/node_modules/
+**/dist/
+**/dist-ssr/
+.eslintcache
+
+# Logs de empaquetadores
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ==========================================
+# 3. JAVA / MAVEN (BACKEND)
+# ==========================================
+**/target/
+**/build/
+.mvn/wrapper/maven-wrapper.jar
+HELP.md
+
+# Excepciones para mantener carpetas target/build críticas si las hubiera
+!**/src/main/**/target/
+!**/src/test/**/target/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# ==========================================
+# 4. EDITORES E IDEs (VS Code, IntelliJ, etc.)
+# ==========================================
+### VS Code ###
+**/.vscode/
+!**/.vscode/extensions.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+### IntelliJ IDEA ###
+**/.idea/
+*.iws
+*.iml
+*.ipr
+
+### Eclipse / STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### NetBeans ###
+**/nbproject/private/
+**/nbbuild/
+**/nbdist/
+**/.nb-gradle/
+
+# ==========================================
+# 5. SISTEMA OPERATIVO Y LOGS GENERALES
+# ==========================================
+# macOS
+.DS_Store
+
+# Logs generales
+logs/
+*.log
