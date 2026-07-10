@@ -15,8 +15,10 @@ export default function OrderPage() {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const estadoClassName = (estado: string) =>
     "pedido-estado-" + estado.toLowerCase().replaceAll("_", "-");
+    const [botonLoading, setBotonLoading] = useState(false);
 
-  const { pedidos } = useOrdersData(token);
+
+  const { pedidos, loading } = useOrdersData(token);
 
   const pedidosPendientes = useMemo(() => {
     return pedidos.filter((pedido) => pedido.nombreEstado !== "SERVIDO");
@@ -32,17 +34,24 @@ export default function OrderPage() {
     setModalIsOpen(false);
   };
 
-  const onClickPedidoServido = async () => {
-    if (!pedidoSeleccionado || !token) return;
+ const onClickPedidoServido = async () => {
+    if (!pedidoSeleccionado || !token || botonLoading) return;
 
+    setBotonLoading(true);
     try {
       await marcarPedidoServido(pedidoSeleccionado.idPedido, "SERVIDO");
 
       cerrarModal();
     } catch (err) {
       console.error("Error al marcar pedido como servido:", err);
+    } finally {
+      setBotonLoading(false);
     }
   };
+
+  if (loading) {
+    return <div className="loading">Cargando pedidos...</div>;
+  }
 
   return (
     <div className="main-container">
@@ -115,8 +124,12 @@ export default function OrderPage() {
               ))}
             </div>
             <div className="modal-bottom-orders">
-              <button className="servido-button" onClick={onClickPedidoServido}>
-                Servido
+              <button
+                className="servido-button"
+                onClick={onClickPedidoServido}
+                disabled={botonLoading}
+              >
+                {botonLoading ? <span className="loader" /> : "Servido"}
               </button>
             </div>
           </div>

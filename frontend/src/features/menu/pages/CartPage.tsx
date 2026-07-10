@@ -5,6 +5,7 @@ import "../styles.css";
 
 export default function CartPage() {
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [botonLoading, setBotonLoading] = useState(false);
 
   const { sessionCode } = useSession();
 
@@ -20,12 +21,16 @@ export default function CartPage() {
   } = useCartData(sessionCode);
 
   const handleRealizarPedido = async () => {
+    if (botonLoading) return;
+
+    setBotonLoading(true);
 
     try {
       await realizarPedido();
     } catch (err) {
       console.error(err);
     } finally {
+      setBotonLoading(false);
       setConfirmOpen(false);
     }
   };
@@ -90,11 +95,12 @@ export default function CartPage() {
                 Cancelar
               </button>
 
-               <button
+              <button
                 className="confirm-btn"
                 onClick={handleRealizarPedido}
+                disabled={botonLoading}
               >
-                Confirmar
+                {botonLoading ? <span className="loader" /> : "Confirmar"}
               </button>
             </div>
           </div>

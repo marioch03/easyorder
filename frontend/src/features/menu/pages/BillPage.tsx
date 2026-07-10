@@ -7,6 +7,7 @@ import "../styles.css";
 export default function BillPage() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const { sessionCode, actualizarEstadoMesa } = useSession();
+  const [botonLoading, setBotonLoading] = useState(false);
 
   const { cuenta, loading, idMesa, estadoMesa } = useBillData(sessionCode);
 
@@ -14,6 +15,7 @@ export default function BillPage() {
 
   const solicitarCuenta = async () => {
     if (!idMesa || !sessionCode) return;
+    setBotonLoading(true);
     try {
       await solicitarCuentaApi(idMesa);
       setConfirmOpen(false);
@@ -22,6 +24,8 @@ export default function BillPage() {
       console.error(err);
 
       alert("No se pudo solicitar la cuenta");
+    } finally {
+      setBotonLoading(false);
     }
   };
   if (loading) return <p>Cargando cuenta...</p>;
@@ -77,8 +81,12 @@ export default function BillPage() {
                 Cancelar
               </button>
 
-              <button className="confirm-btn" onClick={solicitarCuenta}>
-                Confirmar
+              <button
+                className="confirm-btn"
+                onClick={solicitarCuenta}
+                disabled={botonLoading}
+              >
+                {botonLoading ? <span className="loader" /> : "Confirmar"}
               </button>
             </div>
           </div>

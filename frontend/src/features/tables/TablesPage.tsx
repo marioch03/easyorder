@@ -23,7 +23,7 @@ Modal.setAppElement("#root");
 
 export default function TablesPage() {
   const token = localStorage.getItem("accessToken");
-  const { mesas, zonas, setMesas, setZonas } = useTablesData(token);
+  const { mesas, zonas, setMesas, setZonas, loading } = useTablesData(token);
   const { mesas: mesasWS } = useWS();
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -32,6 +32,8 @@ export default function TablesPage() {
   const [numeroMesa, setNumeroMesa] = useState("");
   const [zonaMesa, setZonaMesa] = useState<number | null>(null);
   const estadoMesaSeleccionada = mesaSeleccionada?.estado;
+
+  const [qrLoading, setQrLoading] = useState(false);
 
   const [cuenta, setCuenta] = useState<Cuenta | null>(null);
   const [modalCuentaOpen, setModalCuentaOpen] = useState(false);
@@ -85,17 +87,21 @@ export default function TablesPage() {
 
   const crearSesion = async (mesa: Mesa) => {
     if (!token) return;
+    setQrLoading(true);
 
     try {
       await crearSesionMesa(mesa.id);
       cerrarModal();
     } catch (err) {
       console.error(err);
+    } finally {
+      setQrLoading(false);
     }
   };
 
   const cerrarSesion = async (mesa: Mesa) => {
-    if (!token) return;
+    if (!token || qrLoading) return;
+    setQrLoading(true);
 
     if (!mesa.sesionActiva) {
       throw new Error("La mesa no tiene una sesión activa.");
@@ -103,10 +109,11 @@ export default function TablesPage() {
 
     try {
       await cerrarSesionMesa(mesa.sesionActiva.qrCodeUrl);
-
       cerrarModal();
     } catch (err) {
       console.error(err);
+    } finally {
+      setQrLoading(false);
     }
   };
 
@@ -151,6 +158,10 @@ export default function TablesPage() {
       mesas: mesas.filter((m) => m.zona === zona.nombre),
     }))
     .filter((g) => g.mesas.length > 0);
+
+  if (loading) {
+    return <div className="loading">Cargando mesas...</div>;
+  }
 
   return (
     <div className="main-container">
@@ -203,6 +214,7 @@ export default function TablesPage() {
                 <ImageButton
                   icon={qrIcon}
                   label="Generar QR"
+                  loading={qrLoading}
                   onClick={() => crearSesion(mesaSeleccionada)}
                 />
               ) : mesaSeleccionada?.sesionActiva?.qrCodeUrl ? (
@@ -217,6 +229,7 @@ export default function TablesPage() {
                     <ImageButton
                       icon={closeIcon}
                       label="Cerrar sesión"
+                      loading={qrLoading}
                       onClick={() => cerrarSesion(mesaSeleccionada)}
                     />
                     <ImageButton
