@@ -21,7 +21,7 @@ export default function MenuPage() {
     return categories.map((cat) => ({
       id: cat.id,
       nombre: cat.nombre,
-      products: productosDisponibles.filter((p) => p.idTipo === cat.id),
+      products: productosDisponibles.filter((p) => p.tipoId === cat.id),
     }));
   }, [categories, productosDisponibles]);
 

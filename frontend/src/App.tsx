@@ -11,26 +11,38 @@ import { WebSocketProvider } from "./features/ws/WebSocketProvider";
 function App() {
   return (
     <BrowserRouter>
-      <SessionProvider>
-        <WebSocketProvider>
-          <CartProvider>
-            <Routes>
-              <Route path="/" element={<Navigate to="/admin" replace />} />
-              <Route path="/cliente" element={<CustomerPage />} />
-              <Route path="/auth/login" element={<LoginPage />} />
-              <Route
-                path="/admin"
-                element={
-                  <ProtectedRoute>
-                    <ManagementPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="/error" element={<ErrorPage />} />
-            </Routes>
-          </CartProvider>
-        </WebSocketProvider>
-      </SessionProvider>
+      <Routes>
+        
+        {/* ENTORNO CLIENTE */}
+        <Route 
+          path="/cliente" 
+          element={
+            <SessionProvider>
+              <CartProvider>
+                <CustomerPage />
+              </CartProvider>
+            </SessionProvider>
+          } 
+        />
+
+        {/* ENTORNO ADMINISTRACIÓN */}
+        <Route path="/" element={<Navigate to="/admin" replace />} />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <WebSocketProvider>
+                <ManagementPage />
+              </WebSocketProvider>
+            </ProtectedRoute>
+          }
+        />
+        
+        {/* RUTAS PÚBLICAS */}
+        <Route path="/auth/login" element={<LoginPage />} />
+        <Route path="/error" element={<ErrorPage />} />
+
+      </Routes>
     </BrowserRouter>
   );
 }

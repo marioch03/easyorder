@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.easyorder.api.backend.dto.ProductoDTO;
+import com.easyorder.api.backend.dto.ProductoTipoDTO;
 import com.easyorder.api.backend.model.Producto;
-import com.easyorder.api.backend.model.ProductoTipo;
 import com.easyorder.api.backend.service.ProductoService;
 
 import lombok.RequiredArgsConstructor;
@@ -56,7 +56,7 @@ public class ProductoController {
     }
 
     @GetMapping("/cliente/productos/tipos")
-    public List<ProductoTipo> getTipos(@RequestHeader("X-Session-Code") String sessionCode) {
+    public List<ProductoTipoDTO> getTipos(@RequestHeader("X-Session-Code") String sessionCode) {
         return productoService.getTipos(sessionCode);
     }
 }

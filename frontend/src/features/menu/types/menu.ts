@@ -5,13 +5,12 @@ export type ProductDTO = {
   precio: number;
   disponible: boolean;
   imagen?: string | null;
-  idTipo: number;
+  tipoId: number;
 };
 
 export type CategoryDTO = {
   id: number;
   nombre: string;
-  description?: string | null;
 };
 
 export type ProductosPorCategorias = {

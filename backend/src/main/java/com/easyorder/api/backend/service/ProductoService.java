@@ -1,13 +1,15 @@
 package com.easyorder.api.backend.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.easyorder.api.backend.dto.ProductoDTO;
+import com.easyorder.api.backend.dto.ProductoTipoDTO;
 import com.easyorder.api.backend.exception.NoEncontradoException;
 import com.easyorder.api.backend.model.Producto;
-import com.easyorder.api.backend.model.ProductoTipo;
 import com.easyorder.api.backend.repository.ProductoRepository;
 import com.easyorder.api.backend.repository.ProductoTipoRepository;
 
@@ -21,8 +23,8 @@ public class ProductoService {
 
     private final ProductoTipoRepository productoTipoRepository;
 
+    @Cacheable(value = "productos", key = "'todos'")
     public List<ProductoDTO> findAll(String sessionCode) {
-
         return productoRepository.findAll().stream()
                 .map(producto -> new ProductoDTO(
                         producto.getId(),
@@ -32,7 +34,7 @@ public class ProductoService {
                         producto.isDisponible(),
                         producto.getImagen(),
                         producto.getTipo().getId()))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     public Producto getProducto(Long id) {
@@ -52,7 +54,10 @@ public class ProductoService {
         return productoRepository.findByNombreContainingIgnoreCase(nombre);
     }
 
-    public List<ProductoTipo> getTipos(String sessionCode) {
-        return productoTipoRepository.findAll();
+    @Cacheable(value = "producto_tipos", key = "'todos'")
+    public List<ProductoTipoDTO> getTipos(String sessionCode) {
+        return productoTipoRepository.findAll().stream()
+                .map(tipo -> new ProductoTipoDTO(tipo.getId(), tipo.getNombre()))
+                .collect(Collectors.toList());
     }
 }

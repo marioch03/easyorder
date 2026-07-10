@@ -1,5 +1,7 @@
 package com.easyorder.api.backend.dto;
 
-public record ZonaDTO(Long id, String nombre) {
+import java.io.Serializable;
+
+public record ZonaDTO(Long id, String nombre) implements Serializable {
 
 }
