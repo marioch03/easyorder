@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import AdminPage from "./features/admin/AdminPage";
 import LoginPage from "./features/auth/LoginPage";
 import ProtectedRoute from "./features/auth/ProtectedRoute";
 import { CartProvider } from "./features/cart/CartProvider";
@@ -41,7 +42,7 @@ function App() {
         {/* RUTAS PÚBLICAS */}
         <Route path="/auth/login" element={<LoginPage />} />
         <Route path="/error" element={<ErrorPage />} />
-
+          <Route path="/panel" element={<AdminPage />} />
       </Routes>
     </BrowserRouter>
   );
