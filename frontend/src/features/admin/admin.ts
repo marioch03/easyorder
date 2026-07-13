@@ -47,3 +47,79 @@ export const ACTIONS: Action[] = [
 export const tableActions = ACTIONS.filter((a) => a.group === "Mesas");
 export const catalogActions = ACTIONS.filter((a) => a.group === "Catálogo");
 export const staffActions = ACTIONS.filter((a) => a.group === "Personal");
+
+
+//Form payload types
+export type CreateTableFormProps = FormProps<CreateTablePayload> & {zonas: ZonaDTO[]};
+export type CreateTablePayload = { numero: string; zona: number | null };
+export type DeleteTablePayload = { numero: string };
+export type EditTableFormProps = FormProps<EditTablePayload> & {zonas: ZonaDTO[]};
+export type EditTablePayload = { numero: string; nuevoNumero?: string; nuevaZona?: number | null };
+export type AddProductFormProps = FormProps<AddProductPayload> & {tiposProducto: ProductoTipoDTO[]};
+
+export type AddProductPayload = {
+  nombre: string;
+  descripcion: string;
+  precio: string;
+  tipo: number | null;
+  imagen: string | null;
+};
+export type RemoveProductFormProps = FormProps<RemoveProductPayload> & {productos: ProductoDTO[]};
+export type RemoveProductPayload = { id: number; nombre: string };
+export type RegisterUserFormProps = FormProps<RegisterUserPayload> & {usuarioRoles: UsuarioRolDTO[]};
+export type RegisterUserPayload = { usuario: string; clave: string; rol: number | null };
+
+export type FormProps<T> = { onConfirm: (payload: T) => void; onCancel: () => void };
+//Tipos de datos para formularios
+export type ZonaDTO = {
+  id: number;
+  nombre: string;
+};
+
+export type ProductoDTO = {
+  id: number;
+  nombre: string;
+  descripcion?: string | null;
+  precio: number;
+  disponible: boolean;
+  imagen?: string | null;
+  tipoId: number;
+};
+
+
+export type ProductoTipoDTO = {
+  id: number;
+  nombre: string;
+};
+
+export type UsuarioRolDTO = {
+  id: number;
+  nombre: string;
+};
+
+export const ACTION_META: Record<ActionKey, { title: string; hint: string }> = {
+  addTable: {
+    title: "Añadir mesa",
+    hint: "Da de alta una nueva mesa en el local.",
+  },
+  removeTable: {
+    title: "Eliminar mesa",
+    hint: "Elimina una mesa existente por su número.",
+  },
+  editTable: {
+    title: "Modificar mesa",
+    hint: "Cambia el número y/o la zona de una mesa.",
+  },
+  addProduct: {
+    title: "Añadir producto",
+    hint: "Crea un nuevo producto para el catálogo.",
+  },
+  removeProduct: {
+    title: "Eliminar producto",
+    hint: "Busca un producto y elimínalo del catálogo.",
+  },
+  addUser: {
+    title: "Registrar usuario",
+    hint: "Da de alta un nuevo usuario del sistema.",
+  },
+};

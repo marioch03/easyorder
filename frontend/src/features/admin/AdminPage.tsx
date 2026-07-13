@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-    ACTION_META,
     AddProductForm,
     CreateTableForm,
     DeleteTableForm,
@@ -8,15 +7,25 @@ import {
     RegisterUserForm,
     RemoveProductForm,
 } from "./ActionForms";
-import { type ActionKey, ACTIONS, type ActivityEntry, catalogActions, staffActions, tableActions } from "./admin";
+import {
+    ACTION_META,
+    type ActionKey,
+    ACTIONS,
+    type ActivityEntry,
+    catalogActions,
+    staffActions,
+    tableActions,
+} from "./admin";
 import AdminButton from "./AdminButton";
 import StatCard from "./StatCard";
 import "./styles.css";
+import { useAdminData } from "./useAdminData";
 
 function AdminPage() {
   const [activeKey, setActiveKey] = useState<ActionKey | null>(null);
   const [activity, setActivity] = useState<ActivityEntry[]>([]);
-
+  const { zonas, productos, tiposProducto, usuarioRoles, loading, error } =
+    useAdminData();
   const handleSelect = (action: (typeof ACTIONS)[number]) => {
     setActiveKey(action.key === activeKey ? null : action.key);
   };
@@ -28,10 +37,13 @@ function AdminPage() {
           id: Date.now(),
           label,
           danger,
-          time: new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }),
+          time: new Date().toLocaleTimeString("es-ES", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
         },
         ...prev,
-      ].slice(0, 4)
+      ].slice(0, 4),
     );
   };
 
@@ -55,6 +67,7 @@ function AdminPage() {
               logActivity(`Mesa ${payload.numero} añadida (${payload.zona})`);
               closeForm();
             }}
+            zonas={zonas}
           />
         );
       case "removeTable":
@@ -75,6 +88,7 @@ function AdminPage() {
               logActivity(`Mesa ${payload.numero} modificada`);
               closeForm();
             }}
+            zonas={zonas}
           />
         );
       case "addProduct":
@@ -85,6 +99,7 @@ function AdminPage() {
               logActivity(`Producto "${payload.nombre}" añadido`);
               closeForm();
             }}
+            tiposProducto={tiposProducto}
           />
         );
       case "removeProduct":
@@ -95,6 +110,7 @@ function AdminPage() {
               logActivity(`Producto "${payload.nombre}" eliminado`, true);
               closeForm();
             }}
+            productos={productos}
           />
         );
       case "addUser":
@@ -102,9 +118,12 @@ function AdminPage() {
           <RegisterUserForm
             onCancel={closeForm}
             onConfirm={(payload) => {
-              logActivity(`Usuario "${payload.usuario}" registrado (${payload.rol})`);
+              logActivity(
+                `Usuario "${payload.usuario}" registrado (${payload.rol})`,
+              );
               closeForm();
             }}
+            usuarioRoles={usuarioRoles}
           />
         );
       default:
@@ -202,7 +221,9 @@ function AdminPage() {
         <section className="activity-panel">
           <h3>Actividad reciente</h3>
           {activity.length === 0 ? (
-            <div className="activity-empty">Sin acciones registradas todavía.</div>
+            <div className="activity-empty">
+              Sin acciones registradas todavía.
+            </div>
           ) : (
             <ul className="activity-list">
               {activity.map((entry) => (
