@@ -17,6 +17,7 @@ services:
       JWT_EXPIRATION: ${JWT_EXPIRATION}
       JWT_REFRESH_TOKEN_EXPIRATION: ${JWT_REFRESH_TOKEN_EXPIRATION}
       APP_CORS_ALLOWED_ORIGINS: ${APP_CORS_ALLOWED_ORIGINS}
+      TZ: Europe/Madrid
     depends_on:
       - db
   frontend:
@@ -40,6 +41,7 @@ services:
       MARIADB_DATABASE: ${DB_NAME}
       MARIADB_USER: ${DB_USER}
       MARIADB_PASSWORD: ${DB_PASSWORD}
+      TZ: Europe/Madrid
     ports:
       - "3306:3306"
     volumes:
@@ -47,6 +49,8 @@ services:
   cache:
     image: valkey/valkey:8.0-alpine
     container_name: easyorder-cache
+    environment:
+      TZ: Europe/Madrid
     restart: always
     ports:
       - "6379:6379"
