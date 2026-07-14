@@ -1,10 +1,7 @@
 package com.easyorder.api.backend.controller;
 
-import java.util.List;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,7 +11,6 @@ import com.easyorder.api.backend.dto.LoginRequest;
 import com.easyorder.api.backend.dto.RefreshTokenRequest;
 import com.easyorder.api.backend.dto.RegisterRequest;
 import com.easyorder.api.backend.dto.TokenResponse;
-import com.easyorder.api.backend.dto.UsuarioRolDTO;
 import com.easyorder.api.backend.service.AuthService;
 
 import lombok.RequiredArgsConstructor;
@@ -42,12 +38,6 @@ public class AuthController {
     @PostMapping("/refresh")
     public TokenResponse refreshToken(@RequestBody RefreshTokenRequest request) {
         return authService.refreshToken(request.refreshToken());
-    }
-
-    @GetMapping("/roles")
-    @PreAuthorize("hasAnyRole('ADMIN','PERSONAL')")
-    public List<UsuarioRolDTO> getRoles() {
-        return authService.getAllRoles();
     }
 
 }

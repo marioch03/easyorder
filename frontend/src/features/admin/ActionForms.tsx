@@ -7,7 +7,8 @@ import type {
   FormProps,
   RegisterUserFormProps,
   RemoveProductFormProps,
-  RemoveProductPayload
+  RemoveProductPayload,
+  RemoveUserFormProps
 } from "./admin";
 
 /* -------------------------------------------------------------
@@ -456,6 +457,74 @@ export function RegisterUserForm({
           Confirmar
         </button>
         <button type="button" className="btn-ghost" onClick={onCancel}>
+          Cancelar
+        </button>
+      </div>
+    </form>
+  );
+}
+
+/* ================= Inhabilitar usuario ================= */
+export function RemoveUserForm({
+  onConfirm,
+  onCancel,
+  usuarios,
+}: RemoveUserFormProps) {
+  const [usuarioId, setUsuarioId] = useState<number | null>(null);
+  return (
+    <form
+      className="action-form"
+      onSubmit={(e) => {
+        e.preventDefault();
+
+        if (usuarioId === null) return;
+
+        onConfirm({ id: usuarioId });
+      }}
+    >
+      <div className="form-field">
+        <label htmlFor="usuario-deshabilitar">
+          Usuario a inhabilitar
+        </label>
+
+        <select
+          id="usuario-deshabilitar"
+          value={usuarioId ?? ""}
+          onChange={(e) =>
+            setUsuarioId(
+              e.target.value ? Number(e.target.value) : null
+            )
+          }
+          required
+        >
+          <option value="" disabled>
+            Selecciona un usuario
+          </option>
+
+          {usuarios
+            .filter((u) => u.activo)
+            .map((usuario) => (
+              <option key={usuario.id} value={usuario.id}>
+                {usuario.nombre}
+              </option>
+            ))}
+        </select>
+      </div>
+
+      <div className="form-actions">
+        <button
+          type="submit"
+          className="btn-danger"
+          disabled={usuarioId === null}
+        >
+          Inhabilitar usuario
+        </button>
+
+        <button
+          type="button"
+          className="btn-ghost"
+          onClick={onCancel}
+        >
           Cancelar
         </button>
       </div>

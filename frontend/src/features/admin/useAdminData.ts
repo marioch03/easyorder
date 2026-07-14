@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import type { MesaDTO, ProductoDTO, ProductoTipoDTO, UsuarioRolDTO, ZonaDTO } from "./admin";
-import { getMesas, getProductos, getTiposProducto, getUsuarioRoles, getZonas } from "./adminService";
+import type { MesaDTO, ProductoDTO, ProductoTipoDTO, UsuarioDTO, UsuarioRolDTO, ZonaDTO } from "./admin";
+import { getMesas, getProductos, getTiposProducto, getUsuarioRoles, getUsuarios, getZonas } from "./adminService";
 
 export function useAdminData() {
   const [zonas, setZonas] = useState<ZonaDTO[]>([]);
@@ -8,6 +8,7 @@ export function useAdminData() {
   const [productos, setProductos] = useState<ProductoDTO[]>([]);
   const [tiposProducto, setTiposProducto] = useState<ProductoTipoDTO[]>([]);
   const [usuarioRoles, setUsuarioRoles] = useState<UsuarioRolDTO[]>([]);
+  const [usuarios, setUsuarios] = useState<UsuarioDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,12 +17,13 @@ export function useAdminData() {
       try {
         setLoading(true);
 
-        const [zonasData, mesasData, productosData, tiposProductoData, usuarioRolesData] = await Promise.all([
+        const [zonasData, mesasData, productosData, tiposProductoData, usuarioRolesData, usuariosData] = await Promise.all([
           getZonas(),
           getMesas(),
           getProductos(),
           getTiposProducto(),
           getUsuarioRoles(),
+          getUsuarios(),
         ]);
 
         setZonas(zonasData);
@@ -29,6 +31,7 @@ export function useAdminData() {
         setProductos(productosData);
         setTiposProducto(tiposProductoData);
         setUsuarioRoles(usuarioRolesData);
+        setUsuarios(usuariosData);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Error desconocido");
       } finally {
@@ -39,5 +42,5 @@ export function useAdminData() {
     fetchData();
   },[]);
 
-  return { zonas, mesas, setMesas, productos, tiposProducto, usuarioRoles, loading, error };
+  return { zonas, mesas, setMesas, productos, tiposProducto, usuarioRoles, usuarios, setUsuarios, loading, error };
 }

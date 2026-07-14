@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import AdminPage from "./features/admin/AdminPage";
 import LoginPage from "./features/auth/LoginPage";
 import ProtectedRoute from "./features/auth/ProtectedRoute";
+import RoleSelectPage from "./features/auth/RoleSelecfPage";
 import { CartProvider } from "./features/cart/CartProvider";
 import { ErrorPage } from "./features/error/ErrorPage";
 import ManagementPage from "./features/management/ManagementPage";
@@ -42,6 +43,15 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={["ADMIN"]}>
               <AdminPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/auth/select-interface"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <RoleSelectPage />
             </ProtectedRoute>
           }
         />

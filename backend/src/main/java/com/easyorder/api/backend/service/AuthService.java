@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import com.easyorder.api.backend.dto.LoginRequest;
 import com.easyorder.api.backend.dto.RegisterRequest;
 import com.easyorder.api.backend.dto.TokenResponse;
-import com.easyorder.api.backend.dto.UsuarioRolDTO;
 import com.easyorder.api.backend.exception.TokenInvalidoException;
 import com.easyorder.api.backend.model.Token;
 import com.easyorder.api.backend.model.Usuario;
@@ -106,10 +105,5 @@ public class AuthService {
             }
             tokenRepository.saveAll(validUserTokens);
         }
-    }
-
-    public List<UsuarioRolDTO> getAllRoles() {
-        return usuarioRolRepository.findAll().stream().map(rol -> new UsuarioRolDTO(rol.getId(), rol.getNombre()))
-                .toList();
     }
 }

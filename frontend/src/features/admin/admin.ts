@@ -6,6 +6,7 @@ export type ActionKey =
   | "removeTable"
   | "editTable"
   | "addUser"
+  | "removeUser"
   | "logout"
   | "addProduct"
   | "removeProduct";
@@ -26,8 +27,18 @@ export type Action = {
 };
 
 export const ACTIONS: Action[] = [
-  { key: "addTable", label: "Añadir mesa", icon: icons.addTable, group: "Mesas" },
-  { key: "editTable", label: "Modificar mesa", icon: icons.editTable, group: "Mesas" },
+  {
+    key: "addTable",
+    label: "Añadir mesa",
+    icon: icons.addTable,
+    group: "Mesas",
+  },
+  {
+    key: "editTable",
+    label: "Modificar mesa",
+    icon: icons.editTable,
+    group: "Mesas",
+  },
   {
     key: "removeTable",
     label: "Eliminar mesa",
@@ -35,7 +46,12 @@ export const ACTIONS: Action[] = [
     group: "Mesas",
     variant: "danger",
   },
-  { key: "addProduct", label: "Añadir producto", icon: icons.addProduct, group: "Catálogo" },
+  {
+    key: "addProduct",
+    label: "Añadir producto",
+    icon: icons.addProduct,
+    group: "Catálogo",
+  },
   {
     key: "removeProduct",
     label: "Eliminar producto",
@@ -43,8 +59,25 @@ export const ACTIONS: Action[] = [
     group: "Catálogo",
     variant: "danger",
   },
-  { key: "addUser", label: "Registrar usuario", icon: icons.addUser, group: "Personal" },
-  { key: "logout", label: "Cerrar sesión", icon: icons.logout, group: "Logout" },
+  {
+    key: "addUser",
+    label: "Registrar usuario",
+    icon: icons.addUser,
+    group: "Personal",
+  },
+  {
+    key: "removeUser",
+    label: "Eliminar usuario",
+    icon: icons.removeUser,
+    group: "Personal",
+    variant: "danger",
+  },
+  {
+    key: "logout",
+    label: "Cerrar sesión",
+    icon: icons.logout,
+    group: "Logout",
+  },
 ];
 
 export const tableActions = ACTIONS.filter((a) => a.group === "Mesas");
@@ -53,12 +86,22 @@ export const staffActions = ACTIONS.filter((a) => a.group === "Personal");
 export const logoutActions = ACTIONS.filter((a) => a.group === "Logout");
 
 //Form payload types
-export type CreateTableFormProps = FormProps<CreateTablePayload> & {zonas: ZonaDTO[]};
+export type CreateTableFormProps = FormProps<CreateTablePayload> & {
+  zonas: ZonaDTO[];
+};
 export type CreateTablePayload = { numero: string; zona: number };
 export type DeleteTablePayload = { numero: string };
-export type EditTableFormProps = FormProps<EditTablePayload> & {zonas: ZonaDTO[]};
-export type EditTablePayload = { numero: string; nuevoNumero?: string; nuevaZona?: number | null };
-export type AddProductFormProps = FormProps<AddProductPayload> & {tiposProducto: ProductoTipoDTO[]};
+export type EditTableFormProps = FormProps<EditTablePayload> & {
+  zonas: ZonaDTO[];
+};
+export type EditTablePayload = {
+  numero: string;
+  nuevoNumero?: string;
+  nuevaZona?: number | null;
+};
+export type AddProductFormProps = FormProps<AddProductPayload> & {
+  tiposProducto: ProductoTipoDTO[];
+};
 
 export type AddProductPayload = {
   nombre: string;
@@ -67,12 +110,26 @@ export type AddProductPayload = {
   tipo: number | null;
   imagen: string | null;
 };
-export type RemoveProductFormProps = FormProps<RemoveProductPayload> & {productos: ProductoDTO[]};
+export type RemoveProductFormProps = FormProps<RemoveProductPayload> & {
+  productos: ProductoDTO[];
+};
 export type RemoveProductPayload = { id: number; nombre: string };
-export type RegisterUserFormProps = FormProps<RegisterUserPayload> & {usuarioRoles: UsuarioRolDTO[]};
-export type RegisterUserPayload = { nombre: string; rol: string; clave: string };
-
-export type FormProps<T> = { onConfirm: (payload: T) => void; onCancel: () => void };
+export type RegisterUserFormProps = FormProps<RegisterUserPayload> & {
+  usuarioRoles: UsuarioRolDTO[];
+};
+export type RegisterUserPayload = {
+  nombre: string;
+  rol: string;
+  clave: string;
+};
+export type RemoveUserPayload = { id: number };
+export type RemoveUserFormProps = FormProps<RemoveUserPayload> & {
+  usuarios: UsuarioDTO[];
+};
+export type FormProps<T> = {
+  onConfirm: (payload: T) => void;
+  onCancel: () => void;
+};
 //Tipos de datos para formularios
 export type ZonaDTO = {
   id: number;
@@ -96,7 +153,6 @@ export type ProductoDTO = {
   tipoId: number;
 };
 
-
 export type ProductoTipoDTO = {
   id: number;
   nombre: string;
@@ -105,6 +161,12 @@ export type ProductoTipoDTO = {
 export type UsuarioRolDTO = {
   id: number;
   nombre: string;
+};
+
+export type UsuarioDTO = {
+  id: number;
+  nombre: string;
+  activo: boolean;
 };
 
 export const ACTION_META: Record<ActionKey, { title: string; hint: string }> = {
@@ -131,6 +193,10 @@ export const ACTION_META: Record<ActionKey, { title: string; hint: string }> = {
   addUser: {
     title: "Registrar usuario",
     hint: "Da de alta un nuevo usuario del sistema.",
+  },
+  removeUser: {
+    title: "Eliminar usuario",
+    hint: "Marca como inactivo el usuario indicado",
   },
   logout: {
     title: "Cerrar sesión",

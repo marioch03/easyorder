@@ -1,5 +1,5 @@
 import { privateApi, registerApi } from "../api/apiClient";
-import type { MesaDTO, ProductoDTO, ProductoTipoDTO, UsuarioRolDTO, ZonaDTO } from "./admin";
+import type { MesaDTO, ProductoDTO, ProductoTipoDTO, UsuarioDTO, UsuarioRolDTO, ZonaDTO } from "./admin";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -24,7 +24,12 @@ export async function getTiposProducto(): Promise<ProductoTipoDTO[]> {
 }
 
 export async function getUsuarioRoles(): Promise<UsuarioRolDTO[]> {
-  const response = await privateApi.get<UsuarioRolDTO[]>(`${BASE_URL}/auth/roles`);
+  const response = await privateApi.get<UsuarioRolDTO[]>(`${BASE_URL}/api/admin/usuarios/roles`);
+  return response.data;
+}
+
+export async function getUsuarios(): Promise<UsuarioDTO[]> {
+  const response = await privateApi.get<UsuarioDTO[]>(`${BASE_URL}/api/admin/usuarios/list`);
   return response.data;
 }
 
@@ -48,5 +53,10 @@ export async function registrarUsuario(nombre: string, rol: string, clave: strin
     rol,
     clave,
   });
+  return response.data;
+}
+
+export async function deshabilitarUsuario(id: number){
+  const response = await privateApi.patch(`/usuarios/${id}`);
   return response.data;
 }

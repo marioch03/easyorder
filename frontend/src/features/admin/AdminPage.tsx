@@ -3,25 +3,26 @@ import { useNavigate } from "react-router";
 
 import { logout } from "../management/managementService";
 import {
-    AddProductForm,
-    CreateTableForm,
-    DeleteTableForm,
-    EditTableForm,
-    RegisterUserForm,
-    RemoveProductForm,
+  AddProductForm,
+  CreateTableForm,
+  DeleteTableForm,
+  EditTableForm,
+  RegisterUserForm,
+  RemoveProductForm,
+  RemoveUserForm,
 } from "./ActionForms";
 import {
-    ACTION_META,
-    type ActionKey,
-    ACTIONS,
-    type ActivityEntry,
-    catalogActions,
-    logoutActions,
-    staffActions,
-    tableActions,
+  ACTION_META,
+  type ActionKey,
+  ACTIONS,
+  type ActivityEntry,
+  catalogActions,
+  logoutActions,
+  staffActions,
+  tableActions,
 } from "./admin";
 import AdminButton from "./AdminButton";
-import { crearMesa, eliminarMesa, registrarUsuario } from "./adminService";
+import { crearMesa, deshabilitarUsuario, eliminarMesa, registrarUsuario } from "./adminService";
 import StatCard from "./StatCard";
 import "./styles.css";
 import { useAdminData } from "./useAdminData";
@@ -30,8 +31,9 @@ function AdminPage() {
   const [activeKey, setActiveKey] = useState<ActionKey | null>(null);
   const [activity, setActivity] = useState<ActivityEntry[]>([]);
   const navigate = useNavigate();
-  const { zonas, mesas, setMesas, productos, tiposProducto, usuarioRoles } =
+  const { zonas, mesas, setMesas, productos, tiposProducto, usuarioRoles, usuarios, setUsuarios } =
     useAdminData();
+  const usuariosActivos = usuarios.filter(u => u.activo).length;
   const handleSelect = (action: (typeof ACTIONS)[number]) => {
     setActiveKey(action.key === activeKey ? null : action.key);
   };
@@ -154,15 +156,40 @@ function AdminPage() {
             onCancel={closeForm}
             onConfirm={async (payload) => {
               try {
-                await registrarUsuario(payload.nombre, payload.rol, payload.clave);
+                await registrarUsuario(
+                  payload.nombre,
+                  payload.rol,
+                  payload.clave,
+                );
 
-                logActivity(`Usuario ${payload.nombre} registrado, Rol: "${payload.rol}"`,  true);
+                logActivity(
+                  `Usuario ${payload.nombre} registrado, Rol: "${payload.rol}"`,
+                  true,
+                );
                 closeForm();
               } catch (error) {
                 console.error(error);
               }
             }}
             usuarioRoles={usuarioRoles}
+          />
+        );
+      case "removeUser":
+        return (
+          <RemoveUserForm
+            usuarios={usuarios}
+            onCancel={closeForm}
+            onConfirm={async ({ id }) => {
+              await deshabilitarUsuario(id);
+
+              setUsuarios((prev) =>
+                prev.map((u) => (u.id === id ? { ...u, activo: false } : u)),
+              );
+
+              logActivity(`Usuario inhabilitado correctamente`, true);
+
+              closeForm();
+            }}
           />
         );
       default:
@@ -262,8 +289,8 @@ function AdminPage() {
             value={productos.length.toString()}
           />
           <StatCard
-            label="Usuarios registrados"
-            value={usuarioRoles.length.toString()}
+            label="Usuarios activos"
+            value={usuariosActivos.toString()}
           />
         </div>
 

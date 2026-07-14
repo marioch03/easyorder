@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "./authService";
+import { getRolesFromToken } from "./jwtService";
 import "./styles.css";
 
 export default function LoginPage() {
@@ -18,7 +19,19 @@ export default function LoginPage() {
 
     try {
       await login({ nombre, clave });
-      navigate("/admin");
+
+      const accessToken = localStorage.getItem("accessToken");
+      const roles = accessToken ? getRolesFromToken(accessToken) : [];
+
+      if (roles.includes("ADMIN")) {
+        // El admin puede acceder a ambas interfaces: se le deja elegir.
+        navigate("/auth/select-interface");
+      } else if (roles.includes("PERSONAL")) {
+        // El personal va directo a su panel operativo.
+        navigate("/staff");
+      } else {
+        navigate("/forbidden");
+      }
     } catch (err) {
       console.error(err);
       setError("Usuario o contraseña incorrectos.");
@@ -34,7 +47,7 @@ export default function LoginPage() {
         <div className="login-branding">
           <div className="login-branding-content">
             <div className="login-mark">PT</div>
-            <h2>PideTú</h2>
+            <h2>PideTÚ</h2>
             <p>Panel de administración</p>
             <ul className="login-branding-list">
               <li>Gestión de mesas en tiempo real</li>
