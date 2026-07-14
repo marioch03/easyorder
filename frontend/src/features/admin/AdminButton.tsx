@@ -24,11 +24,13 @@ function AdminButton({
     .join(" ");
 
   return (
-    <button className={classNames} onClick={onClick} type="button">
+  <button className={classNames} onClick={onClick} type="button">
+    <span className="icon-badge">
       <img src={icon} alt="" aria-hidden="true" />
-      <span>{label}</span>
-    </button>
-  );
+    </span>
+    <span>{label}</span>
+  </button>
+);
 }
 
 export default AdminButton;

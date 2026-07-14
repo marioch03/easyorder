@@ -22,7 +22,7 @@ export function CreateTableForm({
   zonas
 }: CreateTableFormProps) {
   const [numero, setNumero] = useState("");
-  const [zona, setZona] = useState<number | null>(null);
+  const [zona, setZona] = useState<number>(0);
 
   return (
     <form
@@ -49,7 +49,7 @@ export function CreateTableForm({
         <select
           value={zona ?? ""}
           onChange={(e) =>
-            setZona(e.target.value ? Number(e.target.value) : null)
+            setZona(Number(e.target.value))
           }
         >
           <option value="" disabled>
@@ -392,16 +392,16 @@ export function RegisterUserForm({
   onCancel,
   usuarioRoles
 }: RegisterUserFormProps) {
-  const [usuario, setUsuario] = useState("");
+  const [nombre, setNombre] = useState("");
   const [clave, setClave] = useState("");
-  const [rol, setRol] = useState<number | null>(null);
+  const [rol, setRol] = useState("");
 
   return (
     <form
       className="action-form"
       onSubmit={(e) => {
         e.preventDefault();
-        onConfirm({ usuario, clave, rol });
+        onConfirm({ nombre, rol, clave });
       }}
     >
       <div className="form-field">
@@ -409,8 +409,8 @@ export function RegisterUserForm({
         <input
           id="usuario-nuevo"
           type="text"
-          value={usuario}
-          onChange={(e) => setUsuario(e.target.value)}
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
           required
         />
       </div>
@@ -432,7 +432,7 @@ export function RegisterUserForm({
           id="rol-nuevo"
           value={rol ?? ""}
           onChange={(e) =>
-            setRol(e.target.value ? Number(e.target.value) : null)
+            setRol(e.target.value)
           }
         >
           <option value="" disabled>
@@ -440,7 +440,7 @@ export function RegisterUserForm({
           </option>
 
           {usuarioRoles.map((rol) => (
-            <option key={rol.id} value={rol.id}>
+            <option key={rol.nombre} value={rol.nombre}>
               {rol.nombre}
             </option>
           ))}
@@ -451,7 +451,7 @@ export function RegisterUserForm({
         <button
           type="submit"
           className="btn-primary"
-          disabled={!usuario || !clave}
+          disabled={!nombre || !clave}
         >
           Confirmar
         </button>

@@ -6,13 +6,16 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 @Configuration
+@Profile("dev")
 public class FlywayConfig {
 
     @Bean
-    @Profile("dev")
     public FlywayMigrationStrategy cleanMigrateStrategy() {
         return flyway -> {
-            flyway.clean();
+            if (System.getenv("RESET_DB") != null) {
+                flyway.clean();
+            }
+
             flyway.migrate();
         };
     }

@@ -135,16 +135,24 @@
   transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.admin-button img {
+.icon-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 34px;
   height: 34px;
-  padding: 5px;
   flex-shrink: 0;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
   box-shadow: var(--shadow-sm);
-  box-sizing: content-box;
   transition: transform 0.25s ease, background 0.25s ease;
+}
+
+.admin-button img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  display: block;
 }
 
 .admin-button:hover {
@@ -182,6 +190,18 @@
 .admin-button.danger.active {
   background: linear-gradient(135deg, var(--color-danger), var(--color-danger-dark));
   color: var(--color-background-secondary);
+}
+
+.admin-button:hover .icon-badge {
+  transform: scale(1.08) rotate(-4deg);
+}
+
+.admin-button.active .icon-badge {
+  background: rgba(245, 237, 237, 0.25);
+}
+
+.admin-button.danger .icon-badge {
+  background: linear-gradient(135deg, var(--color-danger), var(--color-danger-dark));
 }
 
 /* =========================================================

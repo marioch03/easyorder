@@ -10,6 +10,8 @@ export interface LoginResponse {
   refresh_token: string;
 }
 
+const BASE_URL = import.meta.env.VITE_BASE_URL;
+
 export async function login(credentials: LoginRequest): Promise<LoginResponse> {
   try {
     const response = await authApi.post<LoginResponse>("/login", credentials);

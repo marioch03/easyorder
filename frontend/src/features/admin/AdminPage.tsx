@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
+
+import { logout } from "../management/managementService";
 import {
     AddProductForm,
     CreateTableForm,
@@ -13,10 +16,12 @@ import {
     ACTIONS,
     type ActivityEntry,
     catalogActions,
+    logoutActions,
     staffActions,
     tableActions,
 } from "./admin";
 import AdminButton from "./AdminButton";
+import { crearMesa, eliminarMesa, registrarUsuario } from "./adminService";
 import StatCard from "./StatCard";
 import "./styles.css";
 import { useAdminData } from "./useAdminData";
@@ -24,10 +29,21 @@ import { useAdminData } from "./useAdminData";
 function AdminPage() {
   const [activeKey, setActiveKey] = useState<ActionKey | null>(null);
   const [activity, setActivity] = useState<ActivityEntry[]>([]);
-  const { zonas, productos, tiposProducto, usuarioRoles, loading, error } =
+  const navigate = useNavigate();
+  const { zonas, mesas, setMesas, productos, tiposProducto, usuarioRoles } =
     useAdminData();
   const handleSelect = (action: (typeof ACTIONS)[number]) => {
     setActiveKey(action.key === activeKey ? null : action.key);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error(error);
+    }
+
+    navigate("/auth/login");
   };
 
   const logActivity = (label: string, danger = false) => {
@@ -63,9 +79,18 @@ function AdminPage() {
         return (
           <CreateTableForm
             onCancel={closeForm}
-            onConfirm={(payload) => {
-              logActivity(`Mesa ${payload.numero} añadida (${payload.zona})`);
-              closeForm();
+            onConfirm={async (payload) => {
+              try {
+                const nuevaMesa = await crearMesa(
+                  Number(payload.numero),
+                  payload.zona,
+                );
+                setMesas((prev) => [...prev, nuevaMesa]);
+                logActivity(`Mesa ${payload.numero} añadida (${payload.zona})`);
+                closeForm();
+              } catch (error) {
+                console.error(error);
+              }
             }}
             zonas={zonas}
           />
@@ -74,9 +99,19 @@ function AdminPage() {
         return (
           <DeleteTableForm
             onCancel={closeForm}
-            onConfirm={(payload) => {
-              logActivity(`Mesa ${payload.numero} eliminada`, true);
-              closeForm();
+            onConfirm={async (payload) => {
+              try {
+                await eliminarMesa(Number(payload.numero));
+
+                setMesas((prev) =>
+                  prev.filter((m) => m.numero !== Number(payload.numero)),
+                );
+
+                logActivity(`Mesa ${payload.numero} eliminada`, true);
+                closeForm();
+              } catch (error) {
+                console.error(error);
+              }
             }}
           />
         );
@@ -117,11 +152,15 @@ function AdminPage() {
         return (
           <RegisterUserForm
             onCancel={closeForm}
-            onConfirm={(payload) => {
-              logActivity(
-                `Usuario "${payload.usuario}" registrado (${payload.rol})`,
-              );
-              closeForm();
+            onConfirm={async (payload) => {
+              try {
+                await registrarUsuario(payload.nombre, payload.rol, payload.clave);
+
+                logActivity(`Usuario ${payload.nombre} registrado, Rol: "${payload.rol}"`,  true);
+                closeForm();
+              } catch (error) {
+                console.error(error);
+              }
             }}
             usuarioRoles={usuarioRoles}
           />
@@ -181,6 +220,22 @@ function AdminPage() {
             />
           ))}
         </div>
+        <div className="logout-section">
+          {logoutActions.map((a) => (
+            <AdminButton
+              key={a.key}
+              icon={a.icon}
+              label={a.label}
+              variant={a.variant}
+              active={activeKey === a.key}
+              onClick={() => {
+                if (confirm("¿Seguro que quiere cerrar sesión?")) {
+                  handleLogout();
+                }
+              }}
+            />
+          ))}
+        </div>
       </aside>
 
       <main className="admin-main">
@@ -201,13 +256,17 @@ function AdminPage() {
         </div>
 
         <div className="stat-grid">
-          <StatCard label="Mesas activas" value="18" />
-          <StatCard label="Productos en catálogo" value="64" />
-          <StatCard label="Usuarios registrados" value="9" />
+          <StatCard label="Mesas activas" value={mesas.length.toString()} />
+          <StatCard
+            label="Productos en catálogo"
+            value={productos.length.toString()}
+          />
+          <StatCard
+            label="Usuarios registrados"
+            value={usuarioRoles.length.toString()}
+          />
         </div>
 
-        {/* Contenedor de acción: aquí se monta el formulario según el
-            botón pulsado en la barra lateral. */}
         <section className="action-container">
           {activeKey && (
             <>

@@ -13,36 +13,42 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        
         {/* ENTORNO CLIENTE */}
-        <Route 
-          path="/cliente" 
+        <Route
+          path="/cliente"
           element={
             <SessionProvider>
               <CartProvider>
                 <CustomerPage />
               </CartProvider>
             </SessionProvider>
-          } 
+          }
         />
 
         {/* ENTORNO ADMINISTRACIÓN */}
-        <Route path="/" element={<Navigate to="/admin" replace />} />
+        <Route path="/" element={<Navigate to="/staff" replace />} />
         <Route
-          path="/admin"
+          path="/staff"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["ADMIN", "PERSONAL"]}>
               <WebSocketProvider>
                 <ManagementPage />
               </WebSocketProvider>
             </ProtectedRoute>
           }
         />
-        
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <AdminPage />
+            </ProtectedRoute>
+          }
+        />
+
         {/* RUTAS PÚBLICAS */}
         <Route path="/auth/login" element={<LoginPage />} />
         <Route path="/error" element={<ErrorPage />} />
-          <Route path="/panel" element={<AdminPage />} />
       </Routes>
     </BrowserRouter>
   );

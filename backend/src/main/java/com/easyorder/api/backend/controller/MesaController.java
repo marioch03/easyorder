@@ -59,10 +59,10 @@ public class MesaController {
         return ResponseEntity.ok(mesaActualizada);
     }
 
-    @DeleteMapping("/admin/mesas/{id}")
-    public ResponseEntity<String> eliminarMesa(@PathVariable Long id) {
+    @DeleteMapping("/admin/mesas/{numero}")
+    public ResponseEntity<String> eliminarMesa(@PathVariable int numero) {
         try {
-            mesaService.eliminarMesa(id);
+            mesaService.eliminarMesa(numero);
             return ResponseEntity.ok("Mesa eliminada correctamente");
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());

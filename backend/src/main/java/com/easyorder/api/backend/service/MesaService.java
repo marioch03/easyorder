@@ -98,9 +98,9 @@ public class MesaService {
         return mesaCreada;
     }
 
-    public void eliminarMesa(Long id) {
-        Mesa mesa = mesaRepository.findById(id)
-                .orElseThrow(() -> new NoEncontradoException("Mesa no encontrada. Id: " + id));
+    public void eliminarMesa(int numero) {
+        Mesa mesa = mesaRepository.findByNumero(numero)
+                .orElseThrow(() -> new NoEncontradoException("Mesa no encontrada. Numero: " + numero));
 
         mesaRepository.delete(mesa);
     }

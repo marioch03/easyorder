@@ -26,6 +26,24 @@ export const authApi = axios.create({
   },
 });
 
+export const registerApi = axios.create({
+  baseURL: BASE_URL_AUTH,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+registerApi.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error: AxiosError) => Promise.reject(error),
+);
+
 export const initApi = axios.create({
   baseURL: BASE_URL_CLIENTE,
   headers: {

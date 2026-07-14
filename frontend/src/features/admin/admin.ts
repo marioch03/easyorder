@@ -1,3 +1,4 @@
+import type { SesionDTO } from "../tables/tables";
 import { icons } from "./icons";
 
 export type ActionKey =
@@ -5,6 +6,7 @@ export type ActionKey =
   | "removeTable"
   | "editTable"
   | "addUser"
+  | "logout"
   | "addProduct"
   | "removeProduct";
 
@@ -19,7 +21,7 @@ export type Action = {
   key: ActionKey;
   label: string;
   icon: string;
-  group: "Mesas" | "Catálogo" | "Personal";
+  group: "Mesas" | "Catálogo" | "Personal" | "Logout";
   variant?: "default" | "danger";
 };
 
@@ -42,16 +44,17 @@ export const ACTIONS: Action[] = [
     variant: "danger",
   },
   { key: "addUser", label: "Registrar usuario", icon: icons.addUser, group: "Personal" },
+  { key: "logout", label: "Cerrar sesión", icon: icons.logout, group: "Logout" },
 ];
 
 export const tableActions = ACTIONS.filter((a) => a.group === "Mesas");
 export const catalogActions = ACTIONS.filter((a) => a.group === "Catálogo");
 export const staffActions = ACTIONS.filter((a) => a.group === "Personal");
-
+export const logoutActions = ACTIONS.filter((a) => a.group === "Logout");
 
 //Form payload types
 export type CreateTableFormProps = FormProps<CreateTablePayload> & {zonas: ZonaDTO[]};
-export type CreateTablePayload = { numero: string; zona: number | null };
+export type CreateTablePayload = { numero: string; zona: number };
 export type DeleteTablePayload = { numero: string };
 export type EditTableFormProps = FormProps<EditTablePayload> & {zonas: ZonaDTO[]};
 export type EditTablePayload = { numero: string; nuevoNumero?: string; nuevaZona?: number | null };
@@ -67,13 +70,20 @@ export type AddProductPayload = {
 export type RemoveProductFormProps = FormProps<RemoveProductPayload> & {productos: ProductoDTO[]};
 export type RemoveProductPayload = { id: number; nombre: string };
 export type RegisterUserFormProps = FormProps<RegisterUserPayload> & {usuarioRoles: UsuarioRolDTO[]};
-export type RegisterUserPayload = { usuario: string; clave: string; rol: number | null };
+export type RegisterUserPayload = { nombre: string; rol: string; clave: string };
 
 export type FormProps<T> = { onConfirm: (payload: T) => void; onCancel: () => void };
 //Tipos de datos para formularios
 export type ZonaDTO = {
   id: number;
   nombre: string;
+};
+export type MesaDTO = {
+  id: number;
+  numero: number;
+  estado: string;
+  zona: string | null;
+  sesionActiva: SesionDTO | null;
 };
 
 export type ProductoDTO = {
@@ -121,5 +131,9 @@ export const ACTION_META: Record<ActionKey, { title: string; hint: string }> = {
   addUser: {
     title: "Registrar usuario",
     hint: "Da de alta un nuevo usuario del sistema.",
+  },
+  logout: {
+    title: "Cerrar sesión",
+    hint: "Cierra la sesión del usuario actual.",
   },
 };

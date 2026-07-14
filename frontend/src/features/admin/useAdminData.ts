@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import type { ProductoDTO, ProductoTipoDTO, UsuarioRolDTO, ZonaDTO } from "./admin";
-import { getProductos, getTiposProducto, getUsuarioRoles, getZonas } from "./adminService";
+import type { MesaDTO, ProductoDTO, ProductoTipoDTO, UsuarioRolDTO, ZonaDTO } from "./admin";
+import { getMesas, getProductos, getTiposProducto, getUsuarioRoles, getZonas } from "./adminService";
 
 export function useAdminData() {
   const [zonas, setZonas] = useState<ZonaDTO[]>([]);
+  const [mesas, setMesas] = useState<MesaDTO[]>([]);
   const [productos, setProductos] = useState<ProductoDTO[]>([]);
   const [tiposProducto, setTiposProducto] = useState<ProductoTipoDTO[]>([]);
   const [usuarioRoles, setUsuarioRoles] = useState<UsuarioRolDTO[]>([]);
@@ -15,14 +16,16 @@ export function useAdminData() {
       try {
         setLoading(true);
 
-        const [zonasData, productosData, tiposProductoData, usuarioRolesData] = await Promise.all([
+        const [zonasData, mesasData, productosData, tiposProductoData, usuarioRolesData] = await Promise.all([
           getZonas(),
+          getMesas(),
           getProductos(),
           getTiposProducto(),
           getUsuarioRoles(),
         ]);
 
         setZonas(zonasData);
+        setMesas(mesasData);
         setProductos(productosData);
         setTiposProducto(tiposProductoData);
         setUsuarioRoles(usuarioRolesData);
@@ -34,7 +37,7 @@ export function useAdminData() {
     };
 
     fetchData();
-  },);
+  },[]);
 
-  return { zonas, productos, tiposProducto, usuarioRoles, loading, error };
+  return { zonas, mesas, setMesas, productos, tiposProducto, usuarioRoles, loading, error };
 }

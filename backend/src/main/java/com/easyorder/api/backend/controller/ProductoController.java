@@ -30,7 +30,7 @@ public class ProductoController {
     public List<ProductoDTO> getProductos(
             @RequestHeader("X-Session-Code") String sessionCode) {
 
-        return productoService.findAll(sessionCode);
+        return productoService.findAll();
     }
 
     @GetMapping("/admin/productos/{id}")
@@ -57,6 +57,18 @@ public class ProductoController {
 
     @GetMapping("/cliente/productos/tipos")
     public List<ProductoTipoDTO> getTipos(@RequestHeader("X-Session-Code") String sessionCode) {
-        return productoService.getTipos(sessionCode);
+        return productoService.getTipos();
     }
+
+    @GetMapping("/admin/productos/tipos")
+    public List<ProductoTipoDTO> getTipos() {
+        return productoService.getTipos();
+    }
+
+    @GetMapping("/admin/productos/all")
+    public List<ProductoDTO> getProductos() {
+
+        return productoService.findAll();
+    }
+
 }
