@@ -34,7 +34,11 @@ function ManagementPage() {
   return (
     <div className="app-layout">
       <aside className="sidebar">
-        <Sidebar onSelectSection={setActiveSection} onLogout={handleLogout} />
+        <Sidebar
+          activeSection={activeSection}
+          onSelectSection={setActiveSection}
+          onLogout={handleLogout}
+        />
       </aside>
 
       <main className="main-content">

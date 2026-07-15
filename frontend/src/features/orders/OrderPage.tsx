@@ -15,8 +15,7 @@ export default function OrderPage() {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const estadoClassName = (estado: string) =>
     "pedido-estado-" + estado.toLowerCase().replaceAll("_", "-");
-    const [botonLoading, setBotonLoading] = useState(false);
-
+  const [botonLoading, setBotonLoading] = useState(false);
 
   const { pedidos, loading } = useOrdersData(token);
 
@@ -34,7 +33,7 @@ export default function OrderPage() {
     setModalIsOpen(false);
   };
 
- const onClickPedidoServido = async () => {
+  const onClickPedidoServido = async () => {
     if (!pedidoSeleccionado || !token || botonLoading) return;
 
     setBotonLoading(true);
@@ -50,13 +49,18 @@ export default function OrderPage() {
   };
 
   if (loading) {
-    return <div className="loading">Cargando pedidos...</div>;
+    return <div className="loading">Cargando pedidos…</div>;
   }
 
   return (
     <div className="main-container">
       {pedidosPendientes.length === 0 ? (
         <div className="empty-orders-state">
+          <div className="empty-orders-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 12.5l5 5L20 7" />
+            </svg>
+          </div>
           <h2>¡Todo al día!</h2>
           <p>No hay pedidos pendientes por servir ahora mismo.</p>
         </div>
@@ -95,41 +99,40 @@ export default function OrderPage() {
                 <span>Mesa {pedidoSeleccionado.numeroMesa}</span>
               </div>
               <div>
-                Estado:
+                Estado: {" "}
                 <span
                   className={`estado-tag ${estadoClassName(
                     pedidoSeleccionado.nombreEstado,
-                  )}`}
+                  )} order-state`}
                 >
                   {pedidoSeleccionado.nombreEstado}
                 </span>
               </div>
             </div>
-            <div className="pedido-items">
+            <div className="order-detail-list">
               {pedidoSeleccionado.items.map((item) => (
-                <div className="pedido-item" key={item.idProducto}>
-                  <div className="item-line">
-                    <span>
-                      {" "}
-                      {item.cantidad} x {item.nombreProducto}
-                    </span>
+                <div className="order-detail-item" key={item.idProducto}>
+                  <div className="order-detail-line">
+                    <span className="order-detail-qty">{item.cantidad}×</span>
+                    <span>{item.nombreProducto}</span>
                   </div>
 
                   {item.nota && (
-                    <div className="item-nota">
-                      <span className="nota-label">Nota:</span> {item.nota}
+                    <div className="order-detail-note">
+                      <span>{item.nota}</span>
                     </div>
                   )}
                 </div>
               ))}
             </div>
+
             <div className="modal-bottom-orders">
               <button
                 className="servido-button"
                 onClick={onClickPedidoServido}
                 disabled={botonLoading}
               >
-                {botonLoading ? <span className="loader" /> : "Servido"}
+                {botonLoading ? <span className="loader" /> : "Marcar como servido"}
               </button>
             </div>
           </div>

@@ -1,85 +1,11 @@
-.sidebar-button {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 1.2rem;
-  min-width: 120px;
-  min-height: 120px;
-  background-color: var(--color-secondary);
-  color: #fff;
-  border-radius: 0.8rem;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.2s ease, background-color 0.2s ease, border 0.2s ease;
-}
-
-.sidebar-button:hover {
-  background-color: var(--color-secondary-dark);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
-  border-color: rgba(255, 255, 255, 0.3);
-}
-
-.sidebar-button:active {
-  transform: translateY(-1px);
-  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.2);
-}
-
-.sidebar-button img {
-  width: 3.5rem;
-  height: 3.5rem;
-  margin-bottom: 0.7rem;
-  opacity: 0.9;
-  transition: opacity 0.2s ease;
-}
-
-.sidebar-button:hover img {
-  opacity: 1;
-}
-
-.sidebar-button span {
-  font-size: 0.9rem;
-  font-weight: 600;
-  text-align: center;
-  letter-spacing: 0.3px;
-}
-
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 4rem;
-  padding: 1.5rem;
-  justify-content: center;
-  align-items: center;
-  background-color: var(--color-primary);
-  min-width: 100px;
-}
-.page-banner {
-  width: 100%;
-  padding: 1.5rem 2rem;
-  background-color: var(--color-primary);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  min-height: 120px;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.15);
-}
-
-.page-banner h1 {
-  margin: 0;
-  font-size: 1.8rem;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-}
+/* Este archivo asume que index.css ya está cargado globalmente
+   (variables de :root y estilos de body), igual que en el admin. */
 
 .app-layout {
   display: flex;
   height: 100vh;
   overflow: hidden;
+  background: var(--color-background-primary);
 }
 
 .main-content {
@@ -89,16 +15,235 @@
   height: 100%;
   overflow: hidden;
 }
+
+/* =========================================================
+   BARRA LATERAL (rail de iconos)
+   ========================================================= */
+
 .sidebar-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
   height: 100%;
+  width: 144px;
+  padding: 20px 0 24px;
+  background: linear-gradient(
+    180deg,
+    var(--color-primary) 0%,
+    var(--color-primary-dark) 100%
+  );
+  box-shadow: var(--shadow-md);
 }
 
-.app-logo img{ 
-  width: 100px;
-  height:100px;
-  margin-bottom: 0.5rem;
+.app-logo {
+  width: 104px;
+  height: 104px;
+  border-radius: var(--radius-md);
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: top;
+  justify-content: center;
+  overflow: hidden;
+  margin-bottom: 28px;
+  flex-shrink: 0;
+}
+
+.app-logo img {
+  width: 85px;
+  height: 85px;
+  object-fit: contain;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 16px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  border-top: 1px solid rgba(245, 237, 237, 0.18);
+}
+
+/* --- Botón de la barra lateral --- */
+
+.sidebar-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 152px;
+  padding: 12px 6px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-background-secondary);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.sidebar-icon-badge {
+  width: 84px;
+  height: 84px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(245, 237, 237, 0.12);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.sidebar-icon-badge img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  opacity: 0.9;
+}
+
+.sidebar-button span:last-child {
+  opacity: 0.85;
+}
+
+.sidebar-button:hover {
+  transform: translateY(-2px);
+}
+
+.sidebar-button:hover .sidebar-icon-badge {
+  background: rgba(245, 237, 237, 0.22);
+}
+
+.sidebar-button:focus-visible {
+  outline: 2px solid var(--color-primary-dark);
+  outline-offset: 2px;
+}
+
+.sidebar-button.active .sidebar-icon-badge {
+  background: var(--color-primary-dark);
+  box-shadow: var(--shadow-sm);
+}
+
+.sidebar-button.active .sidebar-icon-badge img {
+  opacity: 1;
+}
+
+.sidebar-button.active span:last-child {
+  opacity: 1;
+}
+
+/* Botón de salir: mismo estilo en reposo, tono de aviso al interactuar */
+.sidebar-button.danger:hover .sidebar-icon-badge {
+  background: linear-gradient(135deg, var(--color-danger), var(--color-danger-dark));
+}
+
+.sidebar-button.danger:hover span:last-child {
+  opacity: 1;
+}
+
+/* =========================================================
+   BANNER DE PÁGINA
+   ========================================================= */
+.page-banner {
+  width: 100%;
+  padding: 22px 32px;
+  background: linear-gradient(
+    120deg,
+    var(--color-primary) 0%,
+    var(--color-primary-dark) 100%
+  );
+  border-bottom: 1px solid rgba(245, 237, 237, 0.15);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.page-banner-kicker {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-background-secondary);
+  opacity: 0.7;
+  margin: 0 0 4px;
+}
+
+.page-banner h1 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 26px;
+  color: var(--color-background-secondary);
+  margin: 0;
+}
+
+.page-banner-date {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.03em;
+  color: var(--color-background-secondary);
+  background: rgba(245, 237, 237, 0.12);
+  border: 1px solid rgba(245, 237, 237, 0.3);
+  padding: 7px 13px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 720px) {
+  .app-layout {
+    flex-direction: column;
+  }
+
+  .sidebar-container {
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    padding: 12px 16px;
+  }
+
+  .app-logo {
+    margin-bottom: 0;
+    margin-right: 16px;
+  }
+
+  .sidebar-nav {
+    flex-direction: row;
+  }
+
+  .sidebar-footer {
+    margin-top: 0;
+    margin-left: auto;
+    padding-top: 0;
+    border-top: none;
+    border-left: 1px solid rgba(245, 237, 237, 0.18);
+    padding-left: 16px;
+  }
+
+  .page-banner {
+    padding: 16px 20px;
+    flex-wrap: wrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-button,
+  .sidebar-icon-badge {
+    transition: none;
+  }
 }

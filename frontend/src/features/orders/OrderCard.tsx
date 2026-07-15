@@ -8,6 +8,7 @@ type OrderCardProps = {
   items: number;
   onClick?: () => void;
 };
+
 const estadoClassName = (estado: string) =>
   "pedido-estado-" + estado.toLowerCase().replaceAll("_", "-");
 
@@ -27,20 +28,19 @@ function calcularTiempo(dateString: string): string {
 function OrderCard({ idPedido, mesa, estado, createdAt, items, onClick }: OrderCardProps) {
   return (
     <div className="pedido-card" onClick={onClick} role="button">
-        <div className="pedido-top">
-            <div className="pedido-numero">Pedido #{idPedido}</div>
-            <div className={`pedido-estado ${estadoClassName(estado)}`}>{estado}</div>
-        </div>
-        <div className="pedido-center">
-            <div><span>Mesa: </span>{mesa}</div>
-            <div><span>Items: </span>{items}</div>
-        </div>
-        <div className="pedido-bottom">
-            <div className="pedido-tiempo">{calcularTiempo(createdAt)}</div>
-        </div>
+      <div className="pedido-top">
+        <div className="pedido-numero">Pedido #{idPedido}</div>
+        <div className={`pedido-estado ${estadoClassName(estado)}`}>{estado}</div>
+      </div>
+      <div className="pedido-center">
+        <div><span>Mesa: </span>{mesa}</div>
+        <div><span>Items: </span>{items}</div>
+      </div>
+      <div className="pedido-bottom">
+        <div className="pedido-tiempo">{calcularTiempo(createdAt)}</div>
+      </div>
     </div>
   );
 }
 
 export default OrderCard;
-

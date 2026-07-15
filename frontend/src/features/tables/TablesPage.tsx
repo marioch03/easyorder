@@ -11,7 +11,6 @@ import TableButton from "./TableButton";
 import type { Mesa } from "./tables";
 import {
   cerrarSesionMesa,
-  crearMesa,
   crearSesionMesa,
   getCuentaMesa,
   getMesas,
@@ -21,6 +20,12 @@ import { useTablesData } from "./useTablesData";
 
 Modal.setAppElement("#root");
 
+const LEGEND = [
+  { key: "green", label: "Libre" },
+  { key: "red", label: "Ocupada" },
+  { key: "yellow", label: "Esperando cuenta" },
+];
+
 export default function TablesPage() {
   const token = localStorage.getItem("accessToken");
   const { mesas, zonas, setMesas, setZonas, loading } = useTablesData(token);
@@ -28,9 +33,6 @@ export default function TablesPage() {
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [mesaSeleccionada, setMesaSeleccionada] = useState<Mesa | null>(null);
-  const [modalCrearMesa, setModalCrearMesa] = useState(false);
-  const [numeroMesa, setNumeroMesa] = useState("");
-  const [zonaMesa, setZonaMesa] = useState<number | null>(null);
   const estadoMesaSeleccionada = mesaSeleccionada?.estado;
 
   const [qrLoading, setQrLoading] = useState(false);
@@ -64,26 +66,6 @@ export default function TablesPage() {
 
     cargarDatos();
   }, [token]);
-
-  const crearMesaNueva = async () => {
-    if (!token) return;
-
-    try {
-      if (!numeroMesa) return alert("Debes ingresar un número de mesa");
-      if (!zonaMesa) return alert("Debes seleccionar una zona");
-
-      await crearMesa(Number(numeroMesa), zonaMesa);
-
-      setModalCrearMesa(false);
-      setNumeroMesa("");
-      setZonaMesa(null);
-
-      const mesasData = await getMesas();
-      setMesas(mesasData);
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   const crearSesion = async (mesa: Mesa) => {
     if (!token) return;
@@ -160,11 +142,20 @@ export default function TablesPage() {
     .filter((g) => g.mesas.length > 0);
 
   if (loading) {
-    return <div className="loading">Cargando mesas...</div>;
+    return <div className="loading">Cargando mesas…</div>;
   }
 
   return (
     <div className="main-container">
+      <div className="table-legend">
+        {LEGEND.map((item) => (
+          <span key={item.key} className="table-legend-item">
+            <span className={`table-legend-dot ${item.key}`} />
+            {item.label}
+          </span>
+        ))}
+      </div>
+
       <div className="zones-container">
         {mesasPorZona.map(({ zona, mesas }) => (
           <div key={zona.id} className="zone-group">
@@ -219,12 +210,14 @@ export default function TablesPage() {
                 />
               ) : mesaSeleccionada?.sesionActiva?.qrCodeUrl ? (
                 <div className="qr-actions">
-                  <QRCode
-                    value={
-                      `${frontendUrl}/cliente/?sessionCode=` +
-                      mesaSeleccionada?.sesionActiva?.qrCodeUrl
-                    }
-                  />
+                  <div className="qr-code-frame">
+                    <QRCode
+                      value={
+                        `${frontendUrl}/cliente/?sessionCode=` +
+                        mesaSeleccionada?.sesionActiva?.qrCodeUrl
+                      }
+                    />
+                  </div>
                   <div className="button-group">
                     <ImageButton
                       icon={closeIcon}
@@ -245,57 +238,6 @@ export default function TablesPage() {
             </div>
           </div>
         )}
-      </Modal>
-      <Modal
-        isOpen={modalCrearMesa}
-        onRequestClose={() => setModalCrearMesa(false)}
-        className="modal-container-tables"
-        overlayClassName="modal-overlay-tables"
-      >
-        <div className="modal-items-tables">
-          <div className="modal-top-tables">
-            <h2>Añadir mesa</h2>
-
-            <button
-              className="close-button"
-              onClick={() => setModalCrearMesa(false)}
-            >
-              ×
-            </button>
-          </div>
-
-          <div className="modal-center-tables">
-            <input
-              type="number"
-              placeholder="Número de mesa"
-              value={numeroMesa}
-              onChange={(e) => setNumeroMesa(e.target.value)}
-            />
-
-            <select
-              value={zonaMesa ?? ""}
-              onChange={(e) =>
-                setZonaMesa(e.target.value ? Number(e.target.value) : null)
-              }
-            >
-              <option value="" disabled>
-                Selecciona zona
-              </option>
-
-              {zonas.map((zona) => (
-                <option key={zona.id} value={zona.id}>
-                  {zona.nombre}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="modal-bottom-tables">
-            <button className="create-table-button" onClick={crearMesaNueva}>
-              Crear mesa
-            </button>
-          </div>
-        </div>
       </Modal>
       <Modal
         isOpen={modalCuentaOpen}
@@ -335,12 +277,6 @@ export default function TablesPage() {
           </div>
         )}
       </Modal>
-      <button
-        className="add-table-button"
-        onClick={() => setModalCrearMesa(true)}
-      >
-        +
-      </button>
     </div>
   );
 }
