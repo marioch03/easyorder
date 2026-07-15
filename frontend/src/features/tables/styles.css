@@ -76,7 +76,7 @@
   font-family: var(--font-display);
   font-weight: 600;
   font-size: 19px;
-  color: var(--color-primary-dark);
+  color: black;
   margin: 0 0 18px;
 }
  
@@ -84,7 +84,7 @@
   content: "";
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, var(--color-secondary), transparent);
+  background: linear-gradient(90deg, black, transparent);
 }
  
 .tables-container {
@@ -244,7 +244,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: var(--color-primary-dark);
+  color: black;
 }
  
 .estado-tag {
@@ -381,7 +381,7 @@
   font-family: var(--font-display);
   font-weight: 600;
   font-size: 19px;
-  color: var(--color-primary-dark);
+  color: black;
   margin: 0;
 }
  

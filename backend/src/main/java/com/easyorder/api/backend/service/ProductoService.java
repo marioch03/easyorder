@@ -1,15 +1,18 @@
 package com.easyorder.api.backend.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import com.easyorder.api.backend.dto.EditarProductoDTO;
 import com.easyorder.api.backend.dto.ProductoDTO;
 import com.easyorder.api.backend.dto.ProductoTipoDTO;
 import com.easyorder.api.backend.exception.NoEncontradoException;
 import com.easyorder.api.backend.model.Producto;
+import com.easyorder.api.backend.model.ProductoTipo;
 import com.easyorder.api.backend.repository.ProductoRepository;
 import com.easyorder.api.backend.repository.ProductoTipoRepository;
 
@@ -59,5 +62,25 @@ public class ProductoService {
         return productoTipoRepository.findAll().stream()
                 .map(tipo -> new ProductoTipoDTO(tipo.getId(), tipo.getNombre()))
                 .collect(Collectors.toList());
+    }
+
+    public Producto editarProducto(Long id, EditarProductoDTO dto) {
+
+        Producto producto = productoRepository.findById(id)
+                .orElseThrow(() -> new NoEncontradoException(
+                        "Producto no encontrado. ID: " + id));
+
+        ProductoTipo tipo = productoTipoRepository.findById(dto.tipoId())
+                .orElseThrow(() -> new NoEncontradoException(
+                        "ProductoTipo no encontrado. ID: " + id));
+
+        producto.setId(dto.id());
+        producto.setNombre(dto.nombre());
+        producto.setDescripcion(dto.descripcion());
+        producto.setPrecio(BigDecimal.valueOf(dto.precio()));
+        producto.setDisponible(dto.activo());
+        producto.setTipo(tipo);
+
+        return productoRepository.save(producto);
     }
 }

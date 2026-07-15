@@ -3,12 +3,14 @@ import type {
   AddProductFormProps,
   CreateTableFormProps,
   DeleteTablePayload,
+  EditProductFormProps,
   EditTableFormProps,
   FormProps,
+  ProductoDTO,
   RegisterUserFormProps,
   RemoveProductFormProps,
   RemoveProductPayload,
-  RemoveUserFormProps
+  RemoveUserFormProps,
 } from "./admin";
 
 /* -------------------------------------------------------------
@@ -20,7 +22,7 @@ import type {
 export function CreateTableForm({
   onConfirm,
   onCancel,
-  zonas
+  zonas,
 }: CreateTableFormProps) {
   const [numero, setNumero] = useState("");
   const [zona, setZona] = useState<number>(0);
@@ -49,9 +51,7 @@ export function CreateTableForm({
         <label htmlFor="zona-mesa">Zona</label>
         <select
           value={zona ?? ""}
-          onChange={(e) =>
-            setZona(Number(e.target.value))
-          }
+          onChange={(e) => setZona(Number(e.target.value))}
         >
           <option value="" disabled>
             Selecciona zona
@@ -120,7 +120,7 @@ export function DeleteTableForm({
 export function EditTableForm({
   onConfirm,
   onCancel,
-  zonas
+  zonas,
 }: EditTableFormProps) {
   const [numero, setNumero] = useState("");
   const [nuevoNumero, setNuevoNumero] = useState("");
@@ -197,11 +197,11 @@ export function EditTableForm({
 export function AddProductForm({
   onConfirm,
   onCancel,
-  tiposProducto
+  tiposProducto,
 }: AddProductFormProps) {
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
-  const [precio, setPrecio] = useState("");
+  const [precio, setPrecio] = useState(0);
   const [tipo, setTipo] = useState<number | null>(null);
   const [imagen, setImagen] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -253,7 +253,7 @@ export function AddProductForm({
             min={0}
             step="0.01"
             value={precio}
-            onChange={(e) => setPrecio(e.target.value)}
+            onChange={(e) => setPrecio(Number(e.target.value))}
             required
           />
         </div>
@@ -321,11 +321,179 @@ export function AddProductForm({
   );
 }
 
+/* ================= Editar producto ================= */
+
+export function EditProductForm({
+  onConfirm,
+  onCancel,
+  productos,
+  tiposProducto,
+}: EditProductFormProps) {
+  const [query, setQuery] = useState("");
+
+  const [productoSeleccionado, setProductoSeleccionado] =
+    useState<ProductoDTO | null>(null);
+
+  const [nombre, setNombre] = useState("");
+  const [descripcion, setDescripcion] = useState("");
+  const [precio, setPrecio] = useState(0);
+  const [tipoId, setTipoId] = useState<number | null>(null);
+  const [activo, setActivo] = useState(true);
+
+  const resultados = productos.filter((p) =>
+    p.nombre.toLowerCase().includes(query.toLowerCase()),
+  );
+
+  const seleccionarProducto = (producto: ProductoDTO) => {
+  setProductoSeleccionado(producto);
+
+  setQuery(producto.nombre);
+
+  setNombre(producto.nombre);
+  setDescripcion(producto.descripcion ?? "");
+  setPrecio(producto.precio);
+  setTipoId(producto.tipoId);
+  setActivo(producto.disponible);
+};
+
+  return (
+    <form
+      className="action-form wide-form"
+      onSubmit={(e) => {
+        e.preventDefault();
+
+        if (!productoSeleccionado) return;
+
+        onConfirm({
+          id: productoSeleccionado.id,
+          nombre,
+          descripcion,
+          precio: Number(precio),
+          tipoId,
+          activo,
+        });
+      }}
+    >
+      {/* ================= Buscador ================= */}
+
+      <div className="form-field">
+        <label htmlFor="buscar-producto-editar">Buscar producto</label>
+
+        <input
+          id="buscar-producto-editar"
+          type="text"
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setProductoSeleccionado(null);
+          }}
+          placeholder="Escribe para buscar..."
+        />
+      </div>
+
+      {query && !productoSeleccionado && (
+        <div className="search-results">
+          {resultados.length === 0 ? (
+            <div className="search-empty">Sin resultados</div>
+          ) : (
+            resultados.map((producto) => (
+              <div
+                key={producto.id}
+                className={`search-result-item`}
+                onClick={() => seleccionarProducto(producto)}
+              >
+                {producto.nombre}
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {/* ================= Campos editables ================= */}
+      {productoSeleccionado && (
+        <div className="form-grid edit-product-grid">
+          <div className="form-column">
+            <div className="form-field">
+              <label>Nombre</label>
+              <input
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
+              />
+            </div>
+
+            <div className="form-field">
+              <label>Descripción</label>
+              <textarea
+                value={descripcion}
+                onChange={(e) => setDescripcion(e.target.value)}
+                rows={6}
+              />
+            </div>
+          </div>
+
+          <div className="form-column">
+            <div className="form-field">
+              <label>Precio</label>
+              <input
+                type="number"
+                step="0.01"
+                value={precio}
+                onChange={(e) => setPrecio(Number(e.target.value))}
+              />
+            </div>
+
+            <div className="form-field">
+              <label>Tipo</label>
+
+              <select
+                value={tipoId ?? ""}
+                onChange={(e) => setTipoId(Number(e.target.value))}
+              >
+                {tiposProducto.map((tipoProducto) => (
+                  <option key={tipoProducto.id} value={tipoProducto.id}>
+                    {tipoProducto.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-field">
+              <label>Estado</label>
+
+              <select
+                value={activo ? "true" : "false"}
+                onChange={(e) => setActivo(e.target.value === "true")}
+              >
+                <option value="true">Activo</option>
+                <option value="false">Inactivo</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="form-actions">
+        <button
+          type="submit"
+          className="btn-primary"
+          disabled={!productoSeleccionado}
+        >
+          Guardar cambios
+        </button>
+
+        <button type="button" className="btn-ghost" onClick={onCancel}>
+          Cancelar
+        </button>
+      </div>
+    </form>
+  );
+}
+
 /* ================= Eliminar producto ================= */
 export function RemoveProductForm({
   onConfirm,
   onCancel,
-  productos
+  productos,
 }: RemoveProductFormProps) {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<RemoveProductPayload | null>(null);
@@ -391,7 +559,7 @@ export function RemoveProductForm({
 export function RegisterUserForm({
   onConfirm,
   onCancel,
-  usuarioRoles
+  usuarioRoles,
 }: RegisterUserFormProps) {
   const [nombre, setNombre] = useState("");
   const [clave, setClave] = useState("");
@@ -432,9 +600,7 @@ export function RegisterUserForm({
         <select
           id="rol-nuevo"
           value={rol ?? ""}
-          onChange={(e) =>
-            setRol(e.target.value)
-          }
+          onChange={(e) => setRol(e.target.value)}
         >
           <option value="" disabled>
             Seleccionar rol
@@ -483,17 +649,13 @@ export function RemoveUserForm({
       }}
     >
       <div className="form-field">
-        <label htmlFor="usuario-deshabilitar">
-          Usuario a inhabilitar
-        </label>
+        <label htmlFor="usuario-deshabilitar">Usuario a inhabilitar</label>
 
         <select
           id="usuario-deshabilitar"
           value={usuarioId ?? ""}
           onChange={(e) =>
-            setUsuarioId(
-              e.target.value ? Number(e.target.value) : null
-            )
+            setUsuarioId(e.target.value ? Number(e.target.value) : null)
           }
           required
         >
@@ -520,11 +682,7 @@ export function RemoveUserForm({
           Inhabilitar usuario
         </button>
 
-        <button
-          type="button"
-          className="btn-ghost"
-          onClick={onCancel}
-        >
+        <button type="button" className="btn-ghost" onClick={onCancel}>
           Cancelar
         </button>
       </div>

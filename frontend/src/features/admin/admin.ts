@@ -9,6 +9,7 @@ export type ActionKey =
   | "removeUser"
   | "logout"
   | "addProduct"
+  | "editProduct"
   | "removeProduct";
 
 export type ActivityEntry = {
@@ -50,6 +51,12 @@ export const ACTIONS: Action[] = [
     key: "addProduct",
     label: "Añadir producto",
     icon: icons.addProduct,
+    group: "Catálogo",
+  },
+  {
+    key: "editProduct",
+    label: "Editar producto",
+    icon: icons.editProduct,
     group: "Catálogo",
   },
   {
@@ -106,9 +113,23 @@ export type AddProductFormProps = FormProps<AddProductPayload> & {
 export type AddProductPayload = {
   nombre: string;
   descripcion: string;
-  precio: string;
+  precio: number;
   tipo: number | null;
   imagen: string | null;
+};
+
+export type EditProductPayload = {
+  id: number,
+  nombre: string;
+  descripcion: string;
+  precio: number;
+  tipoId: number | null;
+  activo: boolean
+};
+
+export type EditProductFormProps = FormProps<EditProductPayload> & {
+  productos: ProductoDTO[];
+  tiposProducto: ProductoTipoDTO[];
 };
 export type RemoveProductFormProps = FormProps<RemoveProductPayload> & {
   productos: ProductoDTO[];
@@ -185,6 +206,10 @@ export const ACTION_META: Record<ActionKey, { title: string; hint: string }> = {
   addProduct: {
     title: "Añadir producto",
     hint: "Crea un nuevo producto para el catálogo.",
+  },
+  editProduct: {
+    title: "Editar producto",
+    hint: "Edita un producto existente en el catálogo.",
   },
   removeProduct: {
     title: "Eliminar producto",

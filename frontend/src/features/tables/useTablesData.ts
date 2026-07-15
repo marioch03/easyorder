@@ -51,8 +51,6 @@ export function useTablesData(token: string | null) {
   return {
     mesas,
     zonas,
-    setMesas,
-    setZonas,
     loading,
   };
 }

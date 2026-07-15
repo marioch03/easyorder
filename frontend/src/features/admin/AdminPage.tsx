@@ -6,6 +6,7 @@ import {
   AddProductForm,
   CreateTableForm,
   DeleteTableForm,
+  EditProductForm,
   EditTableForm,
   RegisterUserForm,
   RemoveProductForm,
@@ -22,7 +23,13 @@ import {
   tableActions,
 } from "./admin";
 import AdminButton from "./AdminButton";
-import { crearMesa, deshabilitarUsuario, eliminarMesa, registrarUsuario } from "./adminService";
+import {
+  crearMesa,
+  deshabilitarUsuario,
+  editarProducto,
+  eliminarMesa,
+  registrarUsuario,
+} from "./adminService";
 import StatCard from "./StatCard";
 import "./styles.css";
 import { useAdminData } from "./useAdminData";
@@ -31,9 +38,17 @@ function AdminPage() {
   const [activeKey, setActiveKey] = useState<ActionKey | null>(null);
   const [activity, setActivity] = useState<ActivityEntry[]>([]);
   const navigate = useNavigate();
-  const { zonas, mesas, setMesas, productos, tiposProducto, usuarioRoles, usuarios, setUsuarios } =
-    useAdminData();
-  const usuariosActivos = usuarios.filter(u => u.activo).length;
+  const {
+    zonas,
+    mesas,
+    setMesas,
+    productos,
+    tiposProducto,
+    usuarioRoles,
+    usuarios,
+    setUsuarios,
+  } = useAdminData();
+  const usuariosActivos = usuarios.filter((u) => u.activo).length;
   const handleSelect = (action: (typeof ACTIONS)[number]) => {
     setActiveKey(action.key === activeKey ? null : action.key);
   };
@@ -137,6 +152,27 @@ function AdminPage() {
               closeForm();
             }}
             tiposProducto={tiposProducto}
+          />
+        );
+      case "editProduct":
+        return (
+          <EditProductForm
+            productos={productos}
+            tiposProducto={tiposProducto}
+            onCancel={closeForm}
+            onConfirm={async (payload) => {
+              try {
+                const productoActualizado = await editarProducto(payload);
+
+                logActivity(
+                  `Producto "${productoActualizado.nombre}" modificado`,
+                );
+
+                closeForm();
+              } catch (error) {
+                console.error(error);
+              }
+            }}
           />
         );
       case "removeProduct":

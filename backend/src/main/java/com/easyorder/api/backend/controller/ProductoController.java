@@ -7,11 +7,13 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.easyorder.api.backend.dto.EditarProductoDTO;
 import com.easyorder.api.backend.dto.ProductoDTO;
 import com.easyorder.api.backend.dto.ProductoTipoDTO;
 import com.easyorder.api.backend.model.Producto;
@@ -43,6 +45,15 @@ public class ProductoController {
     public ResponseEntity<Producto> crearProducto(@RequestBody Producto producto) {
         Producto nuevo = productoService.save(producto);
         return ResponseEntity.ok(nuevo);
+    }
+
+    @PutMapping("/admin/productos/edit/{id}")
+    public ResponseEntity<Producto> editarProducto(
+            @PathVariable Long id,
+            @RequestBody EditarProductoDTO dto) {
+
+        return ResponseEntity.ok(
+                productoService.editarProducto(id, dto));
     }
 
     @DeleteMapping("/admin/productos/{id}")

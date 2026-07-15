@@ -24,6 +24,7 @@ export const icons = {
   addUser: svg(USER + PLUS_MARK),
   removeUser: svg(USER + MINUS_MARK),
   addProduct: svg(PACKAGE + PLUS_MARK),
+  editProduct: svg(PACKAGE + PENCIL_MARK),
   removeProduct: svg(PACKAGE + MINUS_MARK),
   logout: svg(LOGOUT),
 };

@@ -1,20 +1,17 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Modal from "react-modal";
 import QRCode from "react-qr-code";
 import billIcon from "../../assets/bill.png";
 import closeIcon from "../../assets/close-window.png";
 import qrIcon from "../../assets/qr.png";
 import type { Cuenta } from "../menu/types/bill";
-import { useWS } from "../ws/useWS";
 import ImageButton from "./ImageButton";
 import TableButton from "./TableButton";
 import type { Mesa } from "./tables";
 import {
   cerrarSesionMesa,
   crearSesionMesa,
-  getCuentaMesa,
-  getMesas,
-  getZonas,
+  getCuentaMesa
 } from "./tablesService";
 import { useTablesData } from "./useTablesData";
 
@@ -28,8 +25,7 @@ const LEGEND = [
 
 export default function TablesPage() {
   const token = localStorage.getItem("accessToken");
-  const { mesas, zonas, setMesas, setZonas, loading } = useTablesData(token);
-  const { mesas: mesasWS } = useWS();
+  const { mesas, zonas, loading } = useTablesData(token);
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [mesaSeleccionada, setMesaSeleccionada] = useState<Mesa | null>(null);
@@ -40,32 +36,6 @@ export default function TablesPage() {
   const [cuenta, setCuenta] = useState<Cuenta | null>(null);
   const [modalCuentaOpen, setModalCuentaOpen] = useState(false);
   const frontendUrl = import.meta.env.VITE_FRONTEND_URL;
-
-  useEffect(() => {
-    if (mesasWS && mesasWS.length > 0) {
-      setMesas(mesasWS);
-    }
-  }, [mesasWS]);
-
-  useEffect(() => {
-    if (!token) return;
-
-    const cargarDatos = async () => {
-      try {
-        const [mesasData, zonasData] = await Promise.all([
-          getMesas(),
-          getZonas(),
-        ]);
-
-        setMesas(mesasData);
-        setZonas(zonasData);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    cargarDatos();
-  }, [token]);
 
   const crearSesion = async (mesa: Mesa) => {
     if (!token) return;
