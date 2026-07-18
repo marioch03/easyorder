@@ -49,7 +49,7 @@
  
 .pedido-estado-en-preparacion { background: var(--color-preparing); color: #5c3a05; }
 .pedido-estado-listo { background: var(--color-success); }
-.pedido-estado-pendiente { background: var(--color-danger); }
+.pedido-estado-pendiente { background: var(--color-occupied); }
  
 .pedido-center {
   margin-top: 16px;

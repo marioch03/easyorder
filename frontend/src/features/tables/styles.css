@@ -406,6 +406,10 @@
   box-shadow: var(--shadow-sm);
   transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
 }
+
+.image-button.danger {
+  background: linear-gradient(135deg, var(--color-danger), var(--color-danger-dark));
+}
  
 .image-button:hover,
 .create-table-button:hover {
@@ -470,6 +474,17 @@
 .add-table-button:hover {
   transform: scale(1.08);
   box-shadow: 0 14px 32px rgba(67, 93, 128, 0.3);
+}
+
+.action-error {
+  margin: 20px 0 6px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(181, 101, 79, 0.12);
+  border: 1px solid rgba(181, 101, 79, 0.3);
+  color: var(--color-danger-dark);
+  font-size: 12.5px;
+  text-align: left;
 }
  
 @media (max-width: 640px) {

@@ -11,7 +11,7 @@ import type { Mesa } from "./tables";
 import {
   cerrarSesionMesa,
   crearSesionMesa,
-  getCuentaMesa
+  getCuentaMesa,
 } from "./tablesService";
 import { useTablesData } from "./useTablesData";
 
@@ -25,13 +25,15 @@ const LEGEND = [
 
 export default function TablesPage() {
   const token = localStorage.getItem("accessToken");
-  const { mesas, zonas, loading } = useTablesData(token);
+  const { mesas, zonas, loading, error } = useTablesData(token);
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [mesaSeleccionada, setMesaSeleccionada] = useState<Mesa | null>(null);
   const estadoMesaSeleccionada = mesaSeleccionada?.estado;
 
   const [qrLoading, setQrLoading] = useState(false);
+  const [cuentaLoading, setCuentaLoading] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const [cuenta, setCuenta] = useState<Cuenta | null>(null);
   const [modalCuentaOpen, setModalCuentaOpen] = useState(false);
@@ -40,12 +42,14 @@ export default function TablesPage() {
   const crearSesion = async (mesa: Mesa) => {
     if (!token) return;
     setQrLoading(true);
+    setActionError(null);
 
     try {
       await crearSesionMesa(mesa.id);
       cerrarModal();
     } catch (err) {
       console.error(err);
+      setActionError("No se pudo generar el QR. Inténtalo de nuevo.");
     } finally {
       setQrLoading(false);
     }
@@ -53,17 +57,22 @@ export default function TablesPage() {
 
   const cerrarSesion = async (mesa: Mesa) => {
     if (!token || qrLoading) return;
-    setQrLoading(true);
 
     if (!mesa.sesionActiva) {
-      throw new Error("La mesa no tiene una sesión activa.");
+      console.error("La mesa no tiene una sesión activa.");
+      setActionError("Esta mesa no tiene ninguna sesión activa que cerrar.");
+      return;
     }
+
+    setQrLoading(true);
+    setActionError(null);
 
     try {
       await cerrarSesionMesa(mesa.sesionActiva.qrCodeUrl);
       cerrarModal();
     } catch (err) {
       console.error(err);
+      setActionError("No se pudo cerrar la sesión. Inténtalo de nuevo.");
     } finally {
       setQrLoading(false);
     }
@@ -84,6 +93,7 @@ export default function TablesPage() {
 
   const abrirModal = (mesa: Mesa) => {
     setMesaSeleccionada(mesa);
+    setActionError(null);
     setModalIsOpen(true);
   };
 
@@ -95,12 +105,18 @@ export default function TablesPage() {
   const obtenerCuenta = async (mesa: Mesa) => {
     if (!token) return;
 
+    setCuentaLoading(true);
+    setActionError(null);
+
     try {
       const data = await getCuentaMesa(mesa.id);
       setCuenta(data);
       setModalCuentaOpen(true);
     } catch (err) {
       console.error("Error obteniendo cuenta:", err);
+      setActionError("No se pudo obtener la cuenta. Inténtalo de nuevo.");
+    } finally {
+      setCuentaLoading(false);
     }
   };
 
@@ -113,6 +129,10 @@ export default function TablesPage() {
 
   if (loading) {
     return <div className="loading">Cargando mesas…</div>;
+  }
+
+  if (error) {
+    return <div className="loading error">{error}</div>;
   }
 
   return (
@@ -192,12 +212,14 @@ export default function TablesPage() {
                     <ImageButton
                       icon={closeIcon}
                       label="Cerrar sesión"
+                      variant="danger"
                       loading={qrLoading}
                       onClick={() => cerrarSesion(mesaSeleccionada)}
                     />
                     <ImageButton
                       icon={billIcon}
                       label="Ver cuenta"
+                      loading={cuentaLoading}
                       onClick={() => obtenerCuenta(mesaSeleccionada)}
                     />
                   </div>
@@ -205,6 +227,7 @@ export default function TablesPage() {
               ) : (
                 <p>No hay sesión activa.</p>
               )}
+              {actionError && <p className="action-error">{actionError}</p>}
             </div>
           </div>
         )}
