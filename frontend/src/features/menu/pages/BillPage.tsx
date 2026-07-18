@@ -28,7 +28,7 @@ export default function BillPage() {
       setBotonLoading(false);
     }
   };
-  if (loading) return <p>Cargando cuenta...</p>;
+  if (loading) return <p className="bill-loading">Cargando cuenta…</p>;
 
   return (
     <div className="bill-page">
@@ -59,7 +59,7 @@ export default function BillPage() {
         </div>
 
         <button
-          className="request-bill-btn"
+          className={`request-bill-btn${cuentaSolicitada ? " requested" : ""}`}
           disabled={cuentaSolicitada}
           onClick={() => !cuentaSolicitada && setConfirmOpen(true)}
         >

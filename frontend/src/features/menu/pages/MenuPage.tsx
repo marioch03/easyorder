@@ -83,8 +83,8 @@ export default function MenuPage() {
     }
   };
 
-  if (loading) return <p>Cargando productos...</p>;
-  if (error) return <p>Error: {error}</p>;
+  if (loading) return <p className="bill-loading">Cargando productos...</p>;
+  if (error) return <p className="bill-loading">Error: {error}</p>;
 
   return (
     <div className="page-menu">
