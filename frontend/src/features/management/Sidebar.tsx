@@ -2,7 +2,7 @@ import { useState } from "react";
 import logoutIcon from "../../assets/logout.png";
 import ordersIcon from "../../assets/orders.png";
 import tablesIcon from "../../assets/tables.png";
-import ConfirmModal from "../../components/ConfirmModal";
+import ConfirmModal from "../../common/ConfirmModal";
 import SidebarButton from "./SidebarButton";
 import "./styles.css";
 

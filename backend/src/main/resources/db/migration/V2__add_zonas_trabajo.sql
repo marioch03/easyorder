@@ -1,6 +1,6 @@
--- Migración V2: Añadir Zonas de Trabajo, Roles y actualizar PedidoItem
+-- Migración V2: Añadir Zonas de Trabajo, Roles y actualizar ProductoTipo y PedidoItem
 
--- 1. Añadir nuevos roles: COCINA y BARRA
+-- 1. Añadir nuevos roles para las estaciones de trabajo
 INSERT INTO `UsuarioRol` (`nombre`, `descripcion`) VALUES 
 ('COCINA', 'Rol para usuarios de estaciones en cocina (KDS)'),
 ('BARRA', 'Rol para usuarios de estaciones en barra');
@@ -18,7 +18,18 @@ INSERT INTO `ZonaTrabajo` (`nombre`) VALUES
 ('COCINA'), 
 ('BARRA');
 
--- 4. Modificar PedidoItem: añadir id_zona_trabajo y flag servido
+-- 4. Modificar ProductoTipo: asociar cada tipo a una zona de trabajo (Tapa -> Cocina, Bebida -> Barra)
+ALTER TABLE `ProductoTipo`
+ADD COLUMN `id_zona_trabajo` bigint(20) DEFAULT NULL,
+ADD CONSTRAINT `FK_producto_tipo_zona_trabajo` FOREIGN KEY (`id_zona_trabajo`) REFERENCES `ZonaTrabajo` (`id`);
+
+-- Actualizamos cada tupla con su zona correspondiente
+UPDATE `ProductoTipo` SET `id_zona_trabajo` = 1 WHERE `id` = 1; -- TAPA -> COCINA
+UPDATE `ProductoTipo` SET `id_zona_trabajo` = 1 WHERE `id` = 2; -- RACION -> COCINA
+UPDATE `ProductoTipo` SET `id_zona_trabajo` = 1 WHERE `id` = 3; -- POSTRE -> COCINA
+UPDATE `ProductoTipo` SET `id_zona_trabajo` = 2 WHERE `id` = 4; -- BEBIDA -> BARRA
+
+-- 5. Modificar PedidoItem: añadir zona de trabajo (para histórico) y los estados de preparación/entrega
 ALTER TABLE `PedidoItem`
 ADD COLUMN `id_zona_trabajo` bigint(20) DEFAULT NULL,
 ADD COLUMN `servido` bit(1) DEFAULT b'0',

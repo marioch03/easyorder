@@ -10,13 +10,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductoDTO implements Serializable {
-        private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-        private long id;
-        private String nombre;
-        private String descripcion;
-        private double precio;
-        private boolean disponible;
-        private String imagen;
-        private long tipoId;
+	private long id;
+	private String nombre;
+	private String descripcion;
+	private double precio;
+	private boolean disponible;
+	private String imagen;
+	private long tipoId;
 }

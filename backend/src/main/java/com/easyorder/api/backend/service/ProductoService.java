@@ -13,8 +13,10 @@ import com.easyorder.api.backend.dto.ProductoTipoDTO;
 import com.easyorder.api.backend.exception.NoEncontradoException;
 import com.easyorder.api.backend.model.Producto;
 import com.easyorder.api.backend.model.ProductoTipo;
+import com.easyorder.api.backend.model.ZonaTrabajo;
 import com.easyorder.api.backend.repository.ProductoRepository;
 import com.easyorder.api.backend.repository.ProductoTipoRepository;
+import com.easyorder.api.backend.repository.ZonaTrabajoRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,6 +27,8 @@ public class ProductoService {
     private final ProductoRepository productoRepository;
 
     private final ProductoTipoRepository productoTipoRepository;
+
+    private final ZonaTrabajoRepository zonaTrabajoRepository;
 
     @Cacheable(value = "productos", key = "'todos'")
     public List<ProductoDTO> findAll() {
@@ -82,5 +86,14 @@ public class ProductoService {
         producto.setTipo(tipo);
 
         return productoRepository.save(producto);
+    }
+
+    public List<ProductoTipoDTO> getTiposKds(String nombreZonaTrabajo) {
+        ZonaTrabajo zonaTrabajo = zonaTrabajoRepository.findByNombre(nombreZonaTrabajo)
+                .orElseThrow(() -> new NoEncontradoException(nombreZonaTrabajo));
+
+        return productoTipoRepository.findByZonaTrabajo(zonaTrabajo).stream()
+                .map(tipo -> new ProductoTipoDTO(tipo.getId(), tipo.getNombre()))
+                .collect(Collectors.toList());
     }
 }

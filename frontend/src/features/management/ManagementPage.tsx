@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import Banner from "../../common/Banner";
 import OrderPage from "../orders/OrderPage";
 import TablesPage from "../tables/TablesPage";
-import Banner from "./Banner";
 import Sidebar from "./Sidebar";
 import { logout } from "./managementService";
 

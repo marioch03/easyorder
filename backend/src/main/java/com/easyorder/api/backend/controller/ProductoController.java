@@ -82,4 +82,9 @@ public class ProductoController {
         return productoService.findAll();
     }
 
+    @GetMapping("/admin/productos/tipos/{nombreZonaTrabajo}")
+    public List<ProductoTipoDTO> getTiposKds(@PathVariable String nombreZonaTrabajo) {
+        return productoService.getTiposKds(nombreZonaTrabajo);
+    }
+
 }

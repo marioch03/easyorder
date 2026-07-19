@@ -5,6 +5,7 @@ import ProtectedRoute from "./features/auth/ProtectedRoute";
 import RoleSelectPage from "./features/auth/RoleSelecfPage";
 import { CartProvider } from "./features/cart/CartProvider";
 import { ErrorPage } from "./features/error/ErrorPage";
+import KdsPage from "./features/kds/KdsPage";
 import ManagementPage from "./features/management/ManagementPage";
 import CustomerPage from "./features/menu/pages/CustomerPage";
 import { SessionProvider } from "./features/session/SessionProvider";
@@ -46,7 +47,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-
+        <Route path="/kds/:zonaTabajoSlug" element={<KdsPage />} />
         <Route
           path="/auth/select-interface"
           element={

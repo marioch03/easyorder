@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -37,6 +38,13 @@ public class PedidoItem {
 
     @Column(name = "listo_para_servir")
     private boolean listoParaServir = false;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_zona_trabajo")
+    private ZonaTrabajo zonaTrabajo;
+
+    @Column(nullable = true)
+    private boolean servido = false;
 
     public PedidoItem() {
     }

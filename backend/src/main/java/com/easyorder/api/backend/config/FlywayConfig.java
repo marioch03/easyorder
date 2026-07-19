@@ -12,7 +12,7 @@ public class FlywayConfig {
     @Bean
     public FlywayMigrationStrategy cleanMigrateStrategy() {
         return flyway -> {
-            if (System.getenv("RESET_DB") != null) {
+            if (Boolean.parseBoolean(System.getenv("RESET_DB"))) {
                 flyway.clean();
             }
 
