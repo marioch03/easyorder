@@ -1,3 +1,4 @@
+import type { ProductoTipoDTO } from "../../common/types";
 import type { SesionDTO } from "../tables/tables";
 import { icons } from "./icons";
 
@@ -172,11 +173,6 @@ export type ProductoDTO = {
   disponible: boolean;
   imagen?: string | null;
   tipoId: number;
-};
-
-export type ProductoTipoDTO = {
-  id: number;
-  nombre: string;
 };
 
 export type UsuarioRolDTO = {

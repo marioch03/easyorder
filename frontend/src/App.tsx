@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import AdminPage from "./features/admin/AdminPage";
+import KdsSelectPage from "./features/auth/KdsSelectPage";
 import LoginPage from "./features/auth/LoginPage";
 import ProtectedRoute from "./features/auth/ProtectedRoute";
 import RoleSelectPage from "./features/auth/RoleSelecfPage";
@@ -47,7 +48,22 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/kds/:zonaTabajoSlug" element={<KdsPage />} />
+      <Route 
+        path="/kds" 
+        element={
+          <ProtectedRoute allowedRoles={["ADMIN", "KDS"]}>
+            <KdsSelectPage />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/kds/:zonaTrabajoSlug" 
+        element={
+          <ProtectedRoute allowedRoles={["ADMIN", "KDS"]}>
+            <KdsPage /> 
+          </ProtectedRoute>
+        } 
+      />
         <Route
           path="/auth/select-interface"
           element={

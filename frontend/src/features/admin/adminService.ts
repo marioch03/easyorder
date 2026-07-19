@@ -1,9 +1,9 @@
+import type { ProductoTipoDTO } from "../../common/types";
 import { privateApi, registerApi } from "../api/apiClient";
 import type {
   EditProductPayload,
   MesaDTO,
   ProductoDTO,
-  ProductoTipoDTO,
   UsuarioDTO,
   UsuarioRolDTO,
   ZonaDTO,

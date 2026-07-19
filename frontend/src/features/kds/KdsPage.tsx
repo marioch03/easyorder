@@ -3,8 +3,8 @@ import Banner from "../../common/Banner";
 import KdsBoard from "./KdsBoard";
 
 export default function KdsPage() {
-  const { zonaNombre } = useParams(); 
-  const zonaTrabajo = zonaNombre || "cocina";
+const { zonaTrabajoSlug } = useParams(); 
+    const zonaTrabajo = zonaTrabajoSlug || "cocina";
 
   const title = zonaTrabajo.charAt(0).toUpperCase() + zonaTrabajo.slice(1);
 

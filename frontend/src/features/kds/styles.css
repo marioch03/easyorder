@@ -1,119 +1,233 @@
-/* kdsBoard.css */
-.kds-container {
-  width: 100%;
-  height: 100%;
+/* Asume index.css cargado globalmente (variables :root + body). */
+
+/* =========================================================
+   LAYOUT
+   ========================================================= */
+
+.kds-layout {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--color-background-primary);
 }
+
+.kds-scope.kds-container {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  width: 100%;
+}
+
+.kds-status {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-primary-dark);
+  opacity: 0.6;
+}
+
+.kds-status-error {
+  color: var(--color-danger-dark);
+  opacity: 0.85;
+}
+
+/* =========================================================
+   COLUMNAS
+   ========================================================= */
 
 .kds-grid {
   display: grid;
-  gap: 1.5rem;
-  padding: 1rem;
+  gap: 14px;
+  padding: 14px;
+  align-items: start;
 }
 
 .kds-column {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .kds-column-header {
-  text-align: center;
-  margin: 0 0 1rem 0;
-  padding-bottom: 0.5rem;
-  border-bottom: 3px solid #333;
-  font-size: 1.2rem;
-  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 10px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--color-primary-dark);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+  color: var(--color-primary-dark);
+}
+
+.kds-column-count {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-background-secondary);
+  background: var(--color-primary-dark);
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .kds-product-list {
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  gap: 8px;
 }
 
-/* LA NUEVA TARJETA PROFESIONAL */
+.kds-column-empty {
+  font-size: 11.5px;
+  color: var(--color-primary-dark);
+  opacity: 0.45;
+  padding: 10px 2px;
+  text-align: center;
+  border: 1px dashed rgba(100, 130, 173, 0.3);
+  border-radius: var(--radius-sm);
+}
+
+/* =========================================================
+   TICKET (compacto: en un KDS, la densidad manda)
+   ========================================================= */
+
 .kds-ticket-card {
   display: flex;
   flex-direction: column;
-  padding: 0.6rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  background-color: #fefce8; /* Un ligero tono amarillo estilo "ticket" */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border-left: 4px solid #4CAF50; /* Borde de estado (Verde por defecto) */
+  padding: 8px 10px;
+  border: 1px solid rgba(100, 130, 173, 0.18);
+  border-radius: var(--radius-sm);
+  background: var(--color-background-secondary);
+  box-shadow: var(--shadow-sm);
+  border-left: 4px solid var(--color-success);
 }
 
-/* Modificadores de tiempo (para cambiar el borde según la espera) */
-.kds-ticket-card.warning { border-left-color: #f59e0b; } /* Amarillo */
-.kds-ticket-card.late { border-left-color: #ef4444; }    /* Rojo */
+.kds-ticket-card.warning {
+  border-left-color: var(--color-preparing);
+}
+
+.kds-ticket-card.late {
+  border-left-color: var(--color-occupied);
+}
 
 .kds-ticket-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.4rem;
+  gap: 8px;
+  margin-bottom: 4px;
 }
 
 .kds-qty-name {
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: #111827;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.2;
 }
 
 .kds-qty {
-  color: #2563eb; /* Azul para destacar la cantidad */
-  margin-right: 0.4rem;
+  color: var(--color-primary-dark);
+  margin-right: 4px;
 }
 
 .kds-time {
-  font-size: 0.85rem;
-  font-weight: bold;
-  color: #4b5563;
-  background-color: #e5e7eb;
-  padding: 0.1rem 0.4rem;
-  border-radius: 4px;
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  background: var(--color-background-primary);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.kds-ticket-card.late .kds-time {
+  color: var(--color-background-secondary);
+  background: var(--color-occupied);
 }
 
 .kds-notes {
-  font-size: 0.9rem;
-  color: #dc2626; /* Rojo para alertas y modificadores */
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  font-size: 11px;
   font-weight: 600;
-  margin-bottom: 0.5rem;
-  padding-left: 1.5rem; /* Indentado debajo del nombre */
+  color: #7a4a06;
+  background: rgba(245, 166, 35, 0.14);
+  border: 1px solid rgba(245, 166, 35, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 3px 7px;
+  margin-bottom: 4px;
+  line-height: 1.3;
 }
 
 .kds-ticket-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 0.5rem;
-  padding-top: 0.5rem;
-  border-top: 1px dashed #d1d5db;
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(100, 130, 173, 0.25);
 }
 
 .kds-table-name {
-  font-size: 0.9rem;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
   font-weight: 600;
-  color: #4b5563;
-  background-color: #f3f4f6;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  border: 1px solid #e5e7eb;
+  color: var(--color-primary-dark);
+  background: rgba(100, 130, 173, 0.1);
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
 }
 
 .kds-btn-ready {
-  padding: 0.4rem 0.8rem;
-  background-color: #10b981;
+  padding: 5px 12px;
+  background: linear-gradient(135deg, var(--color-success), #1e8449);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  font-weight: bold;
-  font-size: 0.85rem;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
-  transition: background-color 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .kds-btn-ready:hover {
-  background-color: #059669; 
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.kds-btn-ready:active {
+  transform: scale(0.96);
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 720px) {
+  .kds-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+    padding: 10px;
+  }
 }

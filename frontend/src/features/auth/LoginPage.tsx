@@ -24,13 +24,13 @@ export default function LoginPage() {
       const roles = accessToken ? getRolesFromToken(accessToken) : [];
 
       if (roles.includes("ADMIN")) {
-        // El admin puede acceder a ambas interfaces: se le deja elegir.
-        navigate("/auth/select-interface");
+        navigate("/auth/select-interface", { replace: true });
+      } else if (roles.includes("KDS")) {
+        navigate("/kds", { replace: true });
       } else if (roles.includes("PERSONAL")) {
-        // El personal va directo a su panel operativo.
-        navigate("/staff");
+        navigate("/staff", { replace: true });
       } else {
-        navigate("/forbidden");
+        navigate("/forbidden", { replace: true });
       }
     } catch (err) {
       console.error(err);
@@ -43,7 +43,6 @@ export default function LoginPage() {
   return (
     <div className="login-page">
       <div className="login-shell">
-        {/* Panel de marca — se oculta en pantallas estrechas */}
         <div className="login-branding">
           <div className="login-branding-content">
             <div className="login-mark">PT</div>
@@ -57,11 +56,10 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Formulario */}
         <div className="login-panel">
           <div className="login-card">
             <h1 className="login-title">Iniciar sesión</h1>
-            <p className="login-subtitle">Accede con tus credenciales de administrador.</p>
+            <p className="login-subtitle">Accede con tus credenciales de acceso.</p>
 
             <form onSubmit={handleLogin} className="login-form">
               <div className="input-group">

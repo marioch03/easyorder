@@ -9,20 +9,20 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 public record PedidoDTO(
-        Long idPedido,
+		Long idPedido,
 
-        @NotNull(message = "El id de sesión es obligatorio") Long idSesion,
+		@NotNull(message = "El id de sesión es obligatorio") Long idSesion,
 
-        @Min(value = 1, message = "El número de mesa debe ser igual o mayor a 1") int numeroMesa,
+		@Min(value = 1, message = "El número de mesa debe ser igual o mayor a 1") int numeroMesa,
 
-        String nombreEstado,
+		String nombreEstado,
 
-        LocalDateTime createdAt,
+		LocalDateTime createdAt,
 
-        @NotEmpty(message = "El pedido debe contener al menos un artículo") @Valid List<PedidoItemDTO> items) {
-    public PedidoDTO {
-        if (items == null) {
-            items = List.of();
-        }
-    }
+		@NotEmpty(message = "El pedido debe contener al menos un artículo") @Valid List<PedidoItemDTO> items) {
+	public PedidoDTO {
+		if (items == null) {
+			items = List.of();
+		}
+	}
 }

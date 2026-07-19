@@ -50,13 +50,14 @@ public class PedidoItem {
     }
 
     public PedidoItem(Producto producto, Pedido pedido, Integer cantidad, BigDecimal precioUnitario, String nota,
-            boolean listoParaServir) {
+            boolean listoParaServir, ZonaTrabajo zonaTrabajo) {
         this.producto = producto;
         this.pedido = pedido;
         this.cantidad = cantidad;
         this.precioUnitario = precioUnitario;
         this.nota = nota;
         this.listoParaServir = listoParaServir;
+        this.zonaTrabajo = zonaTrabajo;
     }
 
     public Long getId() {
@@ -113,6 +114,14 @@ public class PedidoItem {
 
     public void setListoParaServir(boolean listoParaServir) {
         this.listoParaServir = listoParaServir;
+    }
+
+    public ZonaTrabajo getZonaTrabajo() {
+        return this.zonaTrabajo;
+    }
+
+    public void setZonaTrabajo(ZonaTrabajo zonaTrabajo) {
+        this.zonaTrabajo = zonaTrabajo;
     }
 
     @Override

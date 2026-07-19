@@ -3,7 +3,10 @@ package com.easyorder.api.backend.service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -12,7 +15,6 @@ import com.easyorder.api.backend.dto.CrearPedidoDTO;
 import com.easyorder.api.backend.dto.CuentaDTO;
 import com.easyorder.api.backend.dto.PedidoDTO;
 import com.easyorder.api.backend.dto.PedidoItemDTO;
-import com.easyorder.api.backend.dto.PedidoItemKds;
 import com.easyorder.api.backend.dto.SesionDTO;
 import com.easyorder.api.backend.exception.NoEncontradoException;
 import com.easyorder.api.backend.model.Mesa;
@@ -61,12 +63,25 @@ public class PedidoService {
 
 		final Pedido pedidoGuardado = pedidoRepository.save(nuevoPedido);
 
+		Set<Long> productoIds = dto.items().stream()
+				.map(item -> item.idProducto())
+				.collect(Collectors.toSet());
+
+		List<Producto> productosDB = productoRepository.findAllById(productoIds);
+
+		Map<Long, Producto> productoMap = productosDB.stream()
+				.collect(Collectors.toMap(
+						p -> p.getId(),
+						Function.identity()));
+
 		List<PedidoItem> productos = dto.items().stream()
 				.map(pedidoItemDTO -> {
-					Producto producto = productoRepository.findById(pedidoItemDTO.idProducto())
-							.orElseThrow(() -> new NoEncontradoException(
-									"Producto no encontrado. Id: "
-											+ pedidoItemDTO.idProducto()));
+					Producto producto = productoMap.get(pedidoItemDTO.idProducto());
+
+					if (producto == null) {
+						throw new NoEncontradoException(
+								"Producto no encontrado. Id: " + pedidoItemDTO.idProducto());
+					}
 
 					PedidoItem pedidoItem = new PedidoItem();
 					pedidoItem.setPedido(pedidoGuardado);
@@ -75,7 +90,7 @@ public class PedidoService {
 					pedidoItem.setPrecioUnitario(producto.getPrecio());
 					pedidoItem.setNota(pedidoItemDTO.nota());
 					pedidoItem.setListoParaServir(false);
-
+					pedidoItem.setZonaTrabajo(producto.getTipo().getZonaTrabajo());
 					return pedidoItem;
 				})
 				.toList();
@@ -204,32 +219,4 @@ public class PedidoService {
 		}
 		return null;
 	}
-
-	public List<PedidoItemKds> obtenerComandasParaKds(String nombreZonaTrabajo) {
-
-		if (!zonaTrabajoRepository.existsByNombreIgnoreCase(nombreZonaTrabajo.toUpperCase())) {
-			throw new NoEncontradoException("ZonaTRabajo no encontrada: " + nombreZonaTrabajo);
-		}
-
-		List<PedidoItem> items = pedidoItemRepository.findPendientesByZona(nombreZonaTrabajo.toUpperCase());
-
-		return items.stream()
-				.map(item -> new PedidoItemKds(
-						item.getId(),
-						item.getProducto().getNombre(),
-						item.getCantidad(),
-						item.getNota(),
-						item.getPedido().getSesion().getMesa().getNumero(),
-						item.isListoParaServir()))
-				.toList();
-	}
-
-	public PedidoItem marcarPedidoItemListo(Long id) {
-		PedidoItem pedidoItem = pedidoItemRepository.findById(id)
-				.orElseThrow(() -> new NoEncontradoException(
-						"PedidoItem no encontrado para el ID: " + id));
-		pedidoItem.setListoParaServir(true);
-		return pedidoItemRepository.save(pedidoItem);
-	}
-
 }
