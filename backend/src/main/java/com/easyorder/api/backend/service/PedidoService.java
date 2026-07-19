@@ -31,7 +31,6 @@ import com.easyorder.api.backend.repository.PedidoRepository;
 import com.easyorder.api.backend.repository.ProductoRepository;
 import com.easyorder.api.backend.repository.SesionEstadoRepository;
 import com.easyorder.api.backend.repository.SesionRepository;
-import com.easyorder.api.backend.repository.ZonaTrabajoRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +45,7 @@ public class PedidoService {
 	private final SesionRepository sesionRepository;
 	private final SesionEstadoRepository sesionEstadoRepository;
 	private final MesaRepository mesaRepository;
-	private final ZonaTrabajoRepository zonaTrabajoRepository;
+	private final SseNotificationService sseNotificationService;
 
 	private final WebSocketService webSocketService;
 
@@ -96,7 +95,12 @@ public class PedidoService {
 				.toList();
 		pedidoItemRepository.saveAll(productos);
 		notificarCambios();
+		notificarCambiosSse();
 		return pedidoGuardado;
+	}
+
+	private void notificarCambiosSse() {
+		sseNotificationService.notificar("kds");
 	}
 
 	public List<PedidoDTO> listarPedidos() {

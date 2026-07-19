@@ -1,9 +1,9 @@
+import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ProductoTipoDTO } from "../../common/types";
 import type { ColumnaKds, PedidoItemKds } from "./kds";
 import { getComandasKds, getTiposProductos, marcarListoItem } from "./kdsService";
 
-const POLL_INTERVAL_MS = 20_000;
 const CLOCK_TICK_MS = 30_000;
 
 function useNow(intervalMs: number) {
@@ -46,20 +46,43 @@ export function useKdsData(zonaTrabajo: string) {
   }, [zonaTrabajo]);
 
   useEffect(() => {
-    let cancelado = false;
-
     setLoading(true);
     cargar();
 
-    const poll = setInterval(() => {
-      if (!cancelado) cargar();
-    }, POLL_INTERVAL_MS);
+    const abortController = new AbortController();
+    const token = localStorage.getItem("accessToken");
+    
+    const topic = "kds";
+    const apiUrl = import.meta.env.VITE_BASE_URL || "";
+    const url = `${apiUrl}/api/sse/stream/${topic}`;
+
+    fetchEventSource(url, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Accept": "text/event-stream",
+      },
+      signal: abortController.signal,
+
+      onmessage(event) {
+        if (event.data === "refresh") {
+          console.log(`¡Señal de recarga recibida para el topic: ${topic}!`);
+          cargar();
+        }
+      },
+      onclose() {
+        console.warn(`Conexión SSE cerrada para el canal: ${topic}`);
+      },
+      onerror(err) {
+        console.error(`Error en el flujo SSE de ${topic}:`, err);
+        throw err; 
+      },
+    });
 
     return () => {
-      cancelado = true;
-      clearInterval(poll);
+      abortController.abort();
     };
-  }, [cargar]);
+  }, [zonaTrabajo, cargar]);
 
   const marcarListo = useCallback(async (idItem: number) => {
     let itemEliminado: PedidoItemKds | undefined;
