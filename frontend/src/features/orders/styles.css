@@ -135,10 +135,21 @@
   color: black;
 }
 
-.modal-bottom-orders{
+.modal-bottom-orders {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 14px 22px 22px;
+  border-top: 1px solid rgba(100, 130, 173, 0.15);
+  text-align: right;
+}
+ 
+.modal-bottom-orders h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 19px;
+  color: black;
+  margin: 0;
 }
 
 .order-state{

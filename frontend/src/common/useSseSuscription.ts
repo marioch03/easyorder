@@ -1,8 +1,9 @@
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { useEffect, useRef } from "react";
+import type { SseTopic } from "./types";
 
 interface SseOptions {
-  topic: string;
+  topic: SseTopic;
   onRefresh: () => void;
 }
 

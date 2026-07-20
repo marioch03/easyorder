@@ -9,7 +9,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class SseNotificationService {
 
   private final Map<String, List<SseEmitter>> emitters = new ConcurrentHashMap<>();
@@ -35,7 +38,7 @@ public class SseNotificationService {
 
   public void notificar(String topic) {
     List<SseEmitter> canalEmitters = emitters.get(topic);
-
+    log.info("notificar('{}') -> {} suscriptores", topic, canalEmitters == null ? 0 : canalEmitters.size());
     if (canalEmitters != null) {
       for (SseEmitter emitter : canalEmitters) {
         try {

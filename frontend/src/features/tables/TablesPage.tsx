@@ -25,7 +25,7 @@ const LEGEND = [
 
 export default function TablesPage() {
   const token = localStorage.getItem("accessToken");
-  const { mesas, zonas, loading, error } = useTablesData(token);
+  const { mesas, zonas, loading, error } = useTablesData();
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [mesaSeleccionada, setMesaSeleccionada] = useState<Mesa | null>(null);
@@ -168,12 +168,12 @@ export default function TablesPage() {
         isOpen={modalIsOpen}
         onRequestClose={cerrarModal}
         contentLabel="Detalle Mesa"
-        className="modal-container-tables"
-        overlayClassName="modal-overlay-tables"
+        className="modal-staff-container"
+        overlayClassName="modal-staff-overlay"
       >
         {mesaSeleccionada && (
           <div className="modal-items-tables">
-            <div className="modal-top-tables">
+            <div className="modal-staff-top">
               <h2>Mesa {mesaSeleccionada?.numero}</h2>
               <button className="close-button" onClick={cerrarModal}>
                 ×
@@ -235,12 +235,12 @@ export default function TablesPage() {
       <Modal
         isOpen={modalCuentaOpen}
         onRequestClose={() => setModalCuentaOpen(false)}
-        className="modal-container-tables"
-        overlayClassName="modal-overlay-tables"
+        className="modal-staff-container"
+        overlayClassName="modal-staff-overlay"
       >
         {cuenta && (
           <div className="modal-items-tables">
-            <div className="modal-top-tables">
+            <div className="modal-staff-top">
               <h2>Cuenta de la mesa</h2>
               <button
                 className="close-button"

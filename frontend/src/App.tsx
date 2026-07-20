@@ -2,14 +2,12 @@ import { lazy, Suspense } from "react";
 import {
   BrowserRouter,
   Navigate,
-  Outlet,
   Route,
-  Routes,
+  Routes
 } from "react-router-dom";
 import ProtectedRoute from "./features/auth/ProtectedRoute";
 import { CartProvider } from "./features/cart/CartProvider";
 import { SessionProvider } from "./features/session/SessionProvider";
-import { WebSocketProvider } from "./features/ws/WebSocketProvider";
 
 const LoginPage = lazy(() => import("./features/auth/LoginPage"));
 const CustomerPage = lazy(() => import("./features/menu/pages/CustomerPage"));
@@ -29,7 +27,11 @@ const ErrorPageManagement = lazy(
   () => import("./features/error/ErrorPageManagement"),
 );
 
-const PageLoader = () => <div className="p-4">Cargando...</div>;
+const PageLoader = () => (
+  <div className="flex h-screen items-center justify-center p-4">
+    <span>Cargando...</span>
+  </div>
+);
 
 function App() {
   return (
@@ -53,42 +55,28 @@ function App() {
             }
           />
 
-          {/* ENTORNO ADMINISTRACIÓN Y STAFF */}
+          {/* ENTORNO ADMINISTRACIÓN */}
           <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/select-interface" element={<RoleSelectPage />} />
           </Route>
 
-          <Route
-            path="/staff"
-            element={
-              <ProtectedRoute allowedRoles={["ADMIN", "PERSONAL"]}>
-                <WebSocketProvider>
-                  <ManagementPage />
-                </WebSocketProvider>
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<Navigate to="mesas" replace />} />
-
-            <Route path="mesas" element={<TablesPage />} />
-            <Route path="pedidos" element={<OrderPage />} />
+          {/* ENTORNO STAFF (MESAS Y PEDIDOS) */}
+          <Route element={<ProtectedRoute allowedRoles={["ADMIN", "PERSONAL"]} />}>
+            <Route path="/staff" element={<ManagementPage />}>
+              <Route index element={<Navigate to="mesas" replace />} />
+              <Route path="mesas" element={<TablesPage />} />
+              <Route path="pedidos" element={<OrderPage />} />
+            </Route>
           </Route>
 
           {/* ENTORNO KDS */}
-          <Route
-            path="/kds"
-            element={
-              <ProtectedRoute allowedRoles={["ADMIN", "KDS"]}>
-                <Outlet />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<KdsSelectPage />} />
-
-            <Route path=":zonaTrabajoSlug" element={<KdsPage />} />
+          <Route element={<ProtectedRoute allowedRoles={["ADMIN", "KDS"]} />}>
+            <Route path="/kds" element={<KdsSelectPage />} />
+            <Route path="/kds/:zonaTrabajoSlug" element={<KdsPage />} />
           </Route>
 
+          {/* REDIRECCIONES DE FALLBACK */}
           <Route path="/" element={<Navigate to="/auth/login" replace />} />
           <Route path="*" element={<Navigate to="/error" replace />} />
         </Routes>

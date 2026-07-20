@@ -1,4 +1,5 @@
 import { useState } from "react";
+import ConfirmModal from "../../../common/ConfirmModal";
 import { useSession } from "../../session/useSession";
 import { useCartData } from "../hooks/useCartData";
 import "../styles.css";
@@ -81,30 +82,14 @@ export default function CartPage() {
       )}
 
       {confirmOpen && (
-        <div className="confirm-overlay">
-          <div className="confirm-modal">
-            <h3>¿Confirmar pedido?</h3>
-
-            <p>Se enviará el pedido a cocina.</p>
-
-            <div className="confirm-actions">
-              <button
-                className="cancel-btn"
-                onClick={() => setConfirmOpen(false)}
-              >
-                Cancelar
-              </button>
-
-              <button
-                className="confirm-btn"
-                onClick={handleRealizarPedido}
-                disabled={botonLoading}
-              >
-                {botonLoading ? <span className="loader" /> : "Confirmar"}
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmModal
+          open={confirmOpen}
+          title="¿Confirmar pedido?"
+          message="Se enviará el pedido a cocina."
+          loading={botonLoading}
+          onCancel={() => setConfirmOpen(false)}
+          onConfirm={handleRealizarPedido}
+        />
       )}
     </div>
   );

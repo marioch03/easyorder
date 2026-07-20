@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import com.easyorder.api.backend.dto.CrearPedidoDTO;
@@ -16,6 +17,8 @@ import com.easyorder.api.backend.dto.CuentaDTO;
 import com.easyorder.api.backend.dto.PedidoDTO;
 import com.easyorder.api.backend.dto.PedidoItemDTO;
 import com.easyorder.api.backend.dto.SesionDTO;
+import com.easyorder.api.backend.dto.SseTopic;
+import com.easyorder.api.backend.event.SseTopicEvent;
 import com.easyorder.api.backend.exception.NoEncontradoException;
 import com.easyorder.api.backend.model.Mesa;
 import com.easyorder.api.backend.model.Pedido;
@@ -45,9 +48,8 @@ public class PedidoService {
 	private final SesionRepository sesionRepository;
 	private final SesionEstadoRepository sesionEstadoRepository;
 	private final MesaRepository mesaRepository;
-	private final SseNotificationService sseNotificationService;
 
-	private final WebSocketService webSocketService;
+	private final ApplicationEventPublisher eventPublisher;
 
 	@Transactional
 	public Pedido crearPedido(CrearPedidoDTO dto, String sessionCode) {
@@ -94,13 +96,9 @@ public class PedidoService {
 				})
 				.toList();
 		pedidoItemRepository.saveAll(productos);
-		notificarCambios();
-		notificarCambiosSse();
+		eventPublisher.publishEvent(new SseTopicEvent(SseTopic.PEDIDOS));
+		eventPublisher.publishEvent(new SseTopicEvent(SseTopic.KDS));
 		return pedidoGuardado;
-	}
-
-	private void notificarCambiosSse() {
-		sseNotificationService.notificar("kds");
 	}
 
 	public List<PedidoDTO> listarPedidos() {
@@ -113,11 +111,6 @@ public class PedidoService {
 						pedido.getCreatedAt(),
 						getPedidoItems(pedido.getId())))
 				.toList();
-	}
-
-	public void notificarCambios() {
-		List<PedidoDTO> pedidos = listarPedidos();
-		webSocketService.notifyPedidosStateChange(pedidos);
 	}
 
 	public Pedido getPedido(Long id) {
@@ -143,6 +136,7 @@ public class PedidoService {
 		return pedidoRepository.save(pedido);
 	}
 
+	@Transactional
 	public Pedido cambiarEstado(Long id, String estado) {
 		Pedido pedido = pedidoRepository.findById(id)
 				.orElseThrow(() -> new NoEncontradoException("Pedido no encontrado. Id: " + id));
@@ -152,7 +146,7 @@ public class PedidoService {
 
 		pedido.setEstado(nuevoEstado);
 		pedido = pedidoRepository.save(pedido);
-		notificarCambios();
+		eventPublisher.publishEvent(new SseTopicEvent(SseTopic.PEDIDOS));
 		return pedido;
 	}
 

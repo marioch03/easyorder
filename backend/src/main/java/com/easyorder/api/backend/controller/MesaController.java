@@ -54,8 +54,7 @@ public class MesaController {
     public ResponseEntity<Mesa> clienteSolicitaCuenta(@RequestBody ClienteSolicitaCuentaRequest request,
             @RequestHeader("X-Session-Code") String sessionCode) {
 
-        Mesa mesaActualizada = mesaService.cambiarEstadoCliente(request.mesaId(), request.estado(),
-                sessionCode);
+        Mesa mesaActualizada = mesaService.cambiarEstado(request.mesaId(), request.estado());
         return ResponseEntity.ok(mesaActualizada);
     }
 

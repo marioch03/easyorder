@@ -1,42 +1,40 @@
-import { useEffect, useState } from "react";
-import { useWS } from "../ws/useWS";
+import { useCallback, useEffect, useState } from "react";
+import { useSseSubscription } from "../../common/useSseSuscription";
 import type { PedidoDTO } from "./orders";
 import { getPedidosAdmin } from "./orderService";
 
-export function useOrdersData(token: string | null) {
+export function useOrdersData() {
   const [pedidos, setPedidos] = useState<PedidoDTO[]>([]);
-  const { pedidos: pedidosWS } = useWS();
-  const [loading, setLoading] = useState(!pedidosWS || pedidosWS.length === 0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!token) return;
-
-    if (pedidosWS && pedidosWS.length > 0) {
-      setLoading(false);
-      return;
-    }
-
-    const cargarDatos = async () => {
-      setLoading(true);
-      try {
-        const data = await getPedidosAdmin();
-        setPedidos(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    cargarDatos();
-  }, [token]);
-
-  useEffect(() => {
-    if (pedidosWS?.length) {
-      setPedidos(pedidosWS);
+  const cargar = useCallback(async () => {
+    try {
+      const data = await getPedidosAdmin();
+      setPedidos(data);
+      setError(null);
+    } catch (err) {
+      console.error(err);
+      setError("No se han podido cargar los pedidos. Revisa tu conexión.");
+    } finally {
       setLoading(false);
     }
-  }, [pedidosWS]);
+  }, []);
 
-  return { pedidos, setPedidos, loading };
+  useEffect(() => {
+    setLoading(true);
+    cargar();
+  }, [cargar]);
+
+  useSseSubscription({
+    topic: "pedidos",
+    onRefresh: cargar,
+  });
+
+  return {
+    pedidos,
+    loading,
+    error,
+    recargar: cargar,
+  };
 }

@@ -22,4 +22,5 @@ public class SseController {
   public SseEmitter stream(@PathVariable String topic) {
     return sseService.suscribir(topic);
   }
+
 }

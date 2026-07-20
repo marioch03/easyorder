@@ -3,11 +3,14 @@ package com.easyorder.api.backend.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import com.easyorder.api.backend.dto.CrearMesaDTO;
 import com.easyorder.api.backend.dto.MesaDTO;
 import com.easyorder.api.backend.dto.SesionDTO;
+import com.easyorder.api.backend.dto.SseTopic;
+import com.easyorder.api.backend.event.SseTopicEvent;
 import com.easyorder.api.backend.exception.NoEncontradoException;
 import com.easyorder.api.backend.exception.RecursoExistenteException;
 import com.easyorder.api.backend.model.Mesa;
@@ -21,6 +24,7 @@ import com.easyorder.api.backend.repository.SesionEstadoRepository;
 import com.easyorder.api.backend.repository.SesionRepository;
 import com.easyorder.api.backend.repository.ZonaRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -28,13 +32,13 @@ import lombok.RequiredArgsConstructor;
 
 public class MesaService {
 
-    private final WebSocketService webSocketService;
-
     private final MesaRepository mesaRepository;
     private final ZonaRepository zonaRepository;
     private final MesaEstadoRepository mesaEstadoRepository;
     private final SesionRepository sesionRepository;
     private final SesionEstadoRepository sesionEstadoRepository;
+
+    private final ApplicationEventPublisher eventPublisher;
 
     public List<MesaDTO> listarMesas() {
         return mesaRepository.findAll().stream()
@@ -82,6 +86,7 @@ public class MesaService {
         return false;
     }
 
+    @Transactional
     public Mesa crearMesa(CrearMesaDTO crearMesaDTO) {
         if (existeMesa(crearMesaDTO.numero())) {
             throw new RecursoExistenteException("La mesa ya existe");
@@ -94,17 +99,20 @@ public class MesaService {
                 .orElseThrow(() -> new NoEncontradoException("Zona no encontrada. Id: " + crearMesaDTO.idZona()));
         mesa.setZona(zona);
         Mesa mesaCreada = save(mesa);
-        notificarCambios();
+        eventPublisher.publishEvent(new SseTopicEvent(SseTopic.MESAS));
         return mesaCreada;
     }
 
+    @Transactional
     public void eliminarMesa(int numero) {
         Mesa mesa = mesaRepository.findByNumero(numero)
                 .orElseThrow(() -> new NoEncontradoException("Mesa no encontrada. Numero: " + numero));
 
         mesaRepository.delete(mesa);
+        eventPublisher.publishEvent(new SseTopicEvent(SseTopic.MESAS));
     }
 
+    @Transactional
     public Mesa cambiarEstado(Long id, String estado) {
         Mesa mesa = mesaRepository.findById(id)
                 .orElseThrow(() -> new NoEncontradoException("Mesa no encontrada. Id: " + id));
@@ -114,18 +122,8 @@ public class MesaService {
 
         mesa.setEstado(nuevoEstado);
         Mesa mesaActualizada = mesaRepository.save(mesa);
-        notificarCambios();
+        eventPublisher.publishEvent(new SseTopicEvent(SseTopic.MESAS));
         return mesaActualizada;
-    }
-
-    public void notificarCambios() {
-        List<MesaDTO> mesasDTO = listarMesas();
-        webSocketService.notifyMesaStateChange(mesasDTO);
-    }
-
-    public Mesa cambiarEstadoCliente(Long mesaId, String estado, String sessionCode) {
-
-        return cambiarEstado(mesaId, estado);
     }
 
 }

@@ -7,11 +7,14 @@ import java.util.UUID;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import com.easyorder.api.backend.dto.MesaDTO;
 import com.easyorder.api.backend.dto.SesionClienteDTO;
 import com.easyorder.api.backend.dto.SesionDTO;
+import com.easyorder.api.backend.dto.SseTopic;
+import com.easyorder.api.backend.event.SseTopicEvent;
 import com.easyorder.api.backend.exception.NoEncontradoException;
 import com.easyorder.api.backend.model.Mesa;
 import com.easyorder.api.backend.model.MesaEstado;
@@ -34,8 +37,7 @@ public class SesionService {
     private final SesionEstadoRepository sesionEstadoRepository;
     private final MesaRepository mesaRepository;
     private final MesaEstadoRepository mesaEstadoRepository;
-
-    private final WebSocketService webSocketService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public List<Sesion> listarSesiones() {
         return sesionRepository.findAll();
@@ -83,6 +85,7 @@ public class SesionService {
         sesionRepository.delete(sesion);
     }
 
+    @Transactional
     public Sesion cambiarEstado(Long id, String estado) {
         Sesion sesion = sesionRepository.findById(id)
                 .orElseThrow(() -> new NoEncontradoException("Sesion no encontrada. Id: " + id));
@@ -107,10 +110,11 @@ public class SesionService {
         Sesion nuevaSesion = new Sesion(mesa, null, estadoActiva, qrCodeUuid);
         nuevaSesion.setHoraInicio(LocalDateTime.now());
         nuevaSesion = sesionRepository.save(nuevaSesion);
-        webSocketService.notifyMesaStateChange(obtenerMesasDTO());
+        eventPublisher.publishEvent(new SseTopicEvent(SseTopic.MESAS));
         return nuevaSesion;
     }
 
+    @Transactional
     @CacheEvict(value = "sesionClienteCache", key = "#sessionCode")
     public Sesion cerrarSesion(String sessionCode) {
         Sesion sesion = getSesionPorCodigo(sessionCode);
@@ -123,7 +127,7 @@ public class SesionService {
         sesion.setHoraFin(LocalDateTime.now());
         sesion.setEstado(getEstadoSesion("FINALIZADA"));
         sesion = sesionRepository.save(sesion);
-        webSocketService.notifyMesaStateChange(obtenerMesasDTO());
+        eventPublisher.publishEvent(new SseTopicEvent(SseTopic.MESAS));
         return sesion;
     }
 

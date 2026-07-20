@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useWS } from "../ws/useWS";
+import { useCallback, useEffect, useState } from "react";
+import { useSseSubscription } from "../../common/useSseSuscription";
 import type { Mesa, Zona } from "./tables";
 import { getMesas, getZonas } from "./tablesService";
 
@@ -12,64 +12,48 @@ function leerZonasCache(): Zona[] {
   }
 }
 
-export function useTablesData(token: string | null) {
-  const { mesas: mesasWS } = useWS();
-
-  const [mesas, setMesas] = useState<Mesa[]>(mesasWS || []);
+export function useTablesData() { 
+  const [mesas, setMesas] = useState<Mesa[]>([]);
   const [zonas, setZonas] = useState<Zona[]>(leerZonasCache);
-  const [loading, setLoading] = useState(!mesasWS || mesasWS.length === 0);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (mesasWS && mesasWS.length > 0) {
-      setMesas(mesasWS);
+  const cargar = useCallback(async () => {
+    try {
+      const [mesasData, zonasData] = await Promise.all([
+        getMesas(),
+        getZonas(),
+      ]);
+
+      setMesas(mesasData);
+      setZonas(zonasData);
+      localStorage.setItem("zonas", JSON.stringify(zonasData));
+      setError(null);
+    } catch (err) {
+      console.error(err);
+      setError(
+        "No se han podido cargar las mesas. Comprueba tu conexión e inténtalo de nuevo.",
+      );
+    } finally {
       setLoading(false);
-      setError(null);
     }
-  }, [mesasWS]);
+  }, []);
 
   useEffect(() => {
-    if (!token) return;
+    setLoading(true);
+    cargar();
+  }, [cargar]);
 
-    let cancelado = false;
-
-    const fetchData = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const [mesasData, zonasData] = await Promise.all([
-          getMesas(),
-          getZonas(),
-        ]);
-
-        if (cancelado) return;
-
-        setMesas((prev) => (mesasWS && mesasWS.length > 0 ? prev : mesasData));
-        setZonas(zonasData);
-        localStorage.setItem("zonas", JSON.stringify(zonasData));
-      } catch (err) {
-        if (cancelado) return;
-        console.error(err);
-        setError(
-          "No se han podido cargar las mesas. Comprueba tu conexión e inténtalo de nuevo.",
-        );
-      } finally {
-        if (!cancelado) setLoading(false);
-      }
-    };
-
-    fetchData();
-
-    return () => {
-      cancelado = true;
-    };
-  }, [token]);
+  useSseSubscription({
+    topic: "mesas",
+    onRefresh: cargar,
+  });
 
   return {
     mesas,
     zonas,
     loading,
     error,
+    recargar: cargar,
   };
 }

@@ -17,7 +17,7 @@ export default function OrderPage() {
     "pedido-estado-" + estado.toLowerCase().replaceAll("_", "-");
   const [botonLoading, setBotonLoading] = useState(false);
 
-  const { pedidos, loading } = useOrdersData(token);
+  const { pedidos, loading, error } = useOrdersData();
 
   const pedidosPendientes = useMemo(() => {
     return pedidos.filter((pedido) => pedido.nombreEstado !== "SERVIDO");
@@ -52,6 +52,10 @@ export default function OrderPage() {
     return <div className="loading">Cargando pedidos…</div>;
   }
 
+   if (error) {
+    return <div className="loading error">{error}</div>;
+  }
+
   return (
     <div className="main-container">
       {pedidosPendientes.length === 0 ? (
@@ -83,12 +87,12 @@ export default function OrderPage() {
         isOpen={modalIsOpen}
         onRequestClose={cerrarModal}
         contentLabel="Detalle Pedido"
-        className="modal-container-orders"
-        overlayClassName="modal-overlay-orders"
+        className="modal-staff-container"
+        overlayClassName="modal-staff-overlay"
       >
         {pedidoSeleccionado && (
           <div className="modal-items-orders">
-            <div className="modal-top-orders">
+            <div className="modal-staff-top">
               <h2>Pedido {pedidoSeleccionado.idPedido}</h2>
               <button className="close-button" onClick={cerrarModal}>
                 ×

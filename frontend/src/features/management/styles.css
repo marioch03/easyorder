@@ -33,6 +33,7 @@
     var(--color-primary-dark) 100%
   );
   box-shadow: var(--shadow-md);
+  box-sizing: border-box;
 }
 
 .app-logo {
@@ -78,7 +79,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  width: 152px;
+  width: 100%;
   padding: 12px 6px;
   border: none;
   border-radius: var(--radius-md);
