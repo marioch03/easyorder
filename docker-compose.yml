@@ -38,6 +38,9 @@ services:
       VITE_WS_URL: ${VITE_WS_URL}
     depends_on:
       - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
   db:
     image: mariadb:10.11-jammy
     container_name: easyorder-db

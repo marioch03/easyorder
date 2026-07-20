@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { logout } from "./authService";
 // import "./styles.css";
 
 const KDS_ZONES = [
@@ -31,6 +32,15 @@ const KDS_ZONES = [
 export default function KdsSelectPage() {
   const navigate = useNavigate();
 
+    const handleLogout = async () => {
+      try {
+        await logout();
+      } catch (error) {
+        console.error(error);
+      }
+      navigate("/auth/login");
+    };
+
   return (
     <div className="login-page">
       <div className="role-select-shell">
@@ -53,6 +63,16 @@ export default function KdsSelectPage() {
               <span className="role-select-description">{opt.description}</span>
             </button>
           ))}
+        </div>
+
+        <div className="role-select-footer">
+          <button 
+            type="button" 
+            className="role-select-logout-btn"
+            onClick={handleLogout}
+          >
+            Cerrar sesión
+          </button>
         </div>
       </div>
     </div>

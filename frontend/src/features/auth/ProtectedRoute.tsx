@@ -1,10 +1,9 @@
-import type { JSX } from "react";
-import { Navigate } from "react-router-dom";
+import type { ReactNode } from "react";
+import { Navigate, Outlet } from "react-router-dom";
 import { getRolesFromToken } from "./jwtService";
 
-
 type ProtectedRouteProps = {
-  children: JSX.Element;
+  children?: ReactNode; // 1. Hacemos que children sea OPCIONAL (?) y usamos ReactNode
   allowedRoles?: string[];
 };
 
@@ -22,14 +21,12 @@ export default function ProtectedRoute({
   if (allowedRoles && accessToken) {
     const roles = getRolesFromToken(accessToken);
 
-    const hasRole = allowedRoles.some(role =>
-      roles.includes(role)
-    );
+    const hasRole = allowedRoles.some((role) => roles.includes(role));
 
     if (!hasRole) {
-      return <Navigate to="/forbidden" replace />;
+      return <Navigate to="/error" replace />;
     }
   }
 
-  return children;
+  return children ? <>{children}</> : <Outlet />;
 }

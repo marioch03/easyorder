@@ -24,7 +24,7 @@ export default function LoginPage() {
       const roles = accessToken ? getRolesFromToken(accessToken) : [];
 
       if (roles.includes("ADMIN")) {
-        navigate("/auth/select-interface", { replace: true });
+        navigate("/select-interface", { replace: true });
       } else if (roles.includes("KDS")) {
         navigate("/kds", { replace: true });
       } else if (roles.includes("PERSONAL")) {

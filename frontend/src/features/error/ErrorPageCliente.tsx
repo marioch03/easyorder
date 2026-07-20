@@ -1,13 +1,7 @@
 import React from "react";
 import "./styles.css";
 
-interface ErrorSesionProps {
-  mensaje?: string;
-}
-
-export const ErrorPage: React.FC<ErrorSesionProps> = ({
-  mensaje = "La sesión de esta mesa ha expirado o no es válida. Si cree que se trata de un error, por favor solicite asistencia al personal del establecimiento para obtener ayuda.",
-}) => {
+export const ErrorPageCliente: React.FC = () => {
   return (
     <div className="error-page-container">
       <div className="error-card">
@@ -15,7 +9,11 @@ export const ErrorPage: React.FC<ErrorSesionProps> = ({
           ⚠️
         </div>
         <h1 className="error-title">Sesión no válida</h1>
-        <p className="error-message">{mensaje}</p>
+        <p className="error-message">
+          La sesión de esta mesa ha expirado o no es válida. Si cree que se
+          trata de un error, por favor solicite asistencia al personal del
+          establecimiento para obtener ayuda.
+        </p>
         <footer className="error-footer">
           EasyOrder: Servicio Digital de Hostelería
         </footer>
@@ -23,3 +21,5 @@ export const ErrorPage: React.FC<ErrorSesionProps> = ({
     </div>
   );
 };
+
+export default ErrorPageCliente;

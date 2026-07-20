@@ -142,6 +142,9 @@
 }
 
 /* Botón de salir: mismo estilo en reposo, tono de aviso al interactuar */
+.sidebar-button.danger .sidebar-icon-badge {
+  background: var(--color-danger);
+}
 .sidebar-button.danger:hover .sidebar-icon-badge {
   background: linear-gradient(135deg, var(--color-danger), var(--color-danger-dark));
 }

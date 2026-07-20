@@ -1,24 +1,17 @@
-import { useState } from "react";
-import { useNavigate } from "react-router";
+import { Outlet, useLocation, useNavigate } from "react-router-dom"; // o "react-router"
 import Banner from "../../common/Banner";
-import OrderPage from "../orders/OrderPage";
-import TablesPage from "../tables/TablesPage";
+import { logout } from "../auth/authService";
 import Sidebar from "./Sidebar";
-import { logout } from "./managementService";
 
 function ManagementPage() {
-  const [activeSection, setActiveSection] = useState("mesas");
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const renderContent = () => {
-    switch (activeSection) {
-      case "mesas":
-        return <TablesPage />;
-      case "pedidos":
-        return <OrderPage />;
-      default:
-        return <TablesPage />;
-    }
+  const isPedidos = location.pathname.includes("/pedidos");
+  const activeSection = isPedidos ? "pedidos" : "mesas";
+
+  const handleSelectSection = (section: string) => {
+    navigate(`/staff/${section}`);
   };
 
   const handleLogout = async () => {
@@ -27,7 +20,6 @@ function ManagementPage() {
     } catch (error) {
       console.error(error);
     }
-
     navigate("/auth/login");
   };
 
@@ -36,14 +28,15 @@ function ManagementPage() {
       <aside className="sidebar">
         <Sidebar
           activeSection={activeSection}
-          onSelectSection={setActiveSection}
+          onSelectSection={handleSelectSection}
           onLogout={handleLogout}
         />
       </aside>
 
       <main className="main-content">
         <Banner title={activeSection === "mesas" ? "Mesas" : "Pedidos"} />
-        {renderContent()}
+        
+        <Outlet />
       </main>
     </div>
   );

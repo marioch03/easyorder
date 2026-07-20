@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
-import { logout } from "../management/managementService";
+import { logout } from "../auth/authService";
 import {
   AddProductForm,
   CreateTableForm,

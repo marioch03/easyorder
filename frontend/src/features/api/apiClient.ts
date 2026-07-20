@@ -19,21 +19,21 @@ const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue = [];
 };
 
-export const authApi = axios.create({
+export const publicAuthApi = axios.create({
   baseURL: BASE_URL_AUTH,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-export const registerApi = axios.create({
+export const privateAuthApi = axios.create({
   baseURL: BASE_URL_AUTH,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-registerApi.interceptors.request.use(
+privateAuthApi.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem("accessToken");
     if (token) {
@@ -78,7 +78,7 @@ publicApi.interceptors.response.use(
       (error.response.status === 401 || error.response.status === 403 || error.response.status === 404)
     ) {
       localStorage.removeItem("sessionCode");
-      window.location.href = "/error";
+      window.location.href = "/invalid";
     }
     return Promise.reject(error);
   },
@@ -132,7 +132,7 @@ privateApi.interceptors.response.use(
         const refreshToken = localStorage.getItem("refreshToken");
         if (!refreshToken) throw new Error("No hay refresh token");
 
-        const res = await authApi.post(`/refresh`, {
+        const res = await publicAuthApi.post(`/refresh`, {
           refreshToken,
         });
         const { access_token: accessToken } = res.data;
