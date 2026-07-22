@@ -171,7 +171,7 @@ LOCK TABLES `PedidoEstado` WRITE;
 INSERT INTO `PedidoEstado` (`id`, `nombre`, `descripcion`)
 VALUES
 	(1,'PENDIENTE',NULL),
-	(2,'EN_PREPARACION',NULL),
+	(2,'PARCIAL',NULL),
 	(3,'LISTO',NULL),
 	(4,'SERVIDO',NULL),
 	(5,'CANCELADO',NULL);

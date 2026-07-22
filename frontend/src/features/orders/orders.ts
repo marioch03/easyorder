@@ -15,3 +15,11 @@ export type PedidoItemDTO = {
   nota: string | null;
   listoParaServir: boolean;
 };
+
+export const EstadoPedido = {
+  PENDIENTE: 'PENDIENTE',
+  PARCIAL: 'PARCIAL',
+  LISTO: 'LISTO',
+} as const;
+
+export type EstadoPedido = typeof EstadoPedido[keyof typeof EstadoPedido];

@@ -27,8 +27,15 @@ public class PedidoItemController {
   }
 
   @PatchMapping("/admin/comandas/listo/{idPedidoItem}")
-  public ResponseEntity<PedidoItemKds> marcarListoItem(@PathVariable Long idPedidoItem) {
-    return ResponseEntity.ok(pedidoItemService.marcarPedidoItemListo(idPedidoItem));
+  public ResponseEntity<Void> marcarListoItem(@PathVariable Long idPedidoItem) {
+    pedidoItemService.marcarPedidoItemListo(idPedidoItem);
+    return ResponseEntity.noContent().build();
+  }
+
+  @PatchMapping("/admin/comandas/servido/{idPedidoItem}")
+  public ResponseEntity<Void> marcaServidoItem(@PathVariable Long idPedidoItem) {
+    pedidoItemService.marcarPedidoItemServido(idPedidoItem);
+    return ResponseEntity.noContent().build();
   }
 
 }

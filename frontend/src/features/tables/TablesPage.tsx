@@ -24,7 +24,6 @@ const LEGEND = [
 ];
 
 export default function TablesPage() {
-  const token = localStorage.getItem("accessToken");
   const { mesas, zonas, loading, error } = useTablesData();
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -40,7 +39,6 @@ export default function TablesPage() {
   const frontendUrl = import.meta.env.VITE_FRONTEND_URL;
 
   const crearSesion = async (mesa: Mesa) => {
-    if (!token) return;
     setQrLoading(true);
     setActionError(null);
 
@@ -56,7 +54,7 @@ export default function TablesPage() {
   };
 
   const cerrarSesion = async (mesa: Mesa) => {
-    if (!token || qrLoading) return;
+    if (qrLoading) return;
 
     if (!mesa.sesionActiva) {
       console.error("La mesa no tiene una sesión activa.");
@@ -103,8 +101,6 @@ export default function TablesPage() {
   };
 
   const obtenerCuenta = async (mesa: Mesa) => {
-    if (!token) return;
-
     setCuentaLoading(true);
     setActionError(null);
 

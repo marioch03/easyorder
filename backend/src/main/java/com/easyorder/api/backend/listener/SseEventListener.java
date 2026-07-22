@@ -1,5 +1,6 @@
 package com.easyorder.api.backend.listener;
 
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -15,7 +16,8 @@ public class SseEventListener {
 
     private final SseNotificationService sseNotificationService;
 
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
     public void onSseTopicEvent(SseTopicEvent event) {
         sseNotificationService.notificar(event.topic().getValue());
     }

@@ -28,6 +28,7 @@ export function useSseSubscription({ topic, onRefresh }: SseOptions) {
       signal: abortController.signal,
 
       onmessage(event) {
+        console.log(`📥 MENSAJE BRUTO RECIBIDO [${topic}]:`, event.data);
         if (event.data === "refresh") {
           console.log(`¡Señal de recarga recibida para el topic: ${topic}!`);
           onRefreshRef.current();
@@ -36,12 +37,15 @@ export function useSseSubscription({ topic, onRefresh }: SseOptions) {
 
       onclose() {
         console.warn(
-          `⚠️ Conexión SSE cerrada para el topic: ${topic}. Reintentando...`,
+          `⚠️ Conexión SSE cerrada para el topic: ${topic}. Reconectando...`,
         );
+        throw new Error(`Conexión SSE cerrada por el servidor [${topic}]`);
       },
 
       onerror(err) {
+        if (abortController.signal.aborted) return;
         console.error(`❌ Error en el canal SSE [${topic}]:`, err);
+        return 2000;
       },
     });
 

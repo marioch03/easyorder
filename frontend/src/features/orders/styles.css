@@ -1,86 +1,214 @@
+/* =========================================================
+   1. LAYOUT GENERAL Y SECCIONES
+   ========================================================= */
 
 .orders-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); 
+  gap: 38px;
+  width: 100%;
+}
+
+.pedidos-section {
+  margin-bottom: 22px;
+}
+
+.pedidos-section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--color-primary-dark);
+  opacity: 0.75;
+  margin: 0 0 10px;
+}
+
+.pedidos-section-title.listos {
+  opacity: 1;
+  color: #1e8449;
+}
+
+.pedidos-section-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  background: rgba(100, 130, 173, 0.12);
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pedidos-section-title.listos .pedidos-section-count {
+  color: white;
+  background: linear-gradient(135deg, var(--color-success), #1e8449);
+}
+
+.order-legend {
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
+  margin-bottom: 18px;
 }
- 
-/* --- Tarjeta de pedido --- */
- 
+
+.order-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-primary-dark);
+  opacity: 0.7;
+}
+
+.order-legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  box-shadow: var(--shadow-sm);
+}
+
+
+/* =========================================================
+   2. TARJETA DE PEDIDO (.pedido-card)
+   ========================================================= */
+
 .pedido-card {
-  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
   background: var(--color-background-secondary);
-  border-radius: var(--radius-lg);
-  padding: 20px;
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
   box-shadow: var(--shadow-sm);
   border: 1px solid rgba(100, 130, 173, 0.12);
+  border-left: 3px solid var(--color-success);
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
- 
+
 .pedido-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
- 
+
+.pedido-card.warning {
+  border-left-color: var(--color-preparing);
+}
+
+.pedido-card.urgent {
+  border-left-color: var(--color-occupied);
+}
+
 .pedido-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
 }
- 
-.pedido-numero {
+
+.pedido-numero,
+.pedido-mesa {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 19px;
-  color: black;
+  font-size: 17px;
+  color: var(--color-text);
 }
- 
-.pedido-estado {
-  padding: 5px 12px;
-  border-radius: 999px;
+
+.pedido-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-family: var(--font-mono);
   font-size: 10.5px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--color-background-secondary);
+  color: var(--color-primary-dark);
+  opacity: 0.65;
 }
- 
-.pedido-estado-en-preparacion { background: var(--color-preparing); color: #5c3a05; }
-.pedido-estado-listo { background: var(--color-success); }
-.pedido-estado-pendiente { background: var(--color-occupied); }
- 
+
+.pedido-id {
+  opacity: 0.7;
+}
+
+.pedido-items-count {
+  flex: 1;
+}
+
 .pedido-center {
-  margin-top: 16px;
+  margin-top: 8px;
   color: black;
   opacity: 0.75;
   font-family: var(--font-body);
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.5;
 }
- 
+
 .pedido-center span {
   font-weight: 600;
   opacity: 1;
 }
- 
+
 .pedido-bottom {
-  margin-top: 16px;
-  padding-top: 12px;
+  margin-top: 8px;
+  padding-top: 10px;
   border-top: 1px dashed rgba(100, 130, 173, 0.2);
 }
- 
+
 .pedido-tiempo {
   font-family: var(--font-mono);
   font-size: 11px;
+  font-weight: 700;
   letter-spacing: 0.03em;
   color: var(--color-primary-dark);
-  opacity: 0.55;
+  opacity: 1;
 }
- 
-/* --- Estado vacío --- */
- 
+
+.pedido-tiempo.warning {
+  color: #a15c00;
+}
+
+.pedido-tiempo.urgent {
+  color: var(--color-occupied);
+}
+
+
+/* =========================================================
+   3. BADGES Y ESTADOS
+   ========================================================= */
+
+.pedido-estado {
+  flex-shrink: 0;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--color-background-secondary);
+}
+
+.pedido-estado-parcial { background: var(--color-preparing); color: #5c3a05; }
+.pedido-estado-listo { background: var(--color-success); }
+.pedido-estado-pendiente { background: var(--color-occupied); }
+
+.order-state {
+  color: white;
+}
+
+
+/* =========================================================
+   4. ESTADO VACÍO
+   ========================================================= */
+
 .empty-orders-state {
   display: flex;
   flex-direction: column;
@@ -91,7 +219,7 @@
   padding: 60px 20px;
   color: var(--color-primary-dark);
 }
- 
+
 .empty-orders-icon {
   width: 52px;
   height: 52px;
@@ -104,27 +232,30 @@
   margin-bottom: 10px;
   box-shadow: var(--shadow-sm);
 }
- 
+
 .empty-orders-icon svg {
   width: 24px;
   height: 24px;
 }
- 
+
 .empty-orders-state h2 {
   font-family: var(--font-display);
   font-weight: 600;
   font-size: 21px;
   margin: 0;
 }
- 
+
 .empty-orders-state p {
   font-size: 13.5px;
   opacity: 0.65;
   margin: 0;
 }
- 
-/* --- Modal de detalle de pedido --- */
- 
+
+
+/* =========================================================
+   5. MODAL DETALLE DE PEDIDO
+   ========================================================= */
+
 .modal-center-orders {
   display: flex;
   justify-content: space-between;
@@ -143,7 +274,7 @@
   border-top: 1px solid rgba(100, 130, 173, 0.15);
   text-align: right;
 }
- 
+
 .modal-bottom-orders h3 {
   font-family: var(--font-display);
   font-weight: 600;
@@ -152,11 +283,7 @@
   margin: 0;
 }
 
-.order-state{
-  color: white;
-}
-
- .order-detail-list {
+.order-detail-list {
   display: flex;
   flex-direction: column;
   margin: 2px 22px 18px;
@@ -222,7 +349,7 @@
   font-size: 12.5px;
   line-height: 1.4;
 }
- 
+
 .nota-label {
   flex-shrink: 0;
   font-family: var(--font-mono);
@@ -231,9 +358,12 @@
   font-size: 10px;
   letter-spacing: 0.05em;
 }
- 
-/* --- Botón "marcar como servido" --- */
- 
+
+
+/* =========================================================
+   6. BOTONES Y ACCIONES
+   ========================================================= */
+
 .servido-button {
   width: 200px;
   padding: 11px 14px;
@@ -248,25 +378,61 @@
   box-shadow: var(--shadow-sm);
   transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
 }
- 
+
 .servido-button:hover {
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
- 
+
 .servido-button:active {
   transform: translateY(0);
 }
- 
+
 .servido-button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
   transform: none;
 }
- 
+
+.pedido-quick-serve {
+  margin-top: 2px;
+  padding: 7px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--color-success), #1e8449);
+  color: white;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pedido-quick-serve:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.pedido-quick-serve:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   7. ADAPTABILIDAD / MEDIA QUERIES
+   ========================================================= */
+
 @media (max-width: 640px) {
-  .pedido-card {
-    width: 100%;
+  .orders-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
   }
 }
- 
+
+@media (max-width: 420px) {
+  .orders-container {
+    grid-template-columns: 1fr;
+  }
+}

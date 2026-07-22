@@ -23,6 +23,8 @@ public class PedidoItemService {
   private final PedidoItemRepository pedidoItemRepository;
   private final ZonaTrabajoRepository zonaTrabajoRepository;
 
+  private final PedidoService pedidoService;
+
   private final ApplicationEventPublisher eventPublisher;
 
   public List<PedidoItemKds> obtenerComandasParaKds(String nombreZonaTrabajo) {
@@ -47,22 +49,24 @@ public class PedidoItemService {
   }
 
   @Transactional
-  public PedidoItemKds marcarPedidoItemListo(Long id) {
+  public void marcarPedidoItemListo(Long id) {
     PedidoItem pedidoItem = pedidoItemRepository.findById(id)
         .orElseThrow(() -> new NoEncontradoException(
             "PedidoItem no encontrado para el ID: " + id));
     pedidoItem.setListoParaServir(true);
-    PedidoItem itemGuardado = pedidoItemRepository.save(pedidoItem);
+    pedidoItemRepository.save(pedidoItem);
+    pedidoService.recalcularEstadoPedido(pedidoItem.getPedido().getId());
     eventPublisher.publishEvent(new SseTopicEvent(SseTopic.KDS));
-    return new PedidoItemKds(
-        itemGuardado.getId(),
-        itemGuardado.getProducto().getNombre(),
-        itemGuardado.getProducto().getTipo().getId(),
-        itemGuardado.getCantidad(),
-        itemGuardado.getNota(),
-        itemGuardado.getPedido().getSesion().getMesa().getNumero(),
-        itemGuardado.isListoParaServir(),
-        itemGuardado.getPedido().getCreatedAt());
+  }
+
+  @Transactional
+  public void marcarPedidoItemServido(Long id) {
+    PedidoItem pedidoItem = pedidoItemRepository.findById(id)
+        .orElseThrow(() -> new NoEncontradoException(
+            "PedidoItem no encontrado para el ID: " + id));
+    pedidoItem.setServido(true);
+    pedidoItemRepository.save(pedidoItem);
+    eventPublisher.publishEvent(new SseTopicEvent(SseTopic.KDS));
   }
 
 }

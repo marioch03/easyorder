@@ -50,7 +50,7 @@ public class PedidoItem {
     }
 
     public PedidoItem(Producto producto, Pedido pedido, Integer cantidad, BigDecimal precioUnitario, String nota,
-            boolean listoParaServir, ZonaTrabajo zonaTrabajo) {
+            boolean listoParaServir, ZonaTrabajo zonaTrabajo, boolean servido) {
         this.producto = producto;
         this.pedido = pedido;
         this.cantidad = cantidad;
@@ -122,6 +122,14 @@ public class PedidoItem {
 
     public void setZonaTrabajo(ZonaTrabajo zonaTrabajo) {
         this.zonaTrabajo = zonaTrabajo;
+    }
+
+    public boolean isServido() {
+        return this.servido;
+    }
+
+    public void setServido(boolean servido) {
+        this.servido = servido;
     }
 
     @Override

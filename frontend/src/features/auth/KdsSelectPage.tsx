@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { logout } from "./authService";
-// import "./styles.css";
+import "./styles.css";
 
 const KDS_ZONES = [
   {

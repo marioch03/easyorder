@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.easyorder.api.backend.dto.CrearPedidoDTO;
 import com.easyorder.api.backend.dto.CuentaDTO;
 import com.easyorder.api.backend.dto.PedidoDTO;
+import com.easyorder.api.backend.dto.PedidoEstadoEnum;
 import com.easyorder.api.backend.dto.PedidoItemDTO;
 import com.easyorder.api.backend.dto.SesionDTO;
 import com.easyorder.api.backend.dto.SseTopic;
@@ -216,5 +217,36 @@ public class PedidoService {
 					sesion.getQrCodeUrl());
 		}
 		return null;
+	}
+
+	@Transactional
+	public void recalcularEstadoPedido(Long idPedido) {
+		Pedido pedido = pedidoRepository.findById(idPedido)
+				.orElseThrow(() -> new NoEncontradoException("Pedido no encontrado" + idPedido));
+
+		Set<PedidoItem> items = pedido.getItems();
+
+		if (items == null || items.isEmpty()) {
+			return;
+		}
+
+		boolean todosListos = items.stream().allMatch(PedidoItem::isListoParaServir);
+		boolean ningunoListo = items.stream().noneMatch(PedidoItem::isListoParaServir);
+
+		PedidoEstadoEnum enumObjetivo = todosListos ? PedidoEstadoEnum.LISTO
+				: ningunoListo ? PedidoEstadoEnum.PENDIENTE
+						: PedidoEstadoEnum.PARCIAL;
+
+		if (pedido.getEstado() != null && enumObjetivo.getValue().equals(pedido.getEstado().getNombre())) {
+			return;
+		}
+
+		PedidoEstado nuevoEstado = pedidoEstadoRepository.findByNombre(enumObjetivo.getValue())
+				.orElseThrow(() -> new NoEncontradoException("PedidoEstado no encontrado: " + enumObjetivo.getValue()));
+
+		pedido.setEstado(nuevoEstado);
+		pedidoRepository.save(pedido);
+		eventPublisher.publishEvent(new SseTopicEvent(SseTopic.PEDIDOS));
+
 	}
 }

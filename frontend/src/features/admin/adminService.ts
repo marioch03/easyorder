@@ -1,5 +1,5 @@
 import type { ProductoTipoDTO } from "../../common/types";
-import { privateApi, registerApi } from "../api/apiClient";
+import { privateApi, privateAuthApi } from "../api/apiClient";
 import type {
   EditProductPayload,
   MesaDTO,
@@ -71,7 +71,7 @@ export async function registrarUsuario(
   rol: string,
   clave: string,
 ) {
-  const response = await registerApi.post("/register", {
+  const response = await privateAuthApi.post("/register", {
     nombre,
     rol,
     clave,
