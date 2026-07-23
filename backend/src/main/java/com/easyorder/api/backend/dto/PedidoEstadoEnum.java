@@ -3,7 +3,8 @@ package com.easyorder.api.backend.dto;
 public enum PedidoEstadoEnum {
   PENDIENTE("PENDIENTE"),
   PARCIAL("PARCIAL"),
-  LISTO("LISTO");
+  LISTO("LISTO"),
+  SERVIDO("SERVIDO");
 
   private final String value;
 

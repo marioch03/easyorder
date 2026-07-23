@@ -58,7 +58,7 @@ public class PedidoService {
 				.orElseThrow(() -> new NoEncontradoException(
 						"Sesión no encontrada para el QR code: " + sessionCode));
 
-		PedidoEstado estadoPendiente = pedidoEstadoRepository.findByNombre("PENDIENTE")
+		PedidoEstado estadoPendiente = pedidoEstadoRepository.findByNombre(PedidoEstadoEnum.PENDIENTE.getValue())
 				.orElseThrow(() -> new NoEncontradoException("Estado no encontrado"));
 
 		Pedido nuevoPedido = new Pedido(sesion, estadoPendiente);
@@ -125,11 +125,14 @@ public class PedidoService {
 
 		return items.stream()
 				.map(item -> new PedidoItemDTO(
+						item.getId(),
 						item.getProducto().getId(),
 						item.getProducto().getNombre(),
 						item.getCantidad(),
 						item.getPrecioUnitario(),
-						item.getNota()))
+						item.getNota(),
+						item.isListoParaServir(),
+						item.isServido()))
 				.toList();
 	}
 
@@ -146,6 +149,12 @@ public class PedidoService {
 				.orElseThrow(() -> new NoEncontradoException("Estado no encontrado: " + estado));
 
 		pedido.setEstado(nuevoEstado);
+		if (nuevoEstado.getNombre().equals(PedidoEstadoEnum.SERVIDO.getValue())) {
+			pedido.getItems().forEach(pedidoItem -> {
+				pedidoItem.setListoParaServir(true);
+				pedidoItem.setServido(true);
+			});
+		}
 		pedido = pedidoRepository.save(pedido);
 		eventPublisher.publishEvent(new SseTopicEvent(SseTopic.PEDIDOS));
 		return pedido;
@@ -178,17 +187,23 @@ public class PedidoService {
 						Collectors.toMap(
 								item -> item.getProducto().getId(),
 								item -> new PedidoItemDTO(
+										item.getId(),
 										item.getProducto().getId(),
 										item.getProducto().getNombre(),
 										item.getCantidad(),
 										item.getPrecioUnitario(),
-										item.getNota()),
+										item.getNota(),
+										item.isListoParaServir(),
+										item.isServido()),
 								(existente, nuevo) -> new PedidoItemDTO(
+										null,
 										existente.idProducto(),
 										existente.nombreProducto(),
 										existente.cantidad() + nuevo.cantidad(),
 										existente.precioUnitario(),
-										existente.nota())),
+										existente.nota(),
+										existente.listoParaServir() && nuevo.listoParaServir(),
+										existente.servido() && nuevo.servido())),
 						map -> new ArrayList<>(map.values())));
 
 		BigDecimal total = itemsAgrupados.stream()

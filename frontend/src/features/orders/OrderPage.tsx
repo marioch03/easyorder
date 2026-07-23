@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import Modal from "react-modal";
 import OrderCard from "./OrderCard";
 import { EstadoPedido, type PedidoDTO } from "./orders";
-import { marcarPedidoServido } from "./orderService";
+import { marcarPedidoServido, marcarServidoItem } from "./orderService";
 import "./styles.css";
 import { useOrdersData } from "./useOrdersData";
 
@@ -60,6 +60,15 @@ export default function OrderPage() {
   const cerrarModal = () => {
     setPedidoSeleccionado(null);
     setModalIsOpen(false);
+  };
+
+  const handleMarcarServido = async (idItem: number) => {
+    try {
+      await marcarServidoItem(idItem);
+      cerrarModal();
+    } catch (err) {
+      console.error("Error al marcar el ítem como servido:", err);
+    }
   };
 
   const marcarServido = async (idPedido: number) => {
@@ -236,10 +245,30 @@ export default function OrderPage() {
             </div>
             <div className="order-detail-list">
               {pedidoSeleccionado.items.map((item) => (
-                <div className="order-detail-item" key={item.idProducto}>
+                <div
+                  className={`order-detail-item ${item.servido ? "item-servido" : ""}`}
+                  key={item.idProducto}
+                >
                   <div className="order-detail-line">
                     <span className="order-detail-qty">{item.cantidad}×</span>
                     <span>{item.nombreProducto}</span>
+
+                    <span
+                      className={`item-check ${item.listoParaServir ? "checked" : ""}`}
+                    >
+                      {item.listoParaServir && (
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M4 12.5l5 5L20 7" />
+                        </svg>
+                      )}
+                    </span>
                   </div>
 
                   {item.nota && (
@@ -247,6 +276,14 @@ export default function OrderPage() {
                       <span>{item.nota}</span>
                     </div>
                   )}
+
+                  <button
+                    className="item-servido-button"
+                    onClick={() => handleMarcarServido(item.id)}
+                    disabled={item.servido}
+                  >
+                    {item.servido ? "Servido" : "Producto servido"}
+                  </button>
                 </div>
               ))}
             </div>
@@ -261,7 +298,7 @@ export default function OrderPage() {
                 {servidoLoadingId === pedidoSeleccionado.idPedido ? (
                   <span className="loader" />
                 ) : (
-                  "Marcar como servido"
+                  "Pedido servido"
                 )}
               </button>
             </div>

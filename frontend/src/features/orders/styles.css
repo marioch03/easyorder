@@ -419,6 +419,63 @@
   cursor: not-allowed;
 }
 
+.item-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-success);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  background: var(--color-background-secondary);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.item-check svg {
+  width: 14px;
+  height: 14px;
+}
+
+.item-check.checked {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: #fff;
+}
+
+.order-detail-item.item-servido {
+  opacity: 0.7;
+}
+
+.item-servido-button {
+  margin-top: 6px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+/* Estado: aún no servido -> se puede pulsar */
+.item-servido-button:not(:disabled) {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.item-servido-button:not(:disabled):hover {
+  background: var(--color-primary-dark);
+}
+
+/* Estado: ya servido -> deshabilitado, discreto, sin competir con el check */
+.item-servido-button:disabled {
+  background: transparent;
+  color: var(--color-success);
+  border: 1.5px solid var(--color-success);
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
 /* =========================================================
    7. ADAPTABILIDAD / MEDIA QUERIES

@@ -10,11 +10,15 @@ export async function getPedidosAdmin(): Promise<PedidoDTO[]> {
 
 export async function marcarPedidoServido(
   idPedido: number,
-  estado: string
+  estado: string,
 ): Promise<PedidoDTO> {
   const response = await privateApi.patch<PedidoDTO>(`${PATH}/${idPedido}`, {
     nuevoEstado: estado,
   });
-  
+
   return response.data;
+}
+
+export async function marcarServidoItem(idItem: number): Promise<void> {
+  await privateApi.patch(`/comandas/servido/${idItem}`);
 }
