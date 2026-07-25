@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.easyorder.api.backend.dto.EditarProductoDTO;
+import com.easyorder.api.backend.dto.ProductoComandaDTO;
 import com.easyorder.api.backend.dto.ProductoDTO;
 import com.easyorder.api.backend.dto.ProductoTipoDTO;
 import com.easyorder.api.backend.model.Producto;
@@ -80,6 +81,11 @@ public class ProductoController {
     public List<ProductoDTO> getProductos() {
 
         return productoService.findAll();
+    }
+
+    @GetMapping("/admin/productos/all/simplified")
+    public List<ProductoComandaDTO> getProductosSimplificados() {
+        return productoService.getProductosSimplificados();
     }
 
     @GetMapping("/admin/productos/tipos/{nombreZonaTrabajo}")

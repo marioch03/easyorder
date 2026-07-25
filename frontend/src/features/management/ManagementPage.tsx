@@ -7,8 +7,12 @@ function ManagementPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const isPedidos = location.pathname.includes("/pedidos");
-  const activeSection = isPedidos ? "pedidos" : "mesas";
+  const SECCIONES_VALIDAS = ["mesas", "comandas", "pedidos"];
+
+  const segmento = location.pathname.split("/").pop() ?? "";
+  const activeSection = SECCIONES_VALIDAS.includes(segmento)
+    ? segmento
+    : "mesas";
 
   const handleSelectSection = (section: string) => {
     navigate(`/staff/${section}`);
@@ -23,6 +27,12 @@ function ManagementPage() {
     navigate("/auth/login");
   };
 
+  const TITULOS: Record<string, string> = {
+    mesas: "Mesas",
+    comandas: "Comandas",
+    pedidos: "Pedidos",
+  };
+
   return (
     <div className="app-layout">
       <aside className="sidebar">
@@ -34,8 +44,7 @@ function ManagementPage() {
       </aside>
 
       <main className="main-content">
-        <Banner title={activeSection === "mesas" ? "Mesas" : "Pedidos"} />
-        
+        <Banner title={TITULOS[activeSection] ?? "Mesas"} />
         <Outlet />
       </main>
     </div>

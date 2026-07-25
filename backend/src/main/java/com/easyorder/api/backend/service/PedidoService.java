@@ -52,11 +52,7 @@ public class PedidoService {
 
 	private final ApplicationEventPublisher eventPublisher;
 
-	@Transactional
-	public Pedido crearPedido(CrearPedidoDTO dto, String sessionCode) {
-		Sesion sesion = sesionRepository.findByQrCodeUrl(sessionCode)
-				.orElseThrow(() -> new NoEncontradoException(
-						"Sesión no encontrada para el QR code: " + sessionCode));
+	public Pedido crearPedido(CrearPedidoDTO dto, Sesion sesion) {
 
 		PedidoEstado estadoPendiente = pedidoEstadoRepository.findByNombre(PedidoEstadoEnum.PENDIENTE.getValue())
 				.orElseThrow(() -> new NoEncontradoException("Estado no encontrado"));
@@ -100,6 +96,24 @@ public class PedidoService {
 		eventPublisher.publishEvent(new SseTopicEvent(SseTopic.PEDIDOS));
 		eventPublisher.publishEvent(new SseTopicEvent(SseTopic.KDS));
 		return pedidoGuardado;
+	}
+
+	@Transactional
+	public Pedido crearPedidoCliente(CrearPedidoDTO dto, String sessionCode) {
+		Sesion sesion = sesionRepository.findByQrCodeUrl(sessionCode)
+				.orElseThrow(() -> new NoEncontradoException(
+						"Sesión no encontrada para el QR code: " + sessionCode));
+
+		return crearPedido(dto, sesion);
+	}
+
+	@Transactional
+	public Pedido crearPedidoAdmin(CrearPedidoDTO dto, Long idMesa) {
+		Sesion sesion = sesionRepository.findByMesaIdAndEstadoNombre(idMesa, "ACTIVA")
+				.orElseThrow(() -> new NoEncontradoException(
+						"Sesión no encontrada para la mesa: " + idMesa));
+
+		return crearPedido(dto, sesion);
 	}
 
 	public List<PedidoDTO> listarPedidos() {

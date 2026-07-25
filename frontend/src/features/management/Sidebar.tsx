@@ -12,27 +12,23 @@ type SidebarProps = {
   onLogout: () => Promise<void>;
 };
 
-function Sidebar({
-  activeSection,
-  onSelectSection,
-  onLogout,
-}: SidebarProps) {
+function Sidebar({ activeSection, onSelectSection, onLogout }: SidebarProps) {
   const [confirmLogoutOpen, setConfirmLogoutOpen] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
 
   const handleLogout = async () => {
-  try {
-    setLogoutLoading(true);
+    try {
+      setLogoutLoading(true);
 
-    await onLogout();
+      await onLogout();
 
-    setConfirmLogoutOpen(false);
-  } catch (error) {
-    console.error(error);
-  } finally {
-    setLogoutLoading(false);
-  }
-};
+      setConfirmLogoutOpen(false);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLogoutLoading(false);
+    }
+  };
 
   return (
     <div className="sidebar-container">
@@ -53,6 +49,13 @@ function Sidebar({
           label="Pedidos"
           active={activeSection === "pedidos"}
           onClick={() => onSelectSection("pedidos")}
+        />
+
+        <SidebarButton
+          icon={tablesIcon}
+          label="Comandas"
+          active={activeSection === "comandas"}
+          onClick={() => onSelectSection("comandas")}
         />
       </nav>
 

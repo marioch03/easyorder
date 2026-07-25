@@ -1,8 +1,8 @@
 import { useMemo } from "react";
+import type { OrderDTO, OrderItemDTO } from "../../../common/types";
 import { useCart } from "../../cart/useCart";
 import { useSession } from "../../session/useSession";
 import { crearPedido } from "../services/cartService";
-import type { OrderDTO, OrderItemDTO } from "../types/menu";
 
 export function useCartData(sessionCode: string | null) {
   const { items: cart, addItem, decreaseItem, clearCart } = useCart();

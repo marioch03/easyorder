@@ -8,6 +8,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.easyorder.api.backend.dto.EditarProductoDTO;
+import com.easyorder.api.backend.dto.ProductoComandaDTO;
 import com.easyorder.api.backend.dto.ProductoDTO;
 import com.easyorder.api.backend.dto.ProductoTipoDTO;
 import com.easyorder.api.backend.exception.NoEncontradoException;
@@ -41,6 +42,18 @@ public class ProductoService {
                         producto.isDisponible(),
                         producto.getImagen(),
                         producto.getTipo().getId()))
+                .collect(Collectors.toList());
+    }
+
+    @Cacheable(value = "productos", key = "'simplificados'")
+    public List<ProductoComandaDTO> getProductosSimplificados() {
+        return productoRepository.findAll().stream()
+                .map(producto -> new ProductoComandaDTO(
+                        producto.getId(),
+                        producto.getNombre(),
+                        producto.getPrecio(),
+                        producto.getTipo().getId(),
+                        producto.isDisponible()))
                 .collect(Collectors.toList());
     }
 

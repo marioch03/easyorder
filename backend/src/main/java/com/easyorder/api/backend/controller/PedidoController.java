@@ -43,7 +43,16 @@ public class PedidoController {
     @PostMapping("/cliente/pedidos/create")
     public ResponseEntity<Pedido> crearPedido(@RequestBody CrearPedidoDTO dto,
             @RequestHeader("X-Session-Code") String sessionCode) {
-        Pedido nuevoPedido = pedidoService.crearPedido(dto, sessionCode);
+        Pedido nuevoPedido = pedidoService.crearPedidoCliente(dto, sessionCode);
+        return ResponseEntity.status(HttpStatus.CREATED).body(nuevoPedido);
+    }
+
+    @PostMapping("/admin/pedidos/create/mesa/{idMesa}")
+    public ResponseEntity<Pedido> crearPedidoAdmin(
+            @RequestBody CrearPedidoDTO dto,
+            @PathVariable Long idMesa) {
+
+        Pedido nuevoPedido = pedidoService.crearPedidoAdmin(dto, idMesa);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevoPedido);
     }
 

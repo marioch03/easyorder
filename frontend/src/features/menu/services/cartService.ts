@@ -1,5 +1,5 @@
+import type { OrderDTO } from "../../../common/types";
 import { publicApi } from "../../api/apiClient";
-import type { OrderDTO } from "../types/menu";
 
 export async function getEstadoMesa() {
   try {

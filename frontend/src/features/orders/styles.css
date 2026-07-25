@@ -468,7 +468,6 @@
   background: var(--color-primary-dark);
 }
 
-/* Estado: ya servido -> deshabilitado, discreto, sin competir con el check */
 .item-servido-button:disabled {
   background: transparent;
   color: var(--color-success);

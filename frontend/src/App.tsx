@@ -1,12 +1,8 @@
 import { lazy, Suspense } from "react";
-import {
-  BrowserRouter,
-  Navigate,
-  Route,
-  Routes
-} from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./features/auth/ProtectedRoute";
 import { CartProvider } from "./features/cart/CartProvider";
+import ComandasPage from "./features/comandas/ComandasPage";
 import { SessionProvider } from "./features/session/SessionProvider";
 
 const LoginPage = lazy(() => import("./features/auth/LoginPage"));
@@ -62,11 +58,14 @@ function App() {
           </Route>
 
           {/* ENTORNO STAFF (MESAS Y PEDIDOS) */}
-          <Route element={<ProtectedRoute allowedRoles={["ADMIN", "PERSONAL"]} />}>
+          <Route
+            element={<ProtectedRoute allowedRoles={["ADMIN", "PERSONAL"]} />}
+          >
             <Route path="/staff" element={<ManagementPage />}>
               <Route index element={<Navigate to="mesas" replace />} />
               <Route path="mesas" element={<TablesPage />} />
               <Route path="pedidos" element={<OrderPage />} />
+              <Route path="comandas" element={<ComandasPage />} />
             </Route>
           </Route>
 

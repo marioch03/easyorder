@@ -27,14 +27,3 @@ export type Product = {
   allergens?: string;
   imageUrl?: string;
 };
-
-export type OrderItemDTO = {
-  idProducto: number;
-  cantidad: number;
-  precioUnitario: number;
-  nota: string;
-};
-
-export type OrderDTO = {
-  items: OrderItemDTO[];
-};

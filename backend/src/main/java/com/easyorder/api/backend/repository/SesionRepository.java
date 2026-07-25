@@ -11,5 +11,7 @@ import com.easyorder.api.backend.model.SesionEstado;
 public interface SesionRepository extends JpaRepository<Sesion, Long> {
     Optional<Sesion> findByMesaAndEstado(Mesa mesa, SesionEstado estado);
 
+    Optional<Sesion> findByMesaIdAndEstadoNombre(Long mesaId, String nombreEstado);
+
     Optional<Sesion> findByQrCodeUrl(String qrCodeUrl);
 }
