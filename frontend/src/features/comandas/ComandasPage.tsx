@@ -103,6 +103,29 @@ export default function ComandasPage() {
     setLineas((prev) => prev.map((l) => (l.key === key ? { ...l, nota } : l)));
   };
 
+  // Antes, escribir una nota en una línea agrupada (cantidad > 1) se la
+  // aplicaba a TODAS las unidades de esa línea, porque solo hay un campo
+  // `nota` por línea. Al abrir el editor, si hay más de 1 unidad, separamos
+  // 1 en una línea propia (con su propia `key`) y dejamos el resto agrupado
+  // tal cual — así la nota solo afecta a la unidad que de verdad la lleva.
+  const abrirNota = (linea: LineaComanda) => {
+    if (linea.cantidad > 1) {
+      const nuevaKey = `${linea.productoId}-${Date.now()}`;
+
+      setLineas((prev) => {
+        const restoActualizado = prev.map((l) =>
+          l.key === linea.key ? { ...l, cantidad: l.cantidad - 1 } : l,
+        );
+        return [...restoActualizado, { ...linea, key: nuevaKey, cantidad: 1 }];
+      });
+
+      setNotaAbierta(nuevaKey);
+      return;
+    }
+
+    setNotaAbierta(notaAbierta === linea.key ? null : linea.key);
+  };
+
   const quitarLinea = (key: string) => {
     setLineas((prev) => prev.filter((l) => l.key !== key));
     if (notaAbierta === key) setNotaAbierta(null);
@@ -176,13 +199,19 @@ export default function ComandasPage() {
               <button
                 key={producto.id}
                 type="button"
-                className="comanda-product"
-                onClick={() => agregarProducto(producto)}
+                className={`comanda-product${producto.disponible ? "" : " disabled"}`}
+                onClick={() => producto.disponible && agregarProducto(producto)}
+                disabled={!producto.disponible}
               >
                 <span className="comanda-product-name">{producto.nombre}</span>
                 <span className="comanda-product-price">
                   {producto.precio.toFixed(2)} €
                 </span>
+                {!producto.disponible && (
+                  <span className="comanda-product-unavailable">
+                    No disponible
+                  </span>
+                )}
               </button>
             ))
           )}
@@ -262,11 +291,7 @@ export default function ComandasPage() {
                   <button
                     type="button"
                     className="comanda-linea-nota-toggle"
-                    onClick={() =>
-                      setNotaAbierta(
-                        notaAbierta === linea.key ? null : linea.key,
-                      )
-                    }
+                    onClick={() => abrirNota(linea)}
                   >
                     {linea.nota ? "Nota ✓" : "+ Nota"}
                   </button>

@@ -86,8 +86,6 @@
   opacity: 0.55;
 }
 
-/* Producto: pensado para toque rápido, no para lectura pausada
-   (sin descripción, sin imagen — solo lo imprescindible para pedir rápido). */
 .comanda-product {
   display: flex;
   flex-direction: column;
@@ -127,6 +125,30 @@
   color: var(--color-primary-dark);
   opacity: 0.75;
 }
+
+
+.comanda-product:disabled,
+.comanda-product.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  background: var(--color-background-primary);
+}
+ 
+.comanda-product:disabled:hover,
+.comanda-product.disabled:hover {
+  border-color: rgba(100, 130, 173, 0.15);
+  box-shadow: none;
+}
+ 
+.comanda-product-unavailable {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--color-danger-dark);
+}
+ 
 
 /* =========================================================
    TICKET DE LA COMANDA

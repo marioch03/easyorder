@@ -31,7 +31,6 @@ public class ProductoService {
 
     private final ZonaTrabajoRepository zonaTrabajoRepository;
 
-    @Cacheable(value = "productos", key = "'todos'")
     public List<ProductoDTO> findAll() {
         return productoRepository.findAll().stream()
                 .map(producto -> new ProductoDTO(
@@ -45,7 +44,6 @@ public class ProductoService {
                 .collect(Collectors.toList());
     }
 
-    @Cacheable(value = "productos", key = "'simplificados'")
     public List<ProductoComandaDTO> getProductosSimplificados() {
         return productoRepository.findAll().stream()
                 .map(producto -> new ProductoComandaDTO(
