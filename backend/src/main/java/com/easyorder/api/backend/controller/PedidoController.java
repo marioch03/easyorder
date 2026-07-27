@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.easyorder.api.backend.dto.ActualizarEstadoPedidoDTO;
 import com.easyorder.api.backend.dto.CrearPedidoDTO;
 import com.easyorder.api.backend.dto.CuentaDTO;
 import com.easyorder.api.backend.dto.PedidoDTO;
@@ -21,6 +20,7 @@ import com.easyorder.api.backend.dto.PedidoItemDTO;
 import com.easyorder.api.backend.model.Pedido;
 import com.easyorder.api.backend.service.PedidoService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -31,50 +31,53 @@ public class PedidoController {
     private final PedidoService pedidoService;
 
     @GetMapping("/admin/pedidos/list")
-    public List<PedidoDTO> listarPedidos() {
-        return pedidoService.listarPedidos();
+    public ResponseEntity<List<PedidoDTO>> listarPedidos() {
+        return ResponseEntity.ok(pedidoService.listarPedidos());
     }
 
     @GetMapping("/admin/pedidos/{id}/items")
-    public List<PedidoItemDTO> getPedidoItems(@PathVariable Long id) {
-        return pedidoService.getPedidoItems(id);
+    public ResponseEntity<List<PedidoItemDTO>> getPedidoItems(@PathVariable Long id) {
+        return ResponseEntity.ok(pedidoService.getPedidoItems(id));
     }
 
-    @PostMapping("/cliente/pedidos/create")
-    public ResponseEntity<Pedido> crearPedido(@RequestBody CrearPedidoDTO dto,
-            @RequestHeader("X-Session-Code") String sessionCode) {
-        Pedido nuevoPedido = pedidoService.crearPedidoCliente(dto, sessionCode);
-        return ResponseEntity.status(HttpStatus.CREATED).body(nuevoPedido);
+    @GetMapping("/admin/pedidos/{idMesa}/cuenta")
+    public ResponseEntity<CuentaDTO> getCuentaAdmin(@PathVariable Long idMesa) {
+        return ResponseEntity.ok(pedidoService.obtenerCuenta(idMesa));
     }
 
     @PostMapping("/admin/pedidos/create/mesa/{idMesa}")
     public ResponseEntity<Pedido> crearPedidoAdmin(
-            @RequestBody CrearPedidoDTO dto,
+            @Valid @RequestBody CrearPedidoDTO dto,
             @PathVariable Long idMesa) {
-
         Pedido nuevoPedido = pedidoService.crearPedidoAdmin(dto, idMesa);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevoPedido);
     }
 
-    @PatchMapping("/admin/pedidos/{id}")
-    public ResponseEntity<Pedido> modificarPedido(@PathVariable Long id,
-            @RequestBody ActualizarEstadoPedidoDTO nuevoEstado) {
-        Pedido pedidoActualizado = pedidoService.cambiarEstado(id, nuevoEstado.nuevoEstado());
-        return ResponseEntity.ok(pedidoActualizado);
+    @PatchMapping("/admin/pedidos/{id}/servido")
+    public ResponseEntity<Void> marcarPedidoServido(@PathVariable Long id) {
+
+        pedidoService.marcarPedidoServido(id);
+
+        return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/cliente/pedidos/")
-    public List<PedidoDTO> getPedidosPorSesion(@RequestHeader("X-Session-Code") String sessionCode) {
-        return pedidoService.listarPedidosPorSesion(sessionCode);
+    @GetMapping("/cliente/pedidos")
+    public ResponseEntity<List<PedidoDTO>> getPedidosPorSesion(
+            @RequestHeader("X-Session-Code") String sessionCode) {
+        return ResponseEntity.ok(pedidoService.listarPedidosPorSesion(sessionCode));
     }
 
     @GetMapping("/cliente/pedidos/cuenta")
-    public CuentaDTO getCuentaCliente(@RequestHeader("X-Session-Code") String sessionCode) {
-        return pedidoService.obtenerCuentaCliente(sessionCode);
+    public ResponseEntity<CuentaDTO> getCuentaCliente(
+            @RequestHeader("X-Session-Code") String sessionCode) {
+        return ResponseEntity.ok(pedidoService.obtenerCuentaCliente(sessionCode));
     }
 
-    @GetMapping("/admin/pedidos/{idMesa}/cuenta")
-    public CuentaDTO getCuenta(@PathVariable Long idMesa) {
-        return pedidoService.obtenerCuenta(idMesa);
+    @PostMapping("/cliente/pedidos/create")
+    public ResponseEntity<Pedido> crearPedidoCliente(
+            @Valid @RequestBody CrearPedidoDTO dto,
+            @RequestHeader("X-Session-Code") String sessionCode) {
+        Pedido nuevoPedido = pedidoService.crearPedidoCliente(dto, sessionCode);
+        return ResponseEntity.status(HttpStatus.CREATED).body(nuevoPedido);
     }
 }

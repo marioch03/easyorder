@@ -2,22 +2,22 @@ package com.easyorder.api.backend.service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.easyorder.api.backend.dto.CrearPedidoDTO;
 import com.easyorder.api.backend.dto.CuentaDTO;
 import com.easyorder.api.backend.dto.PedidoDTO;
 import com.easyorder.api.backend.dto.PedidoEstadoEnum;
 import com.easyorder.api.backend.dto.PedidoItemDTO;
-import com.easyorder.api.backend.dto.SesionDTO;
 import com.easyorder.api.backend.dto.SseTopic;
 import com.easyorder.api.backend.event.SseTopicEvent;
 import com.easyorder.api.backend.exception.NoEncontradoException;
@@ -36,12 +36,12 @@ import com.easyorder.api.backend.repository.ProductoRepository;
 import com.easyorder.api.backend.repository.SesionEstadoRepository;
 import com.easyorder.api.backend.repository.SesionRepository;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class PedidoService {
+
 	private final ProductoRepository productoRepository;
 	private final PedidoRepository pedidoRepository;
 	private final PedidoEstadoRepository pedidoEstadoRepository;
@@ -49,83 +49,68 @@ public class PedidoService {
 	private final SesionRepository sesionRepository;
 	private final SesionEstadoRepository sesionEstadoRepository;
 	private final MesaRepository mesaRepository;
-
 	private final ApplicationEventPublisher eventPublisher;
 
+	@Transactional
 	public Pedido crearPedido(CrearPedidoDTO dto, Sesion sesion) {
-
 		PedidoEstado estadoPendiente = pedidoEstadoRepository.findByNombre(PedidoEstadoEnum.PENDIENTE.getValue())
 				.orElseThrow(() -> new NoEncontradoException("Estado no encontrado"));
 
 		Pedido nuevoPedido = new Pedido(sesion, estadoPendiente);
-
 		final Pedido pedidoGuardado = pedidoRepository.save(nuevoPedido);
 
 		Set<Long> productoIds = dto.items().stream()
 				.map(item -> item.idProducto())
 				.collect(Collectors.toSet());
 
-		List<Producto> productosDB = productoRepository.findAllById(productoIds);
+		Map<Long, Producto> productoMap = productoRepository.findAllById(productoIds).stream()
+				.collect(Collectors.toMap(Producto::getId, Function.identity()));
 
-		Map<Long, Producto> productoMap = productosDB.stream()
-				.collect(Collectors.toMap(
-						p -> p.getId(),
-						Function.identity()));
+		List<PedidoItem> items = dto.items().stream().map(itemDTO -> {
+			Producto producto = productoMap.get(itemDTO.idProducto());
+			if (producto == null) {
+				throw new NoEncontradoException("Producto no encontrado. Id: " + itemDTO.idProducto());
+			}
 
-		List<PedidoItem> productos = dto.items().stream()
-				.map(pedidoItemDTO -> {
-					Producto producto = productoMap.get(pedidoItemDTO.idProducto());
+			PedidoItem pedidoItem = new PedidoItem();
+			pedidoItem.setPedido(pedidoGuardado);
+			pedidoItem.setProducto(producto);
+			pedidoItem.setCantidad(itemDTO.cantidad());
+			pedidoItem.setPrecioUnitario(producto.getPrecio());
+			pedidoItem.setNota(itemDTO.nota());
+			pedidoItem.setListoParaServir(false);
+			pedidoItem.setZonaTrabajo(producto.getTipo().getZonaTrabajo());
+			return pedidoItem;
+		}).toList();
 
-					if (producto == null) {
-						throw new NoEncontradoException(
-								"Producto no encontrado. Id: " + pedidoItemDTO.idProducto());
-					}
+		pedidoItemRepository.saveAll(items);
 
-					PedidoItem pedidoItem = new PedidoItem();
-					pedidoItem.setPedido(pedidoGuardado);
-					pedidoItem.setProducto(producto);
-					pedidoItem.setCantidad(pedidoItemDTO.cantidad());
-					pedidoItem.setPrecioUnitario(producto.getPrecio());
-					pedidoItem.setNota(pedidoItemDTO.nota());
-					pedidoItem.setListoParaServir(false);
-					pedidoItem.setZonaTrabajo(producto.getTipo().getZonaTrabajo());
-					return pedidoItem;
-				})
-				.toList();
-		pedidoItemRepository.saveAll(productos);
 		eventPublisher.publishEvent(new SseTopicEvent(SseTopic.PEDIDOS));
 		eventPublisher.publishEvent(new SseTopicEvent(SseTopic.KDS));
+
 		return pedidoGuardado;
 	}
 
-	@Transactional
 	public Pedido crearPedidoCliente(CrearPedidoDTO dto, String sessionCode) {
 		Sesion sesion = sesionRepository.findByQrCodeUrl(sessionCode)
-				.orElseThrow(() -> new NoEncontradoException(
-						"Sesión no encontrada para el QR code: " + sessionCode));
-
+				.orElseThrow(() -> new NoEncontradoException("Sesión no encontrada para el QR code: " + sessionCode));
 		return crearPedido(dto, sesion);
 	}
 
-	@Transactional
 	public Pedido crearPedidoAdmin(CrearPedidoDTO dto, Long idMesa) {
 		Sesion sesion = sesionRepository.findByMesaIdAndEstadoNombre(idMesa, "ACTIVA")
-				.orElseThrow(() -> new NoEncontradoException(
-						"Sesión no encontrada para la mesa: " + idMesa));
-
+				.orElseThrow(() -> new NoEncontradoException("Sesión no encontrada para la mesa: " + idMesa));
 		return crearPedido(dto, sesion);
 	}
 
 	public List<PedidoDTO> listarPedidos() {
-		return pedidoRepository.findAll().stream()
-				.map(pedido -> new PedidoDTO(
-						pedido.getId(),
-						pedido.getSesion().getId(),
-						pedido.getSesion().getMesa().getNumero(),
-						pedido.getEstado().getNombre(),
-						pedido.getCreatedAt(),
-						getPedidoItems(pedido.getId())))
-				.toList();
+		return construirPedidoDTOs(pedidoRepository.findAll());
+	}
+
+	public List<PedidoDTO> listarPedidosPorSesion(String sessionCode) {
+		Sesion sesion = sesionRepository.findByQrCodeUrl(sessionCode)
+				.orElseThrow(() -> new NoEncontradoException("Sesión no encontrada para el QR code: " + sessionCode));
+		return construirPedidoDTOs(pedidoRepository.findBySesionId(sesion.getId()));
 	}
 
 	public Pedido getPedido(Long id) {
@@ -133,20 +118,10 @@ public class PedidoService {
 				.orElseThrow(() -> new NoEncontradoException("Pedido no encontrado. Id: " + id));
 	}
 
+	@Transactional(readOnly = true)
 	public List<PedidoItemDTO> getPedidoItems(Long id) {
-		Pedido pedido = getPedido(id);
-		List<PedidoItem> items = pedidoItemRepository.findByPedidoId(pedido.getId());
-
-		return items.stream()
-				.map(item -> new PedidoItemDTO(
-						item.getId(),
-						item.getProducto().getId(),
-						item.getProducto().getNombre(),
-						item.getCantidad(),
-						item.getPrecioUnitario(),
-						item.getNota(),
-						item.isListoParaServir(),
-						item.isServido()))
+		return pedidoItemRepository.findByPedidoId(id).stream()
+				.map(this::toPedidoItemDTO)
 				.toList();
 	}
 
@@ -155,106 +130,29 @@ public class PedidoService {
 	}
 
 	@Transactional
-	public Pedido cambiarEstado(Long id, String estado) {
+	public void marcarPedidoServido(Long id) {
 		Pedido pedido = pedidoRepository.findById(id)
 				.orElseThrow(() -> new NoEncontradoException("Pedido no encontrado. Id: " + id));
 
-		PedidoEstado nuevoEstado = pedidoEstadoRepository.findByNombre(estado.toUpperCase())
-				.orElseThrow(() -> new NoEncontradoException("Estado no encontrado: " + estado));
+		pedido.getItems().forEach(item -> {
+			item.setListoParaServir(true);
+			item.setServido(true);
+		});
 
-		pedido.setEstado(nuevoEstado);
-		if (nuevoEstado.getNombre().equals(PedidoEstadoEnum.SERVIDO.getValue())) {
-			pedido.getItems().forEach(pedidoItem -> {
-				pedidoItem.setListoParaServir(true);
-				pedidoItem.setServido(true);
-			});
-		}
-		pedido = pedidoRepository.save(pedido);
+		PedidoEstado estadoServido = pedidoEstadoRepository.findByNombre(PedidoEstadoEnum.SERVIDO.getValue())
+				.orElseThrow(() -> new NoEncontradoException("Estado no encontrado: SERVIDO"));
+		pedido.setEstado(estadoServido);
+
+		pedidoRepository.save(pedido);
 		eventPublisher.publishEvent(new SseTopicEvent(SseTopic.PEDIDOS));
-		return pedido;
-	}
-
-	public List<PedidoDTO> listarPedidosPorSesion(String sessionCode) {
-		Sesion sesion = sesionRepository.findByQrCodeUrl(sessionCode)
-				.orElseThrow(() -> new NoEncontradoException(
-						"Sesión no encontrada para el QR code: " + sessionCode));
-		return pedidoRepository.findBySesionId(sesion.getId()).stream()
-				.map(pedido -> new PedidoDTO(
-						pedido.getId(),
-						pedido.getSesion().getId(),
-						pedido.getSesion().getMesa().getNumero(),
-						pedido.getEstado().getNombre(),
-						pedido.getCreatedAt(),
-						getPedidoItems(pedido.getId())))
-				.toList();
-	}
-
-	public CuentaDTO obtenerCuenta(Long idMesa) {
-		Mesa mesa = mesaRepository.findById(idMesa)
-				.orElseThrow(() -> new NoEncontradoException("Mesa no encontrada. Id: " + idMesa));
-		SesionDTO sesion = obtenerSesionActiva(mesa);
-		List<Pedido> pedidos = pedidoRepository.findBySesionId(sesion.id());
-
-		List<PedidoItemDTO> itemsAgrupados = pedidos.stream()
-				.flatMap(pedido -> pedidoItemRepository.findByPedidoId(pedido.getId()).stream())
-				.collect(Collectors.collectingAndThen(
-						Collectors.toMap(
-								item -> item.getProducto().getId(),
-								item -> new PedidoItemDTO(
-										item.getId(),
-										item.getProducto().getId(),
-										item.getProducto().getNombre(),
-										item.getCantidad(),
-										item.getPrecioUnitario(),
-										item.getNota(),
-										item.isListoParaServir(),
-										item.isServido()),
-								(existente, nuevo) -> new PedidoItemDTO(
-										null,
-										existente.idProducto(),
-										existente.nombreProducto(),
-										existente.cantidad() + nuevo.cantidad(),
-										existente.precioUnitario(),
-										existente.nota(),
-										existente.listoParaServir() && nuevo.listoParaServir(),
-										existente.servido() && nuevo.servido())),
-						map -> new ArrayList<>(map.values())));
-
-		BigDecimal total = itemsAgrupados.stream()
-				.map(i -> i.precioUnitario().multiply(BigDecimal.valueOf(i.cantidad())))
-				.reduce(BigDecimal.ZERO, BigDecimal::add);
-
-		return new CuentaDTO(itemsAgrupados, total);
-	}
-
-	public CuentaDTO obtenerCuentaCliente(String sessionCode) {
-		Mesa mesa = sesionRepository.findByQrCodeUrl(sessionCode)
-				.orElseThrow(() -> new NoEncontradoException(
-						"Sesión no encontrada para el QR code: " + sessionCode))
-				.getMesa();
-		return obtenerCuenta(mesa.getId());
-	}
-
-	private SesionDTO obtenerSesionActiva(Mesa mesa) {
-		SesionEstado estadoActiva = sesionEstadoRepository.findByNombre("ACTIVA")
-				.orElseThrow(() -> new NoEncontradoException("Estado no encontrado: ACTIVA"));
-		Optional<Sesion> sesionMesa = sesionRepository.findByMesaAndEstado(mesa, estadoActiva);
-		if (sesionMesa.isPresent()) {
-			Sesion sesion = sesionMesa.get();
-			return new SesionDTO(
-					sesion.getId(),
-					sesion.getQrCodeUrl());
-		}
-		return null;
 	}
 
 	@Transactional
 	public void recalcularEstadoPedido(Long idPedido) {
 		Pedido pedido = pedidoRepository.findById(idPedido)
-				.orElseThrow(() -> new NoEncontradoException("Pedido no encontrado" + idPedido));
+				.orElseThrow(() -> new NoEncontradoException("Pedido no encontrado: " + idPedido));
 
 		Set<PedidoItem> items = pedido.getItems();
-
 		if (items == null || items.isEmpty()) {
 			return;
 		}
@@ -262,9 +160,9 @@ public class PedidoService {
 		boolean todosListos = items.stream().allMatch(PedidoItem::isListoParaServir);
 		boolean ningunoListo = items.stream().noneMatch(PedidoItem::isListoParaServir);
 
-		PedidoEstadoEnum enumObjetivo = todosListos ? PedidoEstadoEnum.LISTO
-				: ningunoListo ? PedidoEstadoEnum.PENDIENTE
-						: PedidoEstadoEnum.PARCIAL;
+		PedidoEstadoEnum enumObjetivo = todosListos
+				? PedidoEstadoEnum.LISTO
+				: ningunoListo ? PedidoEstadoEnum.PENDIENTE : PedidoEstadoEnum.PARCIAL;
 
 		if (pedido.getEstado() != null && enumObjetivo.getValue().equals(pedido.getEstado().getNombre())) {
 			return;
@@ -276,6 +174,108 @@ public class PedidoService {
 		pedido.setEstado(nuevoEstado);
 		pedidoRepository.save(pedido);
 		eventPublisher.publishEvent(new SseTopicEvent(SseTopic.PEDIDOS));
+	}
 
+	public CuentaDTO obtenerCuenta(Long idMesa) {
+		Mesa mesa = mesaRepository.findById(idMesa)
+				.orElseThrow(() -> new NoEncontradoException("Mesa no encontrada. Id: " + idMesa));
+
+		Sesion sesion = obtenerSesionActivaEntidad(mesa);
+		if (sesion == null) {
+			return new CuentaDTO(List.of(), BigDecimal.ZERO);
+		}
+
+		return construirCuenta(sesion.getId());
+	}
+
+	public CuentaDTO obtenerCuentaCliente(String sessionCode) {
+		Sesion sesion = sesionRepository.findByQrCodeUrl(sessionCode)
+				.orElseThrow(() -> new NoEncontradoException("Sesión no encontrada para el QR code: " + sessionCode));
+		return construirCuenta(sesion.getId());
+	}
+
+	@Transactional(readOnly = true)
+	private List<PedidoDTO> construirPedidoDTOs(List<Pedido> pedidos) {
+		if (pedidos.isEmpty()) {
+			return List.of();
+		}
+
+		List<Long> pedidoIds = pedidos.stream()
+				.map(Pedido::getId)
+				.toList();
+
+		Map<Long, List<PedidoItemDTO>> itemsPorPedido = pedidoItemRepository.findByPedidoIdIn(pedidoIds).stream()
+				.collect(Collectors.groupingBy(
+						item -> item.getPedido().getId(),
+						Collectors.mapping(this::toPedidoItemDTO, Collectors.toList())));
+
+		return pedidos.stream()
+				.map(pedido -> new PedidoDTO(
+						pedido.getId(),
+						pedido.getSesion().getId(),
+						pedido.getSesion().getMesa().getNumero(),
+						pedido.getEstado().getNombre(),
+						pedido.getCreatedAt(),
+						itemsPorPedido.getOrDefault(pedido.getId(), List.of())))
+				.toList();
+	}
+
+	@Transactional(readOnly = true)
+	private CuentaDTO construirCuenta(Long idSesion) {
+		List<Pedido> pedidos = pedidoRepository.findBySesionId(idSesion);
+		List<Long> pedidoIds = pedidos.stream()
+				.map(Pedido::getId)
+				.toList();
+
+		List<PedidoItem> items = pedidoIds.isEmpty()
+				? List.of()
+				: pedidoItemRepository.findByPedidoIdIn(pedidoIds);
+
+		List<PedidoItemDTO> itemsAgrupados = agruparPorProductoYNota(items);
+
+		BigDecimal total = itemsAgrupados.stream()
+				.map(i -> i.precioUnitario().multiply(BigDecimal.valueOf(i.cantidad())))
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+
+		return new CuentaDTO(itemsAgrupados, total);
+	}
+
+	private List<PedidoItemDTO> agruparPorProductoYNota(List<PedidoItem> items) {
+		Map<String, PedidoItemDTO> agrupados = new LinkedHashMap<>();
+
+		for (PedidoItem item : items) {
+			String nota = item.getNota() == null ? "" : item.getNota();
+			String clave = item.getProducto().getId() + "|" + nota;
+
+			agrupados.merge(clave, toPedidoItemDTO(item), (existente, nuevo) -> new PedidoItemDTO(
+					null,
+					existente.idProducto(),
+					existente.nombreProducto(),
+					existente.cantidad() + nuevo.cantidad(),
+					existente.precioUnitario(),
+					existente.nota(),
+					existente.listoParaServir() && nuevo.listoParaServir(),
+					existente.servido() && nuevo.servido()));
+		}
+
+		return new ArrayList<>(agrupados.values());
+	}
+
+	private Sesion obtenerSesionActivaEntidad(Mesa mesa) {
+		SesionEstado estadoActiva = sesionEstadoRepository.findByNombre("ACTIVA")
+				.orElseThrow(() -> new NoEncontradoException("Estado no encontrado: ACTIVA"));
+		return sesionRepository.findByMesaAndEstado(mesa, estadoActiva).orElse(null);
+	}
+
+	private PedidoItemDTO toPedidoItemDTO(PedidoItem item) {
+		return new PedidoItemDTO(
+				item.getId(),
+				item.getProducto().getId(),
+				item.getProducto().getNombre(),
+				item.getCantidad(),
+				item.getPrecioUnitario(),
+				item.getNota(),
+				item.isListoParaServir(),
+				item.isServido());
 	}
 }

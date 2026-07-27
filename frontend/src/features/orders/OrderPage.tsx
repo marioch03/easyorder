@@ -78,7 +78,7 @@ export default function OrderPage() {
     setActionError(null);
 
     try {
-      await marcarPedidoServido(idPedido, "SERVIDO");
+      await marcarPedidoServido(idPedido);
       if (pedidoSeleccionado?.idPedido === idPedido) {
         cerrarModal();
       }

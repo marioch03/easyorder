@@ -1,5 +1,6 @@
 package com.easyorder.api.backend.repository;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,4 +23,7 @@ public interface PedidoItemRepository extends JpaRepository<PedidoItem, Long> {
                 ORDER BY p.createdAt ASC
             """)
     List<PedidoItem> findPendientesByZona(@Param("zonaTrabajoNombre") String zonaTrabajoNombre);
+
+    List<PedidoItem> findByPedidoIdIn(Collection<Long> pedidoIds);
+
 }
