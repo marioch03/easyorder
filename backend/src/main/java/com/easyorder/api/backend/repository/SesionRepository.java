@@ -1,5 +1,6 @@
 package com.easyorder.api.backend.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,6 +13,8 @@ public interface SesionRepository extends JpaRepository<Sesion, Long> {
     Optional<Sesion> findByMesaAndEstado(Mesa mesa, SesionEstado estado);
 
     Optional<Sesion> findByMesaIdAndEstadoNombre(Long mesaId, String nombreEstado);
+
+    List<Sesion> findByMesaInAndEstadoNombre(List<Mesa> mesas, String nombreEstado);
 
     Optional<Sesion> findByQrCodeUrl(String qrCodeUrl);
 }

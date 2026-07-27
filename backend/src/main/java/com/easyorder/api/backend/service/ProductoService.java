@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +32,7 @@ public class ProductoService {
 
     private final ZonaTrabajoRepository zonaTrabajoRepository;
 
+    @Cacheable(value = "productos", key = "'todos'")
     public List<ProductoDTO> findAll() {
         return productoRepository.findAll().stream()
                 .map(producto -> new ProductoDTO(
@@ -44,6 +46,7 @@ public class ProductoService {
                 .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "productos", key = "'simplificados'")
     public List<ProductoComandaDTO> getProductosSimplificados() {
         return productoRepository.findAll().stream()
                 .map(producto -> new ProductoComandaDTO(
@@ -79,6 +82,7 @@ public class ProductoService {
                 .collect(Collectors.toList());
     }
 
+    @CacheEvict(value = "productos", allEntries = true)
     public Producto editarProducto(Long id, EditarProductoDTO dto) {
 
         Producto producto = productoRepository.findById(id)

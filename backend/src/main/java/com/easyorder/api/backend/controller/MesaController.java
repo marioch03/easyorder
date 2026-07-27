@@ -45,16 +45,7 @@ public class MesaController {
 
     @PutMapping("/admin/mesas/{id}/estado")
     public ResponseEntity<Mesa> cambiarEstadoMesa(@PathVariable Long id, @RequestParam String estado) {
-
         Mesa mesaActualizada = mesaService.cambiarEstado(id, estado);
-        return ResponseEntity.ok(mesaActualizada);
-    }
-
-    @PutMapping("/cliente/mesas/cuenta")
-    public ResponseEntity<Mesa> clienteSolicitaCuenta(@RequestBody ClienteSolicitaCuentaRequest request,
-            @RequestHeader("X-Session-Code") String sessionCode) {
-
-        Mesa mesaActualizada = mesaService.cambiarEstado(request.mesaId(), request.estado());
         return ResponseEntity.ok(mesaActualizada);
     }
 
@@ -66,6 +57,13 @@ public class MesaController {
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
+    }
+
+    @PutMapping("/cliente/mesas/cuenta")
+    public ResponseEntity<Mesa> clienteSolicitaCuenta(@RequestBody ClienteSolicitaCuentaRequest request,
+            @RequestHeader("X-Session-Code") String sessionCode) {
+        Mesa mesaActualizada = mesaService.cambiarEstado(request.mesaId(), request.estado());
+        return ResponseEntity.ok(mesaActualizada);
     }
 
 }
