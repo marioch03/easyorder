@@ -16,5 +16,7 @@ public interface SesionRepository extends JpaRepository<Sesion, Long> {
 
     List<Sesion> findByMesaInAndEstadoNombre(List<Mesa> mesas, String nombreEstado);
 
+    boolean existsByQrCodeUrlAndEstadoNombre(String qrCodeUrl, String estadoNombre);
+
     Optional<Sesion> findByQrCodeUrl(String qrCodeUrl);
 }

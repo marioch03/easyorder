@@ -5,10 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.easyorder.api.backend.dto.SesionClienteDTO;
@@ -35,13 +33,6 @@ public class SesionController {
     public ResponseEntity<Sesion> cerrarSesion(@PathVariable String sessionCode) {
         Sesion sesion = sesionService.cerrarSesion(sessionCode);
         return ResponseEntity.ok(sesion);
-    }
-
-    @PutMapping("/admin/sesiones/{id}/estado")
-    public ResponseEntity<Sesion> cambiarEstadoSesion(@PathVariable Long id, @RequestParam String estado) {
-
-        Sesion sesionActualizada = sesionService.cambiarEstado(id, estado);
-        return ResponseEntity.ok(sesionActualizada);
     }
 
     @GetMapping("/cliente/sesiones/mesa")
