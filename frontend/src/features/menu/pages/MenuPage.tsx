@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSession } from "../../session/useSession";
+import AllergenLegendModal from "../components/AllergenLegendModal"; // 1. Importamos la leyenda
 import ProductCard from "../components/ProductCard";
 import ProductModal from "../components/ProductModal";
 import { useMenuData } from "../hooks/useMenuData";
 import "../styles.css";
-import type { Product } from "../types/menu";
+import type { Alergeno, Product } from "../types/menu";
+
 export default function MenuPage() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isLegendOpen, setIsLegendOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
   const categoryRefs = useRef<Record<number, HTMLElement | null>>({});
   const [searchQuery, setSearchQuery] = useState("");
@@ -15,6 +18,18 @@ export default function MenuPage() {
 
   const productosDisponibles = useMemo(() => {
     return products.filter((p) => p.disponible);
+  }, [products]);
+
+  const listaAlergenosUnicos = useMemo(() => {
+    const map = new Map<string, Alergeno>();
+    products.forEach((p) => {
+      p.alergenos?.forEach((a) => {
+        if (!map.has(a.nombre)) {
+          map.set(a.nombre, a);
+        }
+      });
+    });
+    return Array.from(map.values());
   }, [products]);
 
   const productosPorCategorias = useMemo(() => {
@@ -108,6 +123,14 @@ export default function MenuPage() {
               </button>
             )}
           </div>
+
+          <button
+            className="allergen-legend-btn"
+            onClick={() => setIsLegendOpen(true)}
+            title="Leyenda de alérgenos"
+          >
+            ℹ️
+          </button>
         </div>
 
         <div className="categories-scroll">
@@ -153,9 +176,16 @@ export default function MenuPage() {
           </section>
         ))}
       </div>
+
       <ProductModal
         product={selectedProduct}
         onClose={() => setSelectedProduct(null)}
+      />
+
+      <AllergenLegendModal
+        isOpen={isLegendOpen}
+        onClose={() => setIsLegendOpen(false)}
+        alergenos={listaAlergenosUnicos}
       />
     </div>
   );

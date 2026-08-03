@@ -31,5 +31,6 @@ export type Product = {
 
 export type Alergeno = {
   nombre: string;
+  descripcion?: string;
   tipo: "CONTIENE" | "PUEDE_CONTENER_TRAZAS";
 };
