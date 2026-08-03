@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.easyorder.api.backend.dto.CrearMesaDTO;
 import com.easyorder.api.backend.dto.MesaDTO;
@@ -24,7 +25,6 @@ import com.easyorder.api.backend.repository.MesaRepository;
 import com.easyorder.api.backend.repository.SesionRepository;
 import com.easyorder.api.backend.repository.ZonaRepository;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -37,6 +37,7 @@ public class MesaService {
     private final SesionRepository sesionRepository;
     private final ApplicationEventPublisher eventPublisher;
 
+    @Transactional(readOnly = true)
     public List<MesaDTO> listarMesas() {
         List<Mesa> mesas = mesaRepository.findAll();
 
@@ -55,6 +56,7 @@ public class MesaService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public Mesa getMesa(Long id) {
         return mesaRepository.findById(id)
                 .orElseThrow(() -> new NoEncontradoException("Mesa no encontrada. Id: " + id));

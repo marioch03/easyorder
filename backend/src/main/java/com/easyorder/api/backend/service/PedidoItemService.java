@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.easyorder.api.backend.dto.PedidoItemKds;
 import com.easyorder.api.backend.dto.SseTopic;
@@ -13,7 +14,6 @@ import com.easyorder.api.backend.model.PedidoItem;
 import com.easyorder.api.backend.repository.PedidoItemRepository;
 import com.easyorder.api.backend.repository.ZonaTrabajoRepository;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -27,6 +27,7 @@ public class PedidoItemService {
 
   private final ApplicationEventPublisher eventPublisher;
 
+  @Transactional(readOnly = true)
   public List<PedidoItemKds> obtenerComandasParaKds(String nombreZonaTrabajo) {
 
     if (!zonaTrabajoRepository.existsByNombreIgnoreCase(nombreZonaTrabajo.toUpperCase())) {
