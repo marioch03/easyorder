@@ -144,7 +144,7 @@ export default function MenuPage() {
                     name: product.nombre,
                     price: product.precio,
                     description: product.descripcion ?? "",
-                    allergens: "",
+                    allergens: product.alergenos ?? [],
                     imageUrl: product.imagen ?? "food.png",
                   }}
                 />

@@ -6,6 +6,7 @@ export type ProductDTO = {
   disponible: boolean;
   imagen?: string | null;
   tipoId: number;
+  alergenos: Alergeno[];
 };
 
 export type CategoryDTO = {
@@ -24,6 +25,11 @@ export type Product = {
   name: string;
   price: number;
   description?: string;
-  allergens?: string;
+  allergens: Alergeno[];
   imageUrl?: string;
+};
+
+export type Alergeno = {
+  nombre: string;
+  tipo: "CONTIENE" | "PUEDE_CONTENER_TRAZAS";
 };

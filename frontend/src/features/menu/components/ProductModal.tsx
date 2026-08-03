@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getAlergenoIcon } from "../../../common/allergens";
 import type { CartItem } from "../../cart/cart";
 import { useCart } from "../../cart/useCart";
 import "../styles.css";
@@ -60,10 +61,27 @@ export default function ProductModal({ product, onClose }: Props) {
         <h3>Descripción:</h3>
         <p className="modal-description">{product.description}</p>
 
-        {product.allergens && (
-          <p className="modal-allergens">
-            <strong>Alérgenos:</strong> {product.allergens}
-          </p>
+        {product.allergens && product.allergens.length > 0 && (
+          <div className="modal-allergens-section">
+            <h3>Alérgenos:</h3>
+            <div className="product-allergens">
+              {product.allergens.map((item, index) => {
+                const iconSrc = getAlergenoIcon(item.nombre);
+                if (!iconSrc) return null;
+                const isTraza = item.tipo === "PUEDE_CONTENER_TRAZAS";
+
+                return (
+                  <span
+                    key={index}
+                    className={`allergen-badge ${isTraza ? "traza" : ""}`}
+                    title={`${item.nombre}${isTraza ? " (Trazas)" : ""}`}
+                  >
+                    <img src={iconSrc} alt={item.nombre} />
+                  </span>
+                );
+              })}
+            </div>
+          </div>
         )}
 
         <div className="modal-order">

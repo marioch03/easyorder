@@ -25,13 +25,32 @@ SET NAMES utf8mb4;
 
 DROP TABLE IF EXISTS `Alergeno`;
 
-CREATE TABLE `Alergeno` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(100) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `nombre` (`nombre`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE Alergeno (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    descripcion VARCHAR(255),
+    CONSTRAINT uk_alergeno_nombre UNIQUE (nombre)
+);
 
+LOCK TABLES `Alergeno` WRITE;
+
+INSERT INTO Alergeno (nombre, descripcion) VALUES
+('Gluten', 'Cereales que contienen gluten: trigo, centeno, cebada, avena, espelta, kamut y sus variedades híbridas'),
+('Crustáceos', 'Crustáceos y productos a base de crustáceos'),
+('Huevos', 'Huevos y productos a base de huevo'),
+('Pescado', 'Pescado y productos a base de pescado'),
+('Cacahuetes', 'Cacahuetes y productos a base de cacahuetes'),
+('Soja', 'Soja y productos a base de soja'),
+('Leche', 'Leche y sus derivados (incluida la lactosa)'),
+('Frutos de cáscara', 'Almendras, avellanas, nueces, anacardos, pacanas, nueces de Brasil, pistachos, nueces de macadamia y productos derivados'),
+('Apio', 'Apio y productos derivados'),
+('Mostaza', 'Mostaza y productos derivados'),
+('Sésamo', 'Granos de sésamo y productos a base de granos de sésamo'),
+('Sulfitos', 'Dióxido de azufre y sulfitos en concentraciones superiores a 10 mg/kg o 10 mg/litro'),
+('Altramuces', 'Altramuces y productos a base de altramuces'),
+('Moluscos', 'Moluscos y productos a base de moluscos');
+
+UNLOCK TABLES;
 
 
 # Volcado de tabla Ingrediente
@@ -50,24 +69,6 @@ CREATE TABLE `Ingrediente` (
   CONSTRAINT `fk_ingrediente_unidad` FOREIGN KEY (`id_unidad`) REFERENCES `Unidad` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `check_stock` CHECK (`stock` >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-
-
-# Volcado de tabla IngredienteAlergeno
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `IngredienteAlergeno`;
-
-CREATE TABLE `IngredienteAlergeno` (
-  `id_ingrediente` int(11) unsigned NOT NULL,
-  `id_alergeno` int(11) unsigned NOT NULL,
-  PRIMARY KEY (`id_ingrediente`,`id_alergeno`),
-  KEY `alergeno_ingrediente` (`id_alergeno`),
-  KEY `ingrediente_alergeno` (`id_ingrediente`),
-  CONSTRAINT `alergeno_ingrediente` FOREIGN KEY (`id_alergeno`) REFERENCES `Alergeno` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `ingrediente_alergeno` FOREIGN KEY (`id_ingrediente`) REFERENCES `Ingrediente` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
 
 
 # Volcado de tabla Mesa
@@ -276,6 +277,83 @@ VALUES
 /*!40000 ALTER TABLE `ProductoTipo` ENABLE KEYS */;
 UNLOCK TABLES;
 
+DROP TABLE IF EXISTS `ProductoAlergeno`;
+
+CREATE TABLE `ProductoAlergeno` (
+    id_producto BIGINT NOT NULL,
+    id_alergeno BIGINT NOT NULL,
+    tipo ENUM('CONTIENE', 'PUEDE_CONTENER_TRAZAS') NOT NULL DEFAULT 'CONTIENE',
+    PRIMARY KEY (id_producto, id_alergeno),
+    CONSTRAINT fk_producto_alergeno_producto
+        FOREIGN KEY (id_producto) REFERENCES Producto(id) ON DELETE CASCADE,
+    CONSTRAINT fk_producto_alergeno_alergeno
+        FOREIGN KEY (id_alergeno) REFERENCES Alergeno(id) ON DELETE CASCADE
+);
+
+LOCK TABLES `ProductoAlergeno` WRITE;
+
+INSERT INTO `ProductoAlergeno` (`id_producto`, `id_alergeno`, `tipo`) VALUES
+  -- Cerveza (ID 4): Gluten
+  (4, 1, 'CONTIENE'),
+  
+  -- Vino (ID 5): Sulfitos
+  (5, 12, 'CONTIENE'),
+  
+  -- Tinto de verano (ID 6): Sulfitos
+  (6, 12, 'CONTIENE'),
+  
+  -- Tortilla de patatas (ID 9): Huevos
+  (9, 3, 'CONTIENE'),
+  
+  -- Croquetas caseras (ID 10): Gluten, Huevos, Leche
+  (10, 1, 'CONTIENE'),
+  (10, 3, 'CONTIENE'),
+  (10, 7, 'CONTIENE'),
+  
+  -- Patatas bravas (ID 11): Trazas de gluten
+  (11, 1, 'PUEDE_CONTENER_TRAZAS'),
+  
+  -- Ensaladilla rusa (ID 12): Huevos, Pescado
+  (12, 3, 'CONTIENE'),
+  (12, 4, 'CONTIENE'),
+  
+  -- Calamares fritos (ID 13): Gluten, Moluscos
+  (13, 1, 'CONTIENE'),
+  (13, 14, 'CONTIENE'),
+  
+  -- Gambas al ajillo (ID 14): Crustáceos
+  (14, 2, 'CONTIENE'),
+  
+  -- Queso curado (ID 16): Leche
+  (16, 7, 'CONTIENE'),
+  
+  -- Huevos rotos (ID 17): Huevos
+  (17, 3, 'CONTIENE'),
+  
+  -- Albóndigas (ID 18): Gluten, Huevos, Leche
+  (18, 1, 'CONTIENE'),
+  (18, 3, 'CONTIENE'),
+  (18, 7, 'CONTIENE'),
+  
+  -- Flan de queso (ID 19): Huevos, Leche
+  (19, 3, 'CONTIENE'),
+  (19, 7, 'CONTIENE'),
+  
+  -- Yogur (ID 20): Leche
+  (20, 7, 'CONTIENE'),
+  
+  -- Natillas (ID 21): Huevos, Leche
+  (21, 3, 'CONTIENE'),
+  (21, 7, 'CONTIENE'),
+  
+  -- Helado (ID 22): Leche, Trazas de frutos de cáscara
+  (22, 7, 'CONTIENE'),
+  (22, 8, 'PUEDE_CONTENER_TRAZAS');
+
+/*!40000 ALTER TABLE `ProductoAlergeno` ENABLE KEYS */;
+UNLOCK TABLES;
+
+CREATE INDEX idx_producto_alergeno_producto ON ProductoAlergeno (id_producto);
 
 # Volcado de tabla Sesion
 # ------------------------------------------------------------

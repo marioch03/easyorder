@@ -2,12 +2,14 @@ package com.easyorder.api.backend.service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import com.easyorder.api.backend.dto.AlergenoDTO;
 import com.easyorder.api.backend.dto.EditarProductoDTO;
 import com.easyorder.api.backend.dto.ProductoComandaDTO;
 import com.easyorder.api.backend.dto.ProductoDTO;
@@ -16,6 +18,7 @@ import com.easyorder.api.backend.exception.NoEncontradoException;
 import com.easyorder.api.backend.model.Producto;
 import com.easyorder.api.backend.model.ProductoTipo;
 import com.easyorder.api.backend.model.ZonaTrabajo;
+import com.easyorder.api.backend.repository.ProductoAlergenoRepository;
 import com.easyorder.api.backend.repository.ProductoRepository;
 import com.easyorder.api.backend.repository.ProductoTipoRepository;
 import com.easyorder.api.backend.repository.ZonaTrabajoRepository;
@@ -32,9 +35,23 @@ public class ProductoService {
 
     private final ZonaTrabajoRepository zonaTrabajoRepository;
 
+    private final ProductoAlergenoRepository productoAlergenoRepository;
+
     @Cacheable(value = "productos", key = "'todos'")
     public List<ProductoDTO> findAll() {
-        return productoRepository.findAll().stream()
+        List<Producto> productos = productoRepository.findAll();
+
+        List<Long> productoIds = productos.stream().map(Producto::getId).toList();
+
+        Map<Long, List<AlergenoDTO>> alergenosPorProducto = productoAlergenoRepository
+                .findByProducto_IdIn(productoIds).stream()
+                .collect(Collectors.groupingBy(
+                        pa -> pa.getProducto().getId(),
+                        Collectors.mapping(
+                                pa -> new AlergenoDTO(pa.getAlergeno().getNombre(), pa.getTipo()),
+                                Collectors.toList())));
+
+        return productos.stream()
                 .map(producto -> new ProductoDTO(
                         producto.getId(),
                         producto.getNombre(),
@@ -42,7 +59,8 @@ public class ProductoService {
                         producto.getPrecio().doubleValue(),
                         producto.isDisponible(),
                         producto.getImagen(),
-                        producto.getTipo().getId()))
+                        producto.getTipo().getId(),
+                        alergenosPorProducto.getOrDefault(producto.getId(), List.of())))
                 .collect(Collectors.toList());
     }
 

@@ -1,6 +1,7 @@
 package com.easyorder.api.backend.dto;
 
 import java.io.Serializable;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,4 +20,5 @@ public class ProductoDTO implements Serializable {
 	private boolean disponible;
 	private String imagen;
 	private long tipoId;
+	private List<AlergenoDTO> alergenos;
 }
