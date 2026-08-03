@@ -18,8 +18,7 @@ public class SseNotificationService {
   private final Map<String, List<SseEmitter>> emitters = new ConcurrentHashMap<>();
 
   public SseEmitter suscribir(String topic) {
-    SseEmitter emitter = new SseEmitter(0L);
-
+    SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
     emitters.computeIfAbsent(topic, k -> new CopyOnWriteArrayList<>()).add(emitter);
 
     emitter.onCompletion(() -> removeEmitter(topic, emitter));

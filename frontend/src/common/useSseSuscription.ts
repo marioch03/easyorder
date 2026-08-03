@@ -27,8 +27,37 @@ export function useSseSubscription({ topic, onRefresh }: SseOptions) {
       },
       signal: abortController.signal,
 
+      async onopen(response) {
+        const contentType = response.headers.get("content-type");
+        if (response.ok && contentType?.includes("text/event-stream")) {
+          console.log(`✅ Conexión SSE establecida con éxito [${topic}]`);
+          return;
+        }
+
+        if (response.status === 401 || response.status === 403) {
+          console.error(
+            `⛔ Error de autenticación en SSE (${response.status}) [${topic}]`,
+          );
+          abortController.abort();
+          return;
+        }
+
+        throw new Error(
+          `Error en respuesta del servidor: status ${response.status}`,
+        );
+      },
+
       onmessage(event) {
-        console.log(`📥 MENSAJE BRUTO RECIBIDO [${topic}]:`, event.data);
+        if (
+          !event.data ||
+          event.data === "connected" ||
+          event.data === "ping"
+        ) {
+          return;
+        }
+
+        console.log(`📥 MENSAJE RECIBIDO [${topic}]:`, event.data);
+
         if (event.data === "refresh") {
           console.log(`¡Señal de recarga recibida para el topic: ${topic}!`);
           onRefreshRef.current();
@@ -37,13 +66,13 @@ export function useSseSubscription({ topic, onRefresh }: SseOptions) {
 
       onclose() {
         console.warn(
-          `⚠️ Conexión SSE cerrada para el topic: ${topic}. Reconectando...`,
+          `⚠️ Conexión SSE cerrada por el servidor [${topic}]. Reintentando...`,
         );
-        throw new Error(`Conexión SSE cerrada por el servidor [${topic}]`);
       },
 
       onerror(err) {
         if (abortController.signal.aborted) return;
+
         console.error(`❌ Error en el canal SSE [${topic}]:`, err);
         return 2000;
       },
