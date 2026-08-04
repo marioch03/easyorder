@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
+import type { ProductoTipoDTO } from "../../../common/types";
 import { getCategories, getProducts } from "../services/menuService";
-import type { CategoryDTO, ProductDTO } from "../types/menu";
+import type { ProductDTO } from "../types/menu";
 
 export function useMenuData(sessionCode: string | null) {
   const [products, setProducts] = useState<ProductDTO[]>([]);
-  const [categories, setCategories] = useState<CategoryDTO[]>([]);
+  const [categories, setCategories] = useState<ProductoTipoDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

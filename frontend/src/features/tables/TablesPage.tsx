@@ -7,7 +7,7 @@ import qrIcon from "../../assets/qr.png";
 import type { Cuenta } from "../menu/types/bill";
 import ImageButton from "./ImageButton";
 import TableButton from "./TableButton";
-import type { Mesa } from "./tables";
+import type { MesaDTO } from "./tables";
 import {
   cerrarSesionMesa,
   crearSesionMesa,
@@ -27,7 +27,7 @@ export default function TablesPage() {
   const { mesas, zonas, loading, error } = useTablesData();
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [mesaSeleccionada, setMesaSeleccionada] = useState<Mesa | null>(null);
+  const [mesaSeleccionada, setMesaSeleccionada] = useState<MesaDTO | null>(null);
   const estadoMesaSeleccionada = mesaSeleccionada?.estado;
 
   const [qrLoading, setQrLoading] = useState(false);
@@ -38,7 +38,7 @@ export default function TablesPage() {
   const [modalCuentaOpen, setModalCuentaOpen] = useState(false);
   const frontendUrl = import.meta.env.VITE_FRONTEND_URL;
 
-  const crearSesion = async (mesa: Mesa) => {
+  const crearSesion = async (mesa: MesaDTO) => {
     setQrLoading(true);
     setActionError(null);
 
@@ -53,7 +53,7 @@ export default function TablesPage() {
     }
   };
 
-  const cerrarSesion = async (mesa: Mesa) => {
+  const cerrarSesion = async (mesa: MesaDTO) => {
     if (qrLoading) return;
 
     if (!mesa.sesionActiva) {
@@ -89,7 +89,7 @@ export default function TablesPage() {
     }
   };
 
-  const abrirModal = (mesa: Mesa) => {
+  const abrirModal = (mesa: MesaDTO) => {
     setMesaSeleccionada(mesa);
     setActionError(null);
     setModalIsOpen(true);
@@ -100,7 +100,7 @@ export default function TablesPage() {
     setModalIsOpen(false);
   };
 
-  const obtenerCuenta = async (mesa: Mesa) => {
+  const obtenerCuenta = async (mesa: MesaDTO) => {
     setCuentaLoading(true);
     setActionError(null);
 

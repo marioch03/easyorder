@@ -1,5 +1,6 @@
+import type { ProductoTipoDTO } from "../../../common/types";
 import { publicApi } from "../../api/apiClient";
-import type { CategoryDTO, ProductDTO } from "../types/menu";
+import type { ProductDTO } from "../types/menu";
 
 export async function getProducts(): Promise<ProductDTO[]> {
   try {
@@ -13,9 +14,9 @@ export async function getProducts(): Promise<ProductDTO[]> {
   }
 }
 
-export async function getCategories(): Promise<CategoryDTO[]> {
+export async function getCategories(): Promise<ProductoTipoDTO[]> {
   try {
-    const response = await publicApi.get<CategoryDTO[]>("/productos/tipos");
+    const response = await publicApi.get<ProductoTipoDTO[]>("/productos/tipos");
     return response.data;
   } catch (error) {
     throw new Error("Error al obtener categorías");

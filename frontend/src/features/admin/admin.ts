@@ -1,5 +1,4 @@
-import type { ProductoTipoDTO } from "../../common/types";
-import type { SesionDTO } from "../tables/tables";
+import type { ProductoTipoDTO, ZonaDTO } from "../../common/types";
 import { icons } from "./icons";
 
 export type ActionKey =
@@ -120,12 +119,12 @@ export type AddProductPayload = {
 };
 
 export type EditProductPayload = {
-  id: number,
+  id: number;
   nombre: string;
   descripcion: string;
   precio: number;
   tipoId: number | null;
-  activo: boolean
+  activo: boolean;
 };
 
 export type EditProductFormProps = FormProps<EditProductPayload> & {
@@ -151,18 +150,6 @@ export type RemoveUserFormProps = FormProps<RemoveUserPayload> & {
 export type FormProps<T> = {
   onConfirm: (payload: T) => void;
   onCancel: () => void;
-};
-//Tipos de datos para formularios
-export type ZonaDTO = {
-  id: number;
-  nombre: string;
-};
-export type MesaDTO = {
-  id: number;
-  numero: number;
-  estado: string;
-  zona: string | null;
-  sesionActiva: SesionDTO | null;
 };
 
 export type ProductoDTO = {

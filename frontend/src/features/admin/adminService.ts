@@ -1,12 +1,10 @@
-import type { ProductoTipoDTO } from "../../common/types";
+import type { MesaDTO, ProductoTipoDTO, ZonaDTO } from "../../common/types";
 import { privateApi, privateAuthApi } from "../api/apiClient";
 import type {
   EditProductPayload,
-  MesaDTO,
   ProductoDTO,
   UsuarioDTO,
   UsuarioRolDTO,
-  ZonaDTO,
 } from "./admin";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import type { ProductoTipoDTO } from "../../common/types";
-import type { Mesa, Zona } from "../tables/tables";
+import type { MesaDTO, ProductoTipoDTO, ZonaDTO } from "../../common/types";
 import { getMesas, getZonas } from "../tables/tablesService";
 import type { ProductoComandaDTO } from "./comandas";
 import {
@@ -9,8 +8,8 @@ import {
 } from "./comandasService";
 
 export function useComandasData() {
-  const [mesas, setMesas] = useState<Mesa[]>([]);
-  const [zonas, setZonas] = useState<Zona[]>([]);
+  const [mesas, setMesas] = useState<MesaDTO[]>([]);
+  const [zonas, setZonas] = useState<ZonaDTO[]>([]);
   const [tiposProducto, setTiposProducto] = useState<ProductoTipoDTO[]>([]);
   const [productos, setProductos] = useState<ProductoComandaDTO[]>([]);
   const [loading, setLoading] = useState(true);

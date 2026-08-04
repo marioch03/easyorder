@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSseSubscription } from "../../common/useSseSuscription";
-import type { Mesa, Zona } from "./tables";
+import type { MesaDTO, ZonaDTO } from "./tables";
 import { getMesas, getZonas } from "./tablesService";
 
-function leerZonasCache(): Zona[] {
+function leerZonasCache(): ZonaDTO[] {
   try {
     const zonasLocal = localStorage.getItem("zonas");
     return zonasLocal ? JSON.parse(zonasLocal) : [];
@@ -13,8 +13,8 @@ function leerZonasCache(): Zona[] {
 }
 
 export function useTablesData() { 
-  const [mesas, setMesas] = useState<Mesa[]>([]);
-  const [zonas, setZonas] = useState<Zona[]>(leerZonasCache);
+  const [mesas, setMesas] = useState<MesaDTO[]>([]);
+  const [zonas, setZonas] = useState<ZonaDTO[]>(leerZonasCache);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

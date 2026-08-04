@@ -1,13 +1,13 @@
 import { privateApi } from "../api/apiClient";
-import type { Mesa, Zona } from "./tables";
+import type { MesaDTO, ZonaDTO } from "./tables";
 
-export async function getMesas(): Promise<Mesa[]> {
-  const response = await privateApi.get<Mesa[]>("/mesas/list");
+export async function getMesas(): Promise<MesaDTO[]> {
+  const response = await privateApi.get<MesaDTO[]>("/mesas/list");
   return response.data;
 }
 
-export async function getZonas(): Promise<Zona[]> {
-  const response = await privateApi.get<Zona[]>("/zonas/list");
+export async function getZonas(): Promise<ZonaDTO[]> {
+  const response = await privateApi.get<ZonaDTO[]>("/zonas/list");
   return response.data;
 }
 
