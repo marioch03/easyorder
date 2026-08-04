@@ -19,13 +19,12 @@ export async function getPedidos(): Promise<Pedido[]> {
   }
 }
 
-export async function solicitarCuentaApi(mesaId: number) {
+export async function solicitarCuentaApi(sessionCode: string) {
   try {
     const response = await publicApi.put("/mesas/cuenta", {
-      mesaId,
-      estado: "ESPERANDO_CUENTA",
+      sessionCode,
     });
-    
+
     return response.data;
   } catch (error) {
     throw new Error("Error solicitando cuenta", { cause: error });

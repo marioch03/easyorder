@@ -25,4 +25,9 @@ public record PedidoDTO(
 			items = List.of();
 		}
 	}
+
+	public PedidoDTO(Long idPedido, Long idSesion, int numeroMesa, LocalDateTime createdAt, String nombreEstado) {
+		this(idPedido, idSesion, numeroMesa, nombreEstado, createdAt, List.of());
+	}
+
 }

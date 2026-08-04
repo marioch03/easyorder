@@ -63,7 +63,7 @@ public class MesaService {
     }
 
     @Transactional
-    public Mesa crearMesa(CrearMesaDTO crearMesaDTO) {
+    public MesaDTO crearMesa(CrearMesaDTO crearMesaDTO) {
         if (existeMesa(crearMesaDTO.numero())) {
             throw new RecursoExistenteException("La mesa ya existe");
         }
@@ -78,11 +78,16 @@ public class MesaService {
 
         Mesa mesaCreada = save(mesa);
         eventPublisher.publishEvent(new SseTopicEvent(SseTopic.MESAS));
-        return mesaCreada;
+        return new MesaDTO(
+                mesaCreada.getId(),
+                mesaCreada.getNumero(),
+                mesaCreada.getEstado().getNombre(),
+                mesaCreada.getZona().getNombre(),
+                null);
     }
 
     @Transactional
-    public Mesa cambiarEstado(Long id, String estado) {
+    public MesaDTO cambiarEstado(Long id, String estado) {
         Mesa mesa = getMesa(id);
         MesaEstado nuevoEstado = getEstadoMesa(estado);
 
@@ -90,7 +95,36 @@ public class MesaService {
 
         Mesa mesaActualizada = save(mesa);
         eventPublisher.publishEvent(new SseTopicEvent(SseTopic.MESAS));
-        return mesaActualizada;
+        return new MesaDTO(
+                mesaActualizada.getId(),
+                mesaActualizada.getNumero(),
+                mesaActualizada.getEstado().getNombre(),
+                mesaActualizada.getZona().getNombre(),
+                null);
+    }
+
+    @Transactional
+    public MesaDTO solicitarCuenta(String sessionCode) {
+        Sesion sesion = sesionRepository.findByQrCodeUrl(sessionCode)
+                .orElseThrow(() -> new NoEncontradoException(
+                        "Sesión no encontrada para el QR code: " + sessionCode));
+
+        if (!"ACTIVA".equals(sesion.getEstado().getNombre())) {
+            throw new NoEncontradoException("La sesión no está activa");
+        }
+        Mesa mesa = sesion.getMesa();
+        MesaEstado estadoEsperandoCuenta = getEstadoMesa("ESPERANDO_CUENTA");
+        mesa.setEstado(estadoEsperandoCuenta);
+        Mesa mesaActualizada = save(mesa);
+
+        eventPublisher.publishEvent(new SseTopicEvent(SseTopic.MESAS));
+
+        return new MesaDTO(
+                mesaActualizada.getId(),
+                mesaActualizada.getNumero(),
+                mesaActualizada.getEstado().getNombre(),
+                mesaActualizada.getZona().getNombre(),
+                new SesionDTO(sesion.getId(), sesion.getQrCodeUrl()));
     }
 
     @Transactional

@@ -7,7 +7,6 @@ export function useBillData(sessionCode: string | null) {
   const [cuenta, setCuenta] = useState<Cuenta | null>(null);
   const [loading, setLoading] = useState(true);
   const sessionData = useSession();
-  const idMesa = sessionData.sessionData?.mesaId ?? null;
   const estadoMesa = sessionData.sessionData?.estadoMesa ?? null;
 
   useEffect(() => {
@@ -29,7 +28,6 @@ export function useBillData(sessionCode: string | null) {
   return {
     cuenta,
     loading,
-    idMesa,
     estadoMesa,
   };
 }

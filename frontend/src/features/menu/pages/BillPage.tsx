@@ -9,15 +9,15 @@ export default function BillPage() {
   const { sessionCode, actualizarEstadoMesa } = useSession();
   const [botonLoading, setBotonLoading] = useState(false);
 
-  const { cuenta, loading, idMesa, estadoMesa } = useBillData(sessionCode);
+  const { cuenta, loading, estadoMesa } = useBillData(sessionCode);
 
   const cuentaSolicitada = estadoMesa === "ESPERANDO_CUENTA";
 
   const solicitarCuenta = async () => {
-    if (!idMesa || !sessionCode) return;
+    if (!sessionCode) return;
     setBotonLoading(true);
     try {
-      await solicitarCuentaApi(idMesa);
+      await solicitarCuentaApi(sessionCode);
       setConfirmOpen(false);
       actualizarEstadoMesa("ESPERANDO_CUENTA");
     } catch (err) {

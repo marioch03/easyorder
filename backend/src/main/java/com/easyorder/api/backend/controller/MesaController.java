@@ -15,10 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.easyorder.api.backend.dto.ClienteSolicitaCuentaRequest;
 import com.easyorder.api.backend.dto.CrearMesaDTO;
 import com.easyorder.api.backend.dto.MesaDTO;
-import com.easyorder.api.backend.model.Mesa;
 import com.easyorder.api.backend.service.MesaService;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -38,14 +36,14 @@ public class MesaController {
     }
 
     @PostMapping("/admin/mesas/create")
-    public ResponseEntity<Mesa> crearMesa(@Valid @RequestBody CrearMesaDTO crearMesaDTO) {
-        Mesa mesaCreada = mesaService.crearMesa(crearMesaDTO);
+    public ResponseEntity<MesaDTO> crearMesa(@Valid @RequestBody CrearMesaDTO crearMesaDTO) {
+        MesaDTO mesaCreada = mesaService.crearMesa(crearMesaDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(mesaCreada);
     }
 
     @PutMapping("/admin/mesas/{id}/estado")
-    public ResponseEntity<Mesa> cambiarEstadoMesa(@PathVariable Long id, @RequestParam String estado) {
-        Mesa mesaActualizada = mesaService.cambiarEstado(id, estado);
+    public ResponseEntity<MesaDTO> cambiarEstadoMesa(@PathVariable Long id, @RequestParam String estado) {
+        MesaDTO mesaActualizada = mesaService.cambiarEstado(id, estado);
         return ResponseEntity.ok(mesaActualizada);
     }
 
@@ -60,9 +58,8 @@ public class MesaController {
     }
 
     @PutMapping("/cliente/mesas/cuenta")
-    public ResponseEntity<Mesa> clienteSolicitaCuenta(@RequestBody ClienteSolicitaCuentaRequest request,
-            @RequestHeader("X-Session-Code") String sessionCode) {
-        Mesa mesaActualizada = mesaService.cambiarEstado(request.mesaId(), request.estado());
+    public ResponseEntity<MesaDTO> clienteSolicitaCuenta(@RequestHeader("X-Session-Code") String sessionCode) {
+        MesaDTO mesaActualizada = mesaService.solicitarCuenta(sessionCode);
         return ResponseEntity.ok(mesaActualizada);
     }
 

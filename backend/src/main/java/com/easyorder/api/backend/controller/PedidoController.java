@@ -17,7 +17,6 @@ import com.easyorder.api.backend.dto.CrearPedidoDTO;
 import com.easyorder.api.backend.dto.CuentaDTO;
 import com.easyorder.api.backend.dto.PedidoDTO;
 import com.easyorder.api.backend.dto.PedidoItemDTO;
-import com.easyorder.api.backend.model.Pedido;
 import com.easyorder.api.backend.service.PedidoService;
 
 import jakarta.validation.Valid;
@@ -46,10 +45,10 @@ public class PedidoController {
     }
 
     @PostMapping("/admin/pedidos/create/mesa/{idMesa}")
-    public ResponseEntity<Pedido> crearPedidoAdmin(
+    public ResponseEntity<PedidoDTO> crearPedidoAdmin(
             @Valid @RequestBody CrearPedidoDTO dto,
             @PathVariable Long idMesa) {
-        Pedido nuevoPedido = pedidoService.crearPedidoAdmin(dto, idMesa);
+        PedidoDTO nuevoPedido = pedidoService.crearPedidoAdmin(dto, idMesa);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevoPedido);
     }
 
@@ -74,10 +73,10 @@ public class PedidoController {
     }
 
     @PostMapping("/cliente/pedidos/create")
-    public ResponseEntity<Pedido> crearPedidoCliente(
+    public ResponseEntity<PedidoDTO> crearPedidoCliente(
             @Valid @RequestBody CrearPedidoDTO dto,
             @RequestHeader("X-Session-Code") String sessionCode) {
-        Pedido nuevoPedido = pedidoService.crearPedidoCliente(dto, sessionCode);
+        PedidoDTO nuevoPedido = pedidoService.crearPedidoCliente(dto, sessionCode);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevoPedido);
     }
 }
