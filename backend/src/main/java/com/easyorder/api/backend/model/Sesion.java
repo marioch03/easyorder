@@ -26,6 +26,10 @@ public class Sesion {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "id_tenant", nullable = false)
+    private Tenant tenant;
+
+    @ManyToOne
     @JoinColumn(name = "id_mesa", nullable = false)
     private Mesa mesa;
 
@@ -60,12 +64,28 @@ public class Sesion {
         this.qrCodeUrl = qrCodeUrl;
     }
 
+    public Sesion(Tenant tenant, Mesa mesa, Usuario usuario, SesionEstado estado, String qrCodeUrl) {
+        this.tenant = tenant;
+        this.mesa = mesa;
+        this.usuario = usuario;
+        this.estado = estado;
+        this.qrCodeUrl = qrCodeUrl;
+    }
+
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Tenant getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
     }
 
     public Mesa getMesa() {
@@ -128,6 +148,7 @@ public class Sesion {
     public String toString() {
         return "Sesion{" +
                 "id=" + id +
+                ", tenant=" + (tenant != null ? tenant.getId() : null) +
                 ", mesa=" + (mesa != null ? mesa.getNumero() : null) +
                 ", usuario=" + (usuario != null ? usuario.getNombre() : null) +
                 ", estado=" + (estado != null ? estado.getNombre() : null) +

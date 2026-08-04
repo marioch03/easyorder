@@ -29,6 +29,10 @@ public class Pedido {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "id_tenant", nullable = false)
+    private Tenant tenant;
+
+    @ManyToOne
     @JoinColumn(name = "id_sesion", nullable = false)
     private Sesion sesion;
 
@@ -57,12 +61,27 @@ public class Pedido {
         this.createdAt = LocalDateTime.now();
     }
 
+    public Pedido(Tenant tenant, Sesion sesion, PedidoEstado estado) {
+        this.tenant = tenant;
+        this.sesion = sesion;
+        this.estado = estado;
+        this.createdAt = LocalDateTime.now();
+    }
+
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Tenant getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
     }
 
     public Sesion getSesion() {
@@ -109,6 +128,7 @@ public class Pedido {
     public String toString() {
         return "Pedido{" +
                 "id=" + id +
+                ", tenant=" + (tenant != null ? tenant.getId() : null) +
                 ", sesionId=" + (sesion != null ? sesion.getId() : null) +
                 ", estado=" + (estado != null ? estado.getNombre() : null) +
                 ", createdAt=" + createdAt +

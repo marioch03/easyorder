@@ -11,19 +11,25 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "Zona", uniqueConstraints = {
-        @UniqueConstraint(columnNames = "nombre")
+        @UniqueConstraint(name = "uk_zona_tenant_nombre", columnNames = {"id_tenant", "nombre"})
 })
 public class Zona {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_tenant", nullable = false)
+    private Tenant tenant;
 
     @Column(nullable = false, length = 50)
     private String nombre;
@@ -43,12 +49,26 @@ public class Zona {
         this.descripcion = descripcion;
     }
 
+    public Zona(Tenant tenant, String nombre, String descripcion) {
+        this.tenant = tenant;
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+    }
+
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Tenant getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
     }
 
     public String getNombre() {
@@ -79,6 +99,7 @@ public class Zona {
     public String toString() {
         return "Zona{" +
                 "id=" + id +
+                ", tenant=" + (tenant != null ? tenant.getId() : null) +
                 ", nombre='" + nombre + '\'' +
                 ", descripcion='" + descripcion + '\'' +
                 '}';

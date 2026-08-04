@@ -12,13 +12,17 @@ import jakarta.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "Mesa", uniqueConstraints = {
-        @UniqueConstraint(columnNames = "numero")
+        @UniqueConstraint(name = "uk_mesa_tenant_numero", columnNames = {"id_tenant", "numero"})
 })
 public class Mesa {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_tenant", nullable = false)
+    private Tenant tenant;
 
     @Column(nullable = false)
     private int numero;
@@ -40,12 +44,27 @@ public class Mesa {
         this.zona = zona;
     }
 
+    public Mesa(Tenant tenant, int numero, MesaEstado estado, Zona zona) {
+        this.tenant = tenant;
+        this.numero = numero;
+        this.estado = estado;
+        this.zona = zona;
+    }
+
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Tenant getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
     }
 
     public int getNumero() {
@@ -76,6 +95,7 @@ public class Mesa {
     public String toString() {
         return "Mesa{" +
                 "id=" + id +
+                ", tenant=" + (tenant != null ? tenant.getId() : null) +
                 ", numero=" + numero +
                 ", estado=" + (estado != null ? estado.getNombre() : null) +
                 ", zona=" + (zona != null ? zona.getNombre() : null) +

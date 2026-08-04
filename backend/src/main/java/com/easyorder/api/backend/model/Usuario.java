@@ -11,6 +11,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,12 +22,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "Usuario")
+@Table(name = "Usuario", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_usuario_tenant_username", columnNames = {"id_tenant", "nombre"})
+})
 public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_tenant", nullable = false)
+    private Tenant tenant;
 
     @Column(nullable = false, length = 100)
     private String nombre;
@@ -55,12 +62,28 @@ public class Usuario {
         this.activo = activo;
     }
 
+    public Usuario(Tenant tenant, String nombre, String clave, UsuarioRol rol, Boolean activo) {
+        this.tenant = tenant;
+        this.nombre = nombre;
+        this.clave = clave;
+        this.rol = rol;
+        this.activo = activo;
+    }
+
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Tenant getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
     }
 
     public String getNombre() {
@@ -115,6 +138,7 @@ public class Usuario {
     public String toString() {
         return "Usuario{" +
                 "id=" + id +
+                ", tenant=" + (tenant != null ? tenant.getId() : null) +
                 ", nombre='" + nombre + '\'' +
                 ", rol=" + (rol != null ? rol.getNombre() : null) +
                 ", activo=" + activo +

@@ -15,16 +15,23 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "ProductoTipo")
+@Table(name = "ProductoTipo", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_productotipo_tenant_nombre", columnNames = {"id_tenant", "nombre"})
+})
 public class ProductoTipo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 100)
+    @ManyToOne
+    @JoinColumn(name = "id_tenant", nullable = false)
+    private Tenant tenant;
+
+    @Column(nullable = false, length = 100)
     private String nombre;
 
     @Column(length = 200)
@@ -46,12 +53,26 @@ public class ProductoTipo {
         this.descripcion = descripcion;
     }
 
+    public ProductoTipo(Tenant tenant, String nombre, String descripcion) {
+        this.tenant = tenant;
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+    }
+
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Tenant getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
     }
 
     public String getNombre() {
