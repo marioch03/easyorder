@@ -15,7 +15,7 @@ export function useSseSubscription({ topic, onRefresh }: SseOptions) {
     const token = localStorage.getItem("accessToken");
     const abortController = new AbortController();
 
-    const url = `${import.meta.env.VITE_BASE_URL}/api/sse/stream/${topic}`;
+    const url = `${import.meta.env.VITE_BASE_URL}/sse/stream/${topic}`;
 
     console.log(`🔌 Conectando al canal de tiempo real: [${topic}]`);
 

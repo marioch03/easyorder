@@ -41,13 +41,15 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   }, [sessionCode]);
 
   const actualizarEstadoMesa = (nuevoEstado: string) => {
-    setSessionData((prev) => (prev ? { ...prev, estadoMesa: nuevoEstado } : null));
+    setSessionData((prev) =>
+      prev ? { ...prev, estadoMesa: nuevoEstado } : null,
+    );
   };
 
   const contextValue = {
     sessionCode,
     sessionData,
-    actualizarEstadoMesa
+    actualizarEstadoMesa,
   };
 
   return (

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Modal from "react-modal";
 import QRCode from "react-qr-code";
+import { useParams } from "react-router-dom";
 import billIcon from "../../assets/bill.png";
 import closeIcon from "../../assets/close-window.png";
 import qrIcon from "../../assets/qr.png";
@@ -27,7 +28,9 @@ export default function TablesPage() {
   const { mesas, zonas, loading, error } = useTablesData();
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [mesaSeleccionada, setMesaSeleccionada] = useState<MesaDTO | null>(null);
+  const [mesaSeleccionada, setMesaSeleccionada] = useState<MesaDTO | null>(
+    null,
+  );
   const estadoMesaSeleccionada = mesaSeleccionada?.estado;
 
   const [qrLoading, setQrLoading] = useState(false);
@@ -36,7 +39,11 @@ export default function TablesPage() {
 
   const [cuenta, setCuenta] = useState<Cuenta | null>(null);
   const [modalCuentaOpen, setModalCuentaOpen] = useState(false);
+
+  const { slug } = useParams<{ slug: string }>();
   const frontendUrl = import.meta.env.VITE_FRONTEND_URL;
+  const currentSlug = slug || localStorage.getItem("tenant_slug") || "";
+  const qrUrl = `${frontendUrl}/${currentSlug}/cliente/?sessionCode=`;
 
   const crearSesion = async (mesa: MesaDTO) => {
     setQrLoading(true);
@@ -198,10 +205,7 @@ export default function TablesPage() {
                 <div className="qr-actions">
                   <div className="qr-code-frame">
                     <QRCode
-                      value={
-                        `${frontendUrl}/cliente/?sessionCode=` +
-                        mesaSeleccionada?.sesionActiva?.qrCodeUrl
-                      }
+                      value={`${qrUrl}${mesaSeleccionada?.sesionActiva?.qrCodeUrl}`}
                     />
                   </div>
                   <div className="button-group">

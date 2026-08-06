@@ -20,11 +20,13 @@ export async function crearMesa(numero: number, idZona: number) {
 }
 
 export async function crearSesionMesa(mesaId: number) {
-  await privateApi.post(`/sesiones/open/${mesaId}`);
+  const response = await privateApi.post(`/sesiones/open/${mesaId}`);
+  return response.data;
 }
 
 export async function cerrarSesionMesa(sessionCode: string) {
-  await privateApi.post(`/sesiones/close/${sessionCode}`);
+  const response = await privateApi.post(`/sesiones/close/${sessionCode}`);
+  return response.data;
 }
 
 export async function getCuentaMesa(mesaId: number) {

@@ -7,7 +7,6 @@ import "./styles.css";
 export default function LoginPage() {
   const [nombre, setNombre] = useState("");
   const [clave, setClave] = useState("");
-  const [tenantSlug, setTenantSlug] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,6 +17,8 @@ export default function LoginPage() {
     setError(null);
     setIsLoading(true);
 
+    const tenantSlug = localStorage.getItem("tenant_slug") || "";
+
     try {
       await login({ nombre, clave, tenantSlug });
 
@@ -25,11 +26,11 @@ export default function LoginPage() {
       const roles = accessToken ? getRolesFromToken(accessToken) : [];
 
       if (roles.includes("ADMIN")) {
-        navigate("/select-interface", { replace: true });
+        navigate(`/${tenantSlug}/select-interface`, { replace: true });
       } else if (roles.includes("KDS")) {
-        navigate("/kds", { replace: true });
+        navigate(`/${tenantSlug}/kds`, { replace: true });
       } else if (roles.includes("PERSONAL")) {
-        navigate("/staff", { replace: true });
+        navigate(`/${tenantSlug}/staff`, { replace: true });
       } else {
         navigate("/forbidden", { replace: true });
       }
@@ -109,29 +110,6 @@ export default function LoginPage() {
                   onChange={(e) => setClave(e.target.value)}
                   className="login-input"
                   autoComplete="current-password"
-                  required
-                />
-              </div>
-
-              <div className="input-group">
-                <svg
-                  className="input-icon"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                  <polyline points="9 22 9 12 15 12 15 22" />
-                </svg>
-                <input
-                  type="text"
-                  placeholder="Código del local (ej. bar-pepe)"
-                  value={tenantSlug}
-                  onChange={(e) => setTenantSlug(e.target.value)}
-                  className="login-input"
                   required
                 />
               </div>

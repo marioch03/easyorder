@@ -85,7 +85,8 @@ public class SecurityConfig {
         configuration.setAllowedOriginPatterns(origins); // Usa patterns para evitar fallos de coincidencia
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(
-                List.of("Authorization", "Content-Type", "Accept", "X-Requested-With", "X-Session-Code"));
+                List.of("Authorization", "Content-Type", "Accept", "X-Requested-With", "X-Session-Code",
+                        "X-Tenant-Slug"));
         configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
 

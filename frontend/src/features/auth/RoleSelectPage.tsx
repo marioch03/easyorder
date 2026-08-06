@@ -1,11 +1,11 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import "./styles.css";
 
 const ADMIN_OPTION = {
   key: "admin",
   title: "Administración",
   description: "Gestión de mesas, catálogo y usuarios.",
-  to: "/admin",
+  to: "admin",
   icon: (
     <svg
       viewBox="0 0 24 24"
@@ -26,7 +26,7 @@ const SECONDARY_OPTIONS = [
     key: "staff",
     title: "Personal",
     description: "Vista operativa para sala y gestión de pedidos.",
-    to: "/staff",
+    to: "staff",
     icon: (
       <svg
         viewBox="0 0 24 24"
@@ -47,7 +47,7 @@ const SECONDARY_OPTIONS = [
     key: "kds",
     title: "Cocina (KDS)",
     description: "Pantalla de comandas en tiempo real para la cocina.",
-    to: "/kds",
+    to: "kds",
     icon: (
       <svg
         viewBox="0 0 24 24"
@@ -69,6 +69,16 @@ const SECONDARY_OPTIONS = [
 
 export default function RoleSelectPage() {
   const navigate = useNavigate();
+  const { slug } = useParams<{ slug: string }>();
+
+  const handleNavigate = (targetPath: string) => {
+    const currentSlug = slug || localStorage.getItem("tenant_slug");
+    if (currentSlug) {
+      navigate(`/${currentSlug}/${targetPath}`);
+    } else {
+      navigate("/error", { replace: true });
+    }
+  };
 
   return (
     <div className="login-page">
@@ -83,7 +93,7 @@ export default function RoleSelectPage() {
           <button
             type="button"
             className="role-select-card admin-card"
-            onClick={() => navigate(ADMIN_OPTION.to)}
+            onClick={() => handleNavigate(ADMIN_OPTION.to)}
           >
             <span className="role-select-icon">{ADMIN_OPTION.icon}</span>
             <span className="role-select-title">{ADMIN_OPTION.title}</span>
@@ -98,7 +108,7 @@ export default function RoleSelectPage() {
                 key={opt.key}
                 type="button"
                 className="role-select-card"
-                onClick={() => navigate(opt.to)}
+                onClick={() => handleNavigate(opt.to)}
               >
                 <span className="role-select-icon">{opt.icon}</span>
                 <span className="role-select-title">{opt.title}</span>

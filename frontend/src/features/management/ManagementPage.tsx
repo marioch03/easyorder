@@ -1,4 +1,4 @@
-import { Outlet, useLocation, useNavigate } from "react-router-dom"; // o "react-router"
+import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 import Banner from "../../common/Banner";
 import { logout } from "../auth/authService";
 import Sidebar from "./Sidebar";
@@ -6,6 +6,9 @@ import Sidebar from "./Sidebar";
 function ManagementPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { slug } = useParams<{ slug: string }>();
+
+  const currentSlug = slug || localStorage.getItem("tenant_slug") || "";
 
   const SECCIONES_VALIDAS = ["mesas", "comandas", "pedidos"];
 
@@ -15,7 +18,11 @@ function ManagementPage() {
     : "mesas";
 
   const handleSelectSection = (section: string) => {
-    navigate(`/staff/${section}`);
+    if (currentSlug) {
+      navigate(`/${currentSlug}/staff/${section}`);
+    } else {
+      navigate("/error", { replace: true });
+    }
   };
 
   const handleLogout = async () => {
@@ -24,7 +31,12 @@ function ManagementPage() {
     } catch (error) {
       console.error(error);
     }
-    navigate("/auth/login");
+
+    if (currentSlug) {
+      navigate(`/${currentSlug}/auth/login`, { replace: true });
+    } else {
+      navigate("/error", { replace: true });
+    }
   };
 
   const TITULOS: Record<string, string> = {

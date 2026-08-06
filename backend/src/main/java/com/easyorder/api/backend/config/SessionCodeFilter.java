@@ -63,6 +63,6 @@ public class SessionCodeFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return !request.getServletPath().startsWith("/api/cliente/");
+        return !request.getServletPath().startsWith("/api/v1/cliente/");
     }
 }
