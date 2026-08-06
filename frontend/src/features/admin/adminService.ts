@@ -7,52 +7,38 @@ import type {
   UsuarioRolDTO,
 } from "./admin";
 
-const BASE_URL = import.meta.env.VITE_BASE_URL;
-
 export async function getZonas(): Promise<ZonaDTO[]> {
-  const response = await privateApi.get<ZonaDTO[]>(
-    `${BASE_URL}/api/admin/zonas/list`,
-  );
+  const response = await privateApi.get<ZonaDTO[]>("/zonas");
   return response.data;
 }
 
 export async function getMesas(): Promise<MesaDTO[]> {
-  const response = await privateApi.get<MesaDTO[]>(
-    `${BASE_URL}/api/admin/mesas/list`,
-  );
+  const response = await privateApi.get<MesaDTO[]>("/mesas");
   return response.data;
 }
 
 export async function getProductos(): Promise<ProductoDTO[]> {
-  const response = await privateApi.get<ProductoDTO[]>(
-    `${BASE_URL}/api/admin/productos/all`,
-  );
+  const response = await privateApi.get<ProductoDTO[]>("/productos");
   return response.data;
 }
 
 export async function getTiposProducto(): Promise<ProductoTipoDTO[]> {
-  const response = await privateApi.get<ProductoTipoDTO[]>(
-    `${BASE_URL}/api/admin/productos/tipos`,
-  );
+  const response = await privateApi.get<ProductoTipoDTO[]>("/productos/tipos");
   return response.data;
 }
 
 export async function getUsuarioRoles(): Promise<UsuarioRolDTO[]> {
-  const response = await privateApi.get<UsuarioRolDTO[]>(
-    `${BASE_URL}/api/admin/usuarios/roles`,
-  );
+  const response = await privateApi.get<UsuarioRolDTO[]>("/usuarios/roles");
   return response.data;
 }
 
 export async function getUsuarios(): Promise<UsuarioDTO[]> {
-  const response = await privateApi.get<UsuarioDTO[]>(
-    `${BASE_URL}/api/admin/usuarios/list`,
-  );
+  const response = await privateApi.get<UsuarioDTO[]>(`/usuarios`);
   return response.data;
 }
 
 export async function crearMesa(numero: number, idZona: number) {
-  const response = await privateApi.post("/mesas/create", {
+  const response = await privateApi.post("/mesas", {
     numero,
     idZona,
   });
@@ -83,10 +69,7 @@ export async function deshabilitarUsuario(id: number) {
 }
 
 export async function editarProducto(producto: EditProductPayload) {
-  const response = await privateApi.put(
-    `/productos/edit/${producto.id}`,
-    producto,
-  );
+  const response = await privateApi.put(`/productos/${producto.id}`, producto);
 
   return response.data;
 }

@@ -15,24 +15,24 @@ import com.easyorder.api.backend.service.PedidoItemService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/admin/comandas")
 @RequiredArgsConstructor
 public class PedidoItemController {
 
   private final PedidoItemService pedidoItemService;
 
-  @GetMapping("/admin/comandas/kds/{nombreZonaTrabajo}")
+  @GetMapping("/kds/{nombreZonaTrabajo}")
   public List<PedidoItemKds> getPedidoItemKds(@PathVariable String nombreZonaTrabajo) {
     return pedidoItemService.obtenerComandasParaKds(nombreZonaTrabajo);
   }
 
-  @PatchMapping("/admin/comandas/listo/{idPedidoItem}")
+  @PatchMapping("/listo/{idPedidoItem}")
   public ResponseEntity<Void> marcarListoItem(@PathVariable Long idPedidoItem) {
     pedidoItemService.marcarPedidoItemListo(idPedidoItem);
     return ResponseEntity.noContent().build();
   }
 
-  @PatchMapping("/admin/comandas/servido/{idPedidoItem}")
+  @PatchMapping("/servido/{idPedidoItem}")
   public ResponseEntity<Void> marcaServidoItem(@PathVariable Long idPedidoItem) {
     pedidoItemService.marcarPedidoItemServido(idPedidoItem);
     return ResponseEntity.noContent().build();

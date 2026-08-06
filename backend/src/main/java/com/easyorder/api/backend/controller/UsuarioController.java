@@ -8,7 +8,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.easyorder.api.backend.dto.UsuarioDTO;
@@ -20,11 +19,10 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
 public class UsuarioController {
     private final UsuarioService usuarioService;
 
-    @GetMapping("/admin/usuarios/list")
+    @GetMapping("/admin/usuarios")
     public List<UsuarioDTO> getUsuarios() {
         return usuarioService.getAllUsers();
     }

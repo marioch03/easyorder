@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.easyorder.api.backend.dto.SesionClienteDTO;
@@ -17,13 +16,12 @@ import com.easyorder.api.backend.service.SesionService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api")
 @RequiredArgsConstructor
 public class SesionController {
 
     private final SesionService sesionService;
 
-    @PostMapping("/admin/sesiones/create/{idMesa}")
+    @PostMapping("/admin/sesiones/open/{idMesa}")
     public ResponseEntity<Sesion> crearSesion(@PathVariable Long idMesa) {
         Sesion nuevaSesion = sesionService.crearSesion(idMesa);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevaSesion);

@@ -12,13 +12,13 @@ import com.easyorder.api.backend.service.ZonaService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/admin/zonas")
+@RequestMapping("/admin/zonas")
 @RequiredArgsConstructor
 public class ZonaController {
 
     private final ZonaService zonaService;
 
-    @GetMapping("/list")
+    @GetMapping
     public List<ZonaDTO> getZonas() {
         return zonaService.getZonas();
     }

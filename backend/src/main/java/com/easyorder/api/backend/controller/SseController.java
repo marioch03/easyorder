@@ -13,7 +13,7 @@ import com.easyorder.api.backend.tenant.TenantContext;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/sse")
+@RequestMapping("/sse")
 @RequiredArgsConstructor
 public class SseController {
 

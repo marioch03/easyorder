@@ -1,9 +1,24 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
-const BASE_URL_CLIENTE = `${BASE_URL}/api/cliente`;
-const BASE_URL_ADMIN = `${BASE_URL}/api/admin`;
+const BASE_URL_CLIENTE = `${BASE_URL}/cliente`;
+const BASE_URL_ADMIN = `${BASE_URL}/admin`;
 const BASE_URL_AUTH = `${BASE_URL}/auth`;
+const BASE_URL_PUBLIC = `${BASE_URL}/public`;
+
+const getTenantSlug = (): string | null => {
+  const storedSlug = localStorage.getItem("tenant_slug");
+  if (storedSlug) return storedSlug;
+
+  const possibleSlug = window.location.pathname.split("/").filter(Boolean)[0];
+  if (
+    possibleSlug &&
+    !["auth", "invalid", "login", "forbidden", "error"].includes(possibleSlug)
+  ) {
+    return possibleSlug;
+  }
+  return null;
+};
 
 let isRefreshing = false;
 let failedQueue: Array<{
@@ -52,13 +67,20 @@ export const initApi = axios.create({
 });
 
 export const publicApi = axios.create({
+  baseURL: BASE_URL_PUBLIC,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+export const clientApi = axios.create({
   baseURL: BASE_URL_CLIENTE,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-publicApi.interceptors.request.use(
+clientApi.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const sessionCode = localStorage.getItem("sessionCode");
 
@@ -70,12 +92,14 @@ publicApi.interceptors.request.use(
   (error: AxiosError) => Promise.reject(error),
 );
 
-publicApi.interceptors.response.use(
+clientApi.interceptors.response.use(
   (response) => response,
   (error) => {
     if (
       error.response &&
-      (error.response.status === 401 || error.response.status === 403 || error.response.status === 404)
+      (error.response.status === 401 ||
+        error.response.status === 403 ||
+        error.response.status === 404)
     ) {
       localStorage.removeItem("sessionCode");
       window.location.href = "/invalid";
@@ -155,3 +179,23 @@ privateApi.interceptors.response.use(
     return Promise.reject(error);
   },
 );
+
+const apisToInjectTenant = [
+  publicAuthApi,
+  privateAuthApi,
+  initApi,
+  clientApi,
+  privateApi,
+];
+
+apisToInjectTenant.forEach((apiInstance) => {
+  apiInstance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+    const slug = getTenantSlug();
+
+    if (slug) {
+      config.headers["X-Tenant-Slug"] = slug;
+    }
+
+    return config;
+  });
+});

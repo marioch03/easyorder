@@ -4,6 +4,7 @@ import ProtectedRoute from "./features/auth/ProtectedRoute";
 import { CartProvider } from "./features/cart/CartProvider";
 import ComandasPage from "./features/comandas/ComandasPage";
 import { SessionProvider } from "./features/session/SessionProvider";
+import TenantLayout from "./features/tenant/TenantLayout";
 
 const LoginPage = lazy(() => import("./features/auth/LoginPage"));
 const CustomerPage = lazy(() => import("./features/menu/pages/CustomerPage"));
@@ -34,49 +35,52 @@ function App() {
     <BrowserRouter>
       <Suspense fallback={<PageLoader />}>
         <Routes>
-          {/* RUTAS PÚBLICAS */}
-          <Route path="/auth/login" element={<LoginPage />} />
+          {/* RUTAS GLOBALES (SIN SLUG) */}
           <Route path="/invalid" element={<ErrorPageCliente />} />
           <Route path="/error" element={<ErrorPageManagement />} />
+          {/* 🟢 CONTENEDOR PADRE QUE CAPTURA EL SLUG */}
+          <Route path="/:slug" element={<TenantLayout />}>
+            <Route path="auth/login" element={<LoginPage />} />
 
-          {/* ENTORNO CLIENTE */}
-          <Route
-            path="/cliente"
-            element={
-              <SessionProvider>
-                <CartProvider>
-                  <CustomerPage />
-                </CartProvider>
-              </SessionProvider>
-            }
-          />
+            {/* ENTORNO CLIENTE */}
+            <Route
+              path="cliente"
+              element={
+                <SessionProvider>
+                  <CartProvider>
+                    <CustomerPage />
+                  </CartProvider>
+                </SessionProvider>
+              }
+            />
 
-          {/* ENTORNO ADMINISTRACIÓN */}
-          <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
-            <Route path="/admin" element={<AdminPage />} />
-            <Route path="/select-interface" element={<RoleSelectPage />} />
-          </Route>
-
-          {/* ENTORNO STAFF (MESAS Y PEDIDOS) */}
-          <Route
-            element={<ProtectedRoute allowedRoles={["ADMIN", "PERSONAL"]} />}
-          >
-            <Route path="/staff" element={<ManagementPage />}>
-              <Route index element={<Navigate to="mesas" replace />} />
-              <Route path="mesas" element={<TablesPage />} />
-              <Route path="pedidos" element={<OrderPage />} />
-              <Route path="comandas" element={<ComandasPage />} />
+            {/* ENTORNO ADMINISTRACIÓN */}
+            <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
+              <Route path="admin" element={<AdminPage />} />
+              <Route path="select-interface" element={<RoleSelectPage />} />
             </Route>
-          </Route>
 
-          {/* ENTORNO KDS */}
-          <Route element={<ProtectedRoute allowedRoles={["ADMIN", "KDS"]} />}>
-            <Route path="/kds" element={<KdsSelectPage />} />
-            <Route path="/kds/:zonaTrabajoSlug" element={<KdsPage />} />
-          </Route>
+            {/* ENTORNO STAFF (MESAS Y PEDIDOS) */}
+            <Route
+              element={<ProtectedRoute allowedRoles={["ADMIN", "PERSONAL"]} />}
+            >
+              <Route path="staff" element={<ManagementPage />}>
+                <Route index element={<Navigate to="mesas" replace />} />
+                <Route path="mesas" element={<TablesPage />} />
+                <Route path="pedidos" element={<OrderPage />} />
+                <Route path="comandas" element={<ComandasPage />} />
+              </Route>
+            </Route>
 
+            {/* ENTORNO KDS */}
+            <Route element={<ProtectedRoute allowedRoles={["ADMIN", "KDS"]} />}>
+              <Route path="kds" element={<KdsSelectPage />} />
+              <Route path="kds/:zonaTrabajoSlug" element={<KdsPage />} />
+            </Route>
+          </Route>{" "}
+          {/* 👈 AQUÍ CIERRA EL TENANT LAYOUT */}
           {/* REDIRECCIONES DE FALLBACK */}
-          <Route path="/" element={<Navigate to="/auth/login" replace />} />
+          <Route path="/" element={<Navigate to="/error" replace />} />
           <Route path="*" element={<Navigate to="/error" replace />} />
         </Routes>
       </Suspense>

@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,24 +23,23 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api")
 @RequiredArgsConstructor
 public class MesaController {
 
     private final MesaService mesaService;
 
-    @GetMapping("/admin/mesas/list")
+    @GetMapping("/admin/mesas")
     public List<MesaDTO> listarMesas() {
         return mesaService.listarMesas();
     }
 
-    @PostMapping("/admin/mesas/create")
+    @PostMapping("/admin/mesas")
     public ResponseEntity<MesaDTO> crearMesa(@Valid @RequestBody CrearMesaDTO crearMesaDTO) {
         MesaDTO mesaCreada = mesaService.crearMesa(crearMesaDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(mesaCreada);
     }
 
-    @PutMapping("/admin/mesas/{id}/estado")
+    @PutMapping("/admin/mesas/{id}")
     public ResponseEntity<MesaDTO> cambiarEstadoMesa(@PathVariable Long id, @RequestParam String estado) {
         MesaDTO mesaActualizada = mesaService.cambiarEstado(id, estado);
         return ResponseEntity.ok(mesaActualizada);

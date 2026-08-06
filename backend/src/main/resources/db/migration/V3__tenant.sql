@@ -11,7 +11,9 @@ CREATE TABLE Tenant (
 
 -- Migración segura de tu bar actual, que hoy no tiene ningún concepto de
 -- tenant: se crea como Tenant #1 y todo lo existente se le asigna.
-INSERT INTO Tenant (id, nombre, slug) VALUES (1, 'Mi bar', 'default');
+INSERT INTO Tenant (id, nombre, slug) VALUES (1, 'Casa Cele', 'casacele');
+INSERT INTO Tenant (id, nombre, slug) VALUES (2, 'Futbolista', 'futbolista');
+
 
 -- Patrón para cada tabla afectada (repite para Zona, Mesa, Producto,
 -- ProductoTipo, Usuario, Sesion, Pedido, Ingrediente si aplica):

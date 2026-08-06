@@ -46,11 +46,12 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()
-                        .requestMatchers("/auth/login", "/auth/refresh").permitAll()
-                        .requestMatchers("/auth/register").hasRole("ADMIN")
-                        .requestMatchers("/api/cliente/**").hasRole("CUSTOMER")
-                        .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "PERSONAL", "KDS")
-                        .requestMatchers("/api/sse/**").authenticated()
+                        .requestMatchers("/api/v1/auth/login", "/api/v1/auth/refresh").permitAll()
+                        .requestMatchers("/api/v1/auth/register").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/cliente/**").hasRole("CUSTOMER")
+                        .requestMatchers("/api/v1/admin/**").hasAnyRole("ADMIN", "PERSONAL", "KDS")
+                        .requestMatchers("/api/v1/sse/**").authenticated()
+                        .requestMatchers("/api/v1/public/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
@@ -59,7 +60,7 @@ public class SecurityConfig {
                 .addFilterBefore(tenantFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(jwtAuthFilter, TenantFilter.class)
                 .addFilterBefore(sessionCodeFilter, TenantFilter.class)
-                .logout(logout -> logout.logoutUrl("/auth/logout")
+                .logout(logout -> logout.logoutUrl("/api/v1/auth/logout")
                         .addLogoutHandler((request, response, authentication) -> {
                             final var authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
                             logout(authHeader);

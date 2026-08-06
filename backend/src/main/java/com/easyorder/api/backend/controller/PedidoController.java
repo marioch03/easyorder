@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.easyorder.api.backend.dto.CrearPedidoDTO;
@@ -23,13 +22,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api")
 @RequiredArgsConstructor
 public class PedidoController {
 
     private final PedidoService pedidoService;
 
-    @GetMapping("/admin/pedidos/list")
+    @GetMapping("/admin/pedidos")
     public ResponseEntity<List<PedidoDTO>> listarPedidos() {
         return ResponseEntity.ok(pedidoService.listarPedidos());
     }
@@ -44,7 +42,7 @@ public class PedidoController {
         return ResponseEntity.ok(pedidoService.obtenerCuenta(idMesa));
     }
 
-    @PostMapping("/admin/pedidos/create/mesa/{idMesa}")
+    @PostMapping("/admin/pedidos/mesa/{idMesa}")
     public ResponseEntity<PedidoDTO> crearPedidoAdmin(
             @Valid @RequestBody CrearPedidoDTO dto,
             @PathVariable Long idMesa) {
@@ -72,7 +70,7 @@ public class PedidoController {
         return ResponseEntity.ok(pedidoService.obtenerCuentaCliente(sessionCode));
     }
 
-    @PostMapping("/cliente/pedidos/create")
+    @PostMapping("/cliente/pedidos")
     public ResponseEntity<PedidoDTO> crearPedidoCliente(
             @Valid @RequestBody CrearPedidoDTO dto,
             @RequestHeader("X-Session-Code") String sessionCode) {

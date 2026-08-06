@@ -1,9 +1,9 @@
-import { publicApi } from "../../api/apiClient";
+import { clientApi } from "../../api/apiClient";
 import type { Pedido } from "../types/bill";
 
 export async function getMesa() {
   try {
-    const response = await publicApi.get("/sesiones/mesa");
+    const response = await clientApi.get("/sesiones/mesa");
     return response.data;
   } catch (error) {
     throw new Error("Error obteniendo mesa");
@@ -12,7 +12,7 @@ export async function getMesa() {
 
 export async function getPedidos(): Promise<Pedido[]> {
   try {
-    const response = await publicApi.get<Pedido[]>("/pedidos/");
+    const response = await clientApi.get<Pedido[]>("/pedidos");
     return response.data;
   } catch (error) {
     throw new Error("Error obteniendo pedidos");
@@ -21,7 +21,7 @@ export async function getPedidos(): Promise<Pedido[]> {
 
 export async function solicitarCuentaApi(sessionCode: string) {
   try {
-    const response = await publicApi.put("/mesas/cuenta", {
+    const response = await clientApi.put("/mesas/cuenta", {
       sessionCode,
     });
 
@@ -33,7 +33,7 @@ export async function solicitarCuentaApi(sessionCode: string) {
 
 export async function getCuenta() {
   try {
-    const response = await publicApi.get("/pedidos/cuenta");
+    const response = await clientApi.get("/pedidos/cuenta");
     return response.data;
   } catch (error) {
     throw new Error("Error obteniendo cuenta");

@@ -4,7 +4,7 @@ import type { PedidoDTO } from "./orders";
 const PATH = "/pedidos";
 
 export async function getPedidosAdmin(): Promise<PedidoDTO[]> {
-  const response = await privateApi.get<PedidoDTO[]>(`${PATH}/list`);
+  const response = await privateApi.get<PedidoDTO[]>(`${PATH}`);
   return response.data;
 }
 

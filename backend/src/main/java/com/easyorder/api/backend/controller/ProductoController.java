@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.easyorder.api.backend.dto.EditarProductoDTO;
@@ -23,13 +22,12 @@ import com.easyorder.api.backend.service.ProductoService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api")
 @RequiredArgsConstructor
 public class ProductoController {
 
     private final ProductoService productoService;
 
-    @GetMapping("/cliente/productos/all")
+    @GetMapping("/cliente/productos")
     public List<ProductoDTO> getProductos(
             @RequestHeader("X-Session-Code") String sessionCode) {
 
@@ -42,13 +40,13 @@ public class ProductoController {
 
     }
 
-    @PostMapping("/admin/productos/create")
+    @PostMapping("/admin/productos")
     public ResponseEntity<Producto> crearProducto(@RequestBody Producto producto) {
         Producto nuevo = productoService.save(producto);
         return ResponseEntity.ok(nuevo);
     }
 
-    @PutMapping("/admin/productos/edit/{id}")
+    @PutMapping("/admin/productos/{id}")
     public ResponseEntity<Producto> editarProducto(
             @PathVariable Long id,
             @RequestBody EditarProductoDTO dto) {
@@ -77,13 +75,13 @@ public class ProductoController {
         return productoService.getTipos();
     }
 
-    @GetMapping("/admin/productos/all")
+    @GetMapping("/admin/productos")
     public List<ProductoDTO> getProductos() {
 
         return productoService.findAll();
     }
 
-    @GetMapping("/admin/productos/all/simplified")
+    @GetMapping("/admin/productos/simplified")
     public List<ProductoComandaDTO> getProductosSimplificados() {
         return productoService.getProductosSimplificados();
     }
