@@ -18,6 +18,7 @@ public class SseNotificationService {
   private final Map<String, List<SseEmitter>> emitters = new ConcurrentHashMap<>();
 
   public SseEmitter suscribir(String topic) {
+    System.out.println(">>>>>>>>>><Suscriptor conectado al topic: " + topic);
     SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
     emitters.computeIfAbsent(topic, k -> new CopyOnWriteArrayList<>()).add(emitter);
 
@@ -28,7 +29,7 @@ public class SseNotificationService {
     try {
       emitter.send(SseEmitter.event().data("connected"));
     } catch (Exception e) {
-      log.error("💥 ERROR al enviar refresh al KDS. Cortando conexión...", e); // 👈 Añade esto
+      log.error("💥 ERROR al enviar refresh. Cortando conexión...", e);
       removeEmitter(topic, emitter);
     }
 
@@ -36,6 +37,7 @@ public class SseNotificationService {
   }
 
   public void notificar(String topic) {
+    System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>NOTIFICANDO EN EL TOPIC: " + topic);
     List<SseEmitter> canalEmitters = emitters.get(topic);
     log.info("notificar('{}') -> {} suscriptores", topic, canalEmitters == null ? 0 : canalEmitters.size());
 
@@ -45,7 +47,7 @@ public class SseNotificationService {
           try {
             emitter.send(SseEmitter.event().data("refresh"));
           } catch (Exception e) {
-            log.error("💥 ERROR al enviar refresh al KDS. Cortando conexión...", e); // 👈 Añade esto
+            log.error("💥 ERROR al enviar refresh. Cortando conexión...", e);
             removeEmitter(topic, emitter);
           }
         }

@@ -85,8 +85,8 @@ public class PedidoService {
 
 		pedidoItemRepository.saveAll(items);
 
-		eventPublisher.publishEvent(new SseTopicEvent(SseTopic.PEDIDOS));
-		eventPublisher.publishEvent(new SseTopicEvent(SseTopic.KDS));
+		eventPublisher.publishEvent(SseTopicEvent.of(SseTopic.PEDIDOS));
+		eventPublisher.publishEvent(SseTopicEvent.of(SseTopic.KDS));
 
 		return new PedidoDTO(
 				pedidoGuardado.getId(),
@@ -96,6 +96,7 @@ public class PedidoService {
 				pedidoGuardado.getEstado().getNombre());
 	}
 
+	@Transactional
 	public PedidoDTO crearPedidoCliente(CrearPedidoDTO dto, String sessionCode) {
 		Sesion sesion = sesionRepository.findByQrCodeUrl(sessionCode)
 				.orElseThrow(() -> new NoEncontradoException("Sesión no encontrada para el QR code: " + sessionCode));
@@ -149,7 +150,7 @@ public class PedidoService {
 		pedido.setEstado(estadoServido);
 
 		pedidoRepository.save(pedido);
-		eventPublisher.publishEvent(new SseTopicEvent(SseTopic.PEDIDOS));
+		eventPublisher.publishEvent(SseTopicEvent.of(SseTopic.PEDIDOS));
 	}
 
 	@Transactional
@@ -178,7 +179,7 @@ public class PedidoService {
 
 		pedido.setEstado(nuevoEstado);
 		pedidoRepository.save(pedido);
-		eventPublisher.publishEvent(new SseTopicEvent(SseTopic.PEDIDOS));
+		eventPublisher.publishEvent(SseTopicEvent.of(SseTopic.PEDIDOS));
 	}
 
 	public CuentaDTO obtenerCuenta(Long idMesa) {

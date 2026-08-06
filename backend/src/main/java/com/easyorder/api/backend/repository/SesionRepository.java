@@ -4,7 +4,10 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import com.easyorder.api.backend.dto.SesionAuthProjection;
 import com.easyorder.api.backend.model.Mesa;
 import com.easyorder.api.backend.model.Sesion;
 import com.easyorder.api.backend.model.SesionEstado;
@@ -19,4 +22,22 @@ public interface SesionRepository extends JpaRepository<Sesion, Long> {
     boolean existsByQrCodeUrlAndEstadoNombre(String qrCodeUrl, String estadoNombre);
 
     Optional<Sesion> findByQrCodeUrl(String qrCodeUrl);
+
+    @Query(value = "SELECT COUNT(*) > 0 FROM Sesion s " +
+            "JOIN SesionEstado e ON s.id_estado = e.id " +
+            "WHERE s.qr_code_url = :qrCodeUrl AND e.nombre = :estadoNombre", nativeQuery = true)
+    int existsByQrCodeUrlAndEstadoNombreUnfiltered(
+            @Param("qrCodeUrl") String qrCodeUrl,
+            @Param("estadoNombre") String estadoNombre);
+
+    @Query(value = "SELECT * FROM Sesion s WHERE s.qr_code_url = :qrCodeUrl", nativeQuery = true)
+    Optional<Sesion> findByQrCodeUrlUnfiltered(@Param("qrCodeUrl") String qrCodeUrl);
+
+    @Query(value = """
+            SELECT s.id AS id, s.id_tenant AS tenantId, e.nombre AS estadoNombre
+            FROM Sesion s
+            JOIN SesionEstado e ON s.id_estado = e.id
+            WHERE s.qr_code_url = :qrCodeUrl
+            """, nativeQuery = true)
+    Optional<SesionAuthProjection> findAuthProjectionByQrCodeUrl(@Param("qrCodeUrl") String qrCodeUrl);
 }

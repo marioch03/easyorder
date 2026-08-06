@@ -3,6 +3,7 @@ import { privateAuthApi, publicAuthApi } from "../api/apiClient";
 export interface LoginRequest {
   nombre: string;
   clave: string;
+  tenantSlug: string;
 }
 
 export interface LoginResponse {

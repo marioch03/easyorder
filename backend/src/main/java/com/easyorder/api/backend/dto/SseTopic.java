@@ -14,4 +14,8 @@ public enum SseTopic {
   public String getValue() {
     return value;
   }
+
+  public static String canal(SseTopic topic, Long tenantId) {
+    return tenantId + "-" + topic.getValue();
+  }
 }

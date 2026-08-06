@@ -77,7 +77,7 @@ public class MesaService {
         mesa.setZona(zona);
 
         Mesa mesaCreada = save(mesa);
-        eventPublisher.publishEvent(new SseTopicEvent(SseTopic.MESAS));
+        eventPublisher.publishEvent(SseTopicEvent.of(SseTopic.MESAS));
         return new MesaDTO(
                 mesaCreada.getId(),
                 mesaCreada.getNumero(),
@@ -94,7 +94,7 @@ public class MesaService {
         mesa.setEstado(nuevoEstado);
 
         Mesa mesaActualizada = save(mesa);
-        eventPublisher.publishEvent(new SseTopicEvent(SseTopic.MESAS));
+        eventPublisher.publishEvent(SseTopicEvent.of(SseTopic.MESAS));
         return new MesaDTO(
                 mesaActualizada.getId(),
                 mesaActualizada.getNumero(),
@@ -117,7 +117,7 @@ public class MesaService {
         mesa.setEstado(estadoEsperandoCuenta);
         Mesa mesaActualizada = save(mesa);
 
-        eventPublisher.publishEvent(new SseTopicEvent(SseTopic.MESAS));
+        eventPublisher.publishEvent(SseTopicEvent.of(SseTopic.MESAS));
 
         return new MesaDTO(
                 mesaActualizada.getId(),
@@ -134,7 +134,7 @@ public class MesaService {
         }
 
         mesaRepository.deleteByNumero(numero);
-        eventPublisher.publishEvent(new SseTopicEvent(SseTopic.MESAS));
+        eventPublisher.publishEvent(SseTopicEvent.of(SseTopic.MESAS));
     }
 
     public Mesa save(Mesa mesa) {

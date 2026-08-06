@@ -22,6 +22,7 @@ export function useOrdersData() {
   }, []);
 
   useEffect(() => {
+    console.log("🌀 Ejecutando useEffect de SSE para el topic: pedidos");
     setLoading(true);
     cargar();
   }, [cargar]);

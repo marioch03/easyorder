@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.easyorder.api.backend.model.Usuario;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -33,6 +34,7 @@ public class JwtService {
         return Jwts.builder()
                 .setSubject(usuario.getNombre())
                 .claim("roles", usuario.getRol().getNombre())
+                .claim("tenantId", usuario.getTenantId())
                 .setIssuedAt(new java.util.Date(System.currentTimeMillis()))
                 .setExpiration(new java.util.Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey())
@@ -51,6 +53,15 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
+    }
+
+    public Long extractTenantId(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.get("tenantId", Long.class);
     }
 
     public boolean isTokenValid(String token, Usuario usuario) {

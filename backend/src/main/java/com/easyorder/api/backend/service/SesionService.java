@@ -10,6 +10,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.easyorder.api.backend.dto.SesionAuthProjection;
 import com.easyorder.api.backend.dto.SesionClienteDTO;
 import com.easyorder.api.backend.dto.SesionDTO;
 import com.easyorder.api.backend.dto.SseTopic;
@@ -59,7 +60,7 @@ public class SesionService {
 
     @Transactional(readOnly = true)
     public boolean validarSesion(String sessionCode) {
-        return sesionRepository.existsByQrCodeUrlAndEstadoNombre(sessionCode, "ACTIVA");
+        return sesionRepository.existsByQrCodeUrlAndEstadoNombreUnfiltered(sessionCode, "ACTIVA") > 0;
     }
 
     @Transactional
@@ -91,7 +92,7 @@ public class SesionService {
         nuevaSesion.setHoraInicio(LocalDateTime.now());
         nuevaSesion = sesionRepository.save(nuevaSesion);
 
-        eventPublisher.publishEvent(new SseTopicEvent(SseTopic.MESAS));
+        eventPublisher.publishEvent(SseTopicEvent.of(SseTopic.MESAS));
         return nuevaSesion;
     }
 
@@ -110,7 +111,7 @@ public class SesionService {
         sesion.setEstado(getEstadoSesion("FINALIZADA"));
         sesion = sesionRepository.save(sesion);
 
-        eventPublisher.publishEvent(new SseTopicEvent(SseTopic.MESAS));
+        eventPublisher.publishEvent(SseTopicEvent.of(SseTopic.MESAS));
         return sesion;
     }
 
@@ -123,7 +124,7 @@ public class SesionService {
 
     @Transactional(readOnly = true)
     public Sesion getSesionPorCodigo(String qrCodeUrl) {
-        return sesionRepository.findByQrCodeUrl(qrCodeUrl)
+        return sesionRepository.findByQrCodeUrlUnfiltered(qrCodeUrl)
                 .orElseThrow(() -> new NoEncontradoException("Sesión no encontrada para el QR code: " + qrCodeUrl));
     }
 
@@ -142,5 +143,17 @@ public class SesionService {
                 mesa.getId(),
                 mesa.getNumero(),
                 mesa.getEstado().getNombre());
+    }
+
+    @Transactional(readOnly = true)
+    public SesionAuthProjection getSesionActivaParaAutenticacion(String qrCodeUrl) {
+        SesionAuthProjection sesion = sesionRepository.findAuthProjectionByQrCodeUrl(qrCodeUrl)
+                .orElseThrow(() -> new NoEncontradoException("Sesión no encontrada para el QR code: " + qrCodeUrl));
+
+        if (!"ACTIVA".equals(sesion.getEstadoNombre())) {
+            throw new NoEncontradoException("La sesión no está activa");
+        }
+
+        return sesion;
     }
 }

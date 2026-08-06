@@ -7,6 +7,7 @@ import "./styles.css";
 export default function LoginPage() {
   const [nombre, setNombre] = useState("");
   const [clave, setClave] = useState("");
+  const [tenantSlug, setTenantSlug] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,7 +19,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      await login({ nombre, clave });
+      await login({ nombre, clave, tenantSlug });
 
       const accessToken = localStorage.getItem("accessToken");
       const roles = accessToken ? getRolesFromToken(accessToken) : [];
@@ -59,11 +60,21 @@ export default function LoginPage() {
         <div className="login-panel">
           <div className="login-card">
             <h1 className="login-title">Iniciar sesión</h1>
-            <p className="login-subtitle">Accede con tus credenciales de acceso.</p>
+            <p className="login-subtitle">
+              Accede con tus credenciales de acceso.
+            </p>
 
             <form onSubmit={handleLogin} className="login-form">
               <div className="input-group">
-                <svg className="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  className="input-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M16 21v-1.5a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4V21" />
                   <circle cx="12" cy="7" r="4" />
                 </svg>
@@ -79,7 +90,15 @@ export default function LoginPage() {
               </div>
 
               <div className="input-group">
-                <svg className="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  className="input-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <rect x="4" y="10.5" width="16" height="10" rx="2" />
                   <path d="M7.5 10.5V7a4.5 4.5 0 0 1 9 0v3.5" />
                 </svg>
@@ -94,9 +113,36 @@ export default function LoginPage() {
                 />
               </div>
 
+              <div className="input-group">
+                <svg
+                  className="input-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                  <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Código del local (ej. bar-pepe)"
+                  value={tenantSlug}
+                  onChange={(e) => setTenantSlug(e.target.value)}
+                  className="login-input"
+                  required
+                />
+              </div>
+
               {error && <div className="login-error">{error}</div>}
 
-              <button type="submit" className="login-button" disabled={isLoading}>
+              <button
+                type="submit"
+                className="login-button"
+                disabled={isLoading}
+              >
                 {isLoading ? "Entrando…" : "Entrar"}
               </button>
             </form>

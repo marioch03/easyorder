@@ -34,6 +34,6 @@ public class UsuarioService {
 
     public List<UsuarioDTO> getAllUsers() {
         return usuarioRepository.findAll().stream()
-                .map(usuario -> new UsuarioDTO(usuario.getId(), usuario.getNombre(), usuario.getActivo())).toList();
+                .map(usuario -> new UsuarioDTO(usuario.getId(), usuario.getNombre(), usuario.isActivo())).toList();
     }
 }

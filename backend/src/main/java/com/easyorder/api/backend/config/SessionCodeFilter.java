@@ -11,7 +11,10 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.easyorder.api.backend.dto.SesionAuthProjection;
+import com.easyorder.api.backend.exception.NoEncontradoException;
 import com.easyorder.api.backend.service.SesionService;
+import com.easyorder.api.backend.tenant.TenantContext;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -27,11 +30,8 @@ public class SessionCodeFilter extends OncePerRequestFilter {
     private final SesionService sesionService;
 
     @Override
-    protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException {
 
         final String sessionCode = request.getHeader(SESSION_HEADER);
 
@@ -40,27 +40,25 @@ public class SessionCodeFilter extends OncePerRequestFilter {
             return;
         }
 
-        final boolean sesionValida = sesionService.validarSesion(sessionCode);
-
-        if (!sesionValida) {
-            response.sendError(
-                    HttpStatus.UNAUTHORIZED.value(),
-                    "Invalid session code");
+        final SesionAuthProjection sesion;
+        try {
+            sesion = sesionService.getSesionActivaParaAutenticacion(sessionCode);
+        } catch (NoEncontradoException e) {
+            response.sendError(HttpStatus.UNAUTHORIZED.value(), "Invalid session code");
             return;
         }
 
-        var authentication = new UsernamePasswordAuthenticationToken(
-                sessionCode,
-                null,
-                List.of(new SimpleGrantedAuthority("ROLE_CUSTOMER")));
+        try {
+            TenantContext.set(sesion.getTenantId());
+            var authentication = new UsernamePasswordAuthenticationToken(
+                    sessionCode, null, List.of(new SimpleGrantedAuthority("ROLE_CUSTOMER")));
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        authentication.setDetails(
-                new WebAuthenticationDetailsSource()
-                        .buildDetails(request));
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        filterChain.doFilter(request, response);
+            filterChain.doFilter(request, response);
+        } finally {
+            TenantContext.clear();
+        }
     }
 
     @Override

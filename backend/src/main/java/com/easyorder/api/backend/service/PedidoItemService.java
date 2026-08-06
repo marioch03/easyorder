@@ -57,8 +57,8 @@ public class PedidoItemService {
     pedidoItem.setListoParaServir(true);
     pedidoItemRepository.save(pedidoItem);
     pedidoService.recalcularEstadoPedido(pedidoItem.getPedido().getId());
-    eventPublisher.publishEvent(new SseTopicEvent(SseTopic.PEDIDOS));
-    eventPublisher.publishEvent(new SseTopicEvent(SseTopic.KDS));
+    eventPublisher.publishEvent(SseTopicEvent.of(SseTopic.PEDIDOS));
+    eventPublisher.publishEvent(SseTopicEvent.of(SseTopic.KDS));
   }
 
   @Transactional
@@ -68,8 +68,8 @@ public class PedidoItemService {
             "PedidoItem no encontrado para el ID: " + id));
     pedidoItem.setServido(true);
     pedidoItemRepository.save(pedidoItem);
-    eventPublisher.publishEvent(new SseTopicEvent(SseTopic.PEDIDOS));
-    eventPublisher.publishEvent(new SseTopicEvent(SseTopic.KDS));
+    eventPublisher.publishEvent(SseTopicEvent.of(SseTopic.PEDIDOS));
+    eventPublisher.publishEvent(SseTopicEvent.of(SseTopic.KDS));
   }
 
 }

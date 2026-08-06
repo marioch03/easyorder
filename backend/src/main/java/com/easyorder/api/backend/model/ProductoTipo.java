@@ -1,6 +1,9 @@
 package com.easyorder.api.backend.model;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import org.hibernate.annotations.TenantId;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -16,20 +19,30 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "ProductoTipo", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_productotipo_tenant_nombre", columnNames = {"id_tenant", "nombre"})
+        @UniqueConstraint(name = "uk_productotipo_tenant_nombre", columnNames = { "id_tenant", "nombre" })
 })
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ProductoTipo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "id_tenant", nullable = false)
-    private Tenant tenant;
+    @TenantId
+    @Column(name = "id_tenant", nullable = false)
+    private Long tenantId;
 
     @Column(nullable = false, length = 100)
     private String nombre;
@@ -43,10 +56,8 @@ public class ProductoTipo {
 
     @OneToMany(mappedBy = "tipo", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
-    private List<Producto> productos;
-
-    public ProductoTipo() {
-    }
+    @Builder.Default
+    private List<Producto> productos = new ArrayList<>();
 
     public ProductoTipo(String nombre, String descripcion) {
         this.nombre = nombre;
@@ -54,56 +65,14 @@ public class ProductoTipo {
     }
 
     public ProductoTipo(Tenant tenant, String nombre, String descripcion) {
-        this.tenant = tenant;
+        this.tenantId = (tenant != null) ? tenant.getId() : null;
         this.nombre = nombre;
         this.descripcion = descripcion;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Tenant getTenant() {
-        return tenant;
-    }
-
-    public void setTenant(Tenant tenant) {
-        this.tenant = tenant;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
+    public ProductoTipo(Long tenantId, String nombre, String descripcion) {
+        this.tenantId = tenantId;
         this.nombre = nombre;
-    }
-
-    public String getDescripcion() {
-        return descripcion;
-    }
-
-    public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
-    }
-
-    public List<Producto> getProductos() {
-        return productos;
-    }
-
-    public void setProductos(List<Producto> productos) {
-        this.productos = productos;
-    }
-
-    public ZonaTrabajo getZonaTrabajo() {
-        return this.zonaTrabajo;
-    }
-
-    public void setZonaTrabajo(ZonaTrabajo zonaTrabajo) {
-        this.zonaTrabajo = zonaTrabajo;
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.easyorder.api.backend.service.SseNotificationService;
+import com.easyorder.api.backend.tenant.TenantContext;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,7 +21,8 @@ public class SseController {
 
   @GetMapping(value = "/stream/{topic}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
   public SseEmitter stream(@PathVariable String topic) {
-    return sseService.suscribir(topic);
+    Long tenantId = TenantContext.get();
+    String canal = tenantId + "-" + topic;
+    return sseService.suscribir(canal);
   }
-
 }

@@ -3,6 +3,8 @@ package com.easyorder.api.backend.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.hibernate.annotations.TenantId;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
@@ -11,25 +13,33 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "Zona", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_zona_tenant_nombre", columnNames = {"id_tenant", "nombre"})
+        @UniqueConstraint(name = "uk_zona_tenant_nombre", columnNames = { "id_tenant", "nombre" })
 })
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Zona {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "id_tenant", nullable = false)
-    private Tenant tenant;
+    @TenantId
+    @Column(name = "id_tenant", nullable = false)
+    private Long tenantId;
 
     @Column(nullable = false, length = 50)
     private String nombre;
@@ -39,69 +49,7 @@ public class Zona {
 
     @OneToMany(mappedBy = "zona", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
+    @Builder.Default
     private Set<Mesa> mesas = new HashSet<>();
 
-    public Zona() {
-    }
-
-    public Zona(String nombre, String descripcion) {
-        this.nombre = nombre;
-        this.descripcion = descripcion;
-    }
-
-    public Zona(Tenant tenant, String nombre, String descripcion) {
-        this.tenant = tenant;
-        this.nombre = nombre;
-        this.descripcion = descripcion;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Tenant getTenant() {
-        return tenant;
-    }
-
-    public void setTenant(Tenant tenant) {
-        this.tenant = tenant;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public String getDescripcion() {
-        return descripcion;
-    }
-
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
-
-    public Set<Mesa> getMesas() {
-        return mesas;
-    }
-
-    public void setMesas(Set<Mesa> mesas) {
-        this.mesas = mesas;
-    }
-
-    @Override
-    public String toString() {
-        return "Zona{" +
-                "id=" + id +
-                ", tenant=" + (tenant != null ? tenant.getId() : null) +
-                ", nombre='" + nombre + '\'' +
-                ", descripcion='" + descripcion + '\'' +
-                '}';
-    }
 }
