@@ -474,7 +474,7 @@ LOCK TABLES `Usuario` WRITE;
 INSERT INTO `Usuario` (`activo`, `created_at`, `id`, `rol`, `nombre`, `clave`)
 VALUES
 	(b'1','2026-04-24 12:32:49',1,1,'Mario','$2a$10$92MiowW9DXGXAIR9N7IyKe/2y8ZQgHchsUi.UKV8Tsfd7loIpQfMG'),
-	(b'1','2026-06-26 20:52:42',2,2,'Pepe','$2a$10$As0Y2nrwk.vQ82.CJSghMeigJJXNut.bjUmU2KqSDGKBR68122kuC');
+	(b'1','2026-06-26 20:52:42',2,1,'tenant2','$2a$10$2WMLVpuJIAtS2Rp8aWE5IuG3Vgdrbzz/o2W4ajpQ16KOSgCIo1fFq');
 
 /*!40000 ALTER TABLE `Usuario` ENABLE KEYS */;
 UNLOCK TABLES;

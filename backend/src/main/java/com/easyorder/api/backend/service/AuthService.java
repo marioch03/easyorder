@@ -38,12 +38,15 @@ public class AuthService {
     private final JwtService jwtService;
 
     public TokenResponse register(RegisterRequest request) {
+        Long tenantId = tenantRepository.findIdBySlug(request.tenantSlug())
+                .orElseThrow(() -> new NoEncontradoException("Bar no encontrado o inactivo" + request.tenantSlug()));
         Usuario usuario = Usuario.builder()
                 .nombre(request.nombre())
                 .clave(passwordEncoder.encode(request.clave()))
                 .createdAt(LocalDateTime.now())
                 .rol(getRolByNombre(request.rol()))
                 .activo(true)
+                .tenantId(tenantId)
                 .build();
         Usuario usuarioGuardado = usuarioRepository.save(usuario);
         String jwtToken = jwtService.generateToken(usuarioGuardado);

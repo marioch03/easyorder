@@ -100,11 +100,8 @@ public class SecurityConfig {
             return;
         }
         final String jwt = token.substring(7);
-        final var storedToken = tokenRepository.findByToken(jwt)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Token"));
-        storedToken.setExpired(true);
-        storedToken.setRevoked(true);
-        tokenRepository.save(storedToken);
+
+        tokenRepository.revocarYExpirarToken(jwt);
     }
 
 }

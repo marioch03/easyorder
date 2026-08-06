@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 
+import ConfirmModal from "../../common/ConfirmModal";
 import { logout } from "../auth/authService";
 import {
   AddProductForm,
@@ -37,6 +38,11 @@ import { useAdminData } from "./useAdminData";
 function AdminPage() {
   const [activeKey, setActiveKey] = useState<ActionKey | null>(null);
   const [activity, setActivity] = useState<ActivityEntry[]>([]);
+  const [confirmLogoutOpen, setConfirmLogoutOpen] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
+  const { slug } = useParams<{ slug: string }>();
+
+  const currentSlug = slug || localStorage.getItem("tenant_slug") || "";
   const navigate = useNavigate();
   const {
     zonas,
@@ -55,12 +61,18 @@ function AdminPage() {
 
   const handleLogout = async () => {
     try {
+      setLogoutLoading(true);
       await logout();
+      if (currentSlug) {
+        navigate(`/${currentSlug}/auth/login`, { replace: true });
+      } else {
+        navigate("/error", { replace: true });
+      }
     } catch (error) {
       console.error(error);
+    } finally {
+      setLogoutLoading(false);
     }
-
-    navigate("/auth/login");
   };
 
   const logActivity = (label: string, danger = false) => {
@@ -196,6 +208,7 @@ function AdminPage() {
                   payload.nombre,
                   payload.rol,
                   payload.clave,
+                  currentSlug,
                 );
 
                 logActivity(
@@ -291,14 +304,20 @@ function AdminPage() {
               label={a.label}
               variant={a.variant}
               active={activeKey === a.key}
-              onClick={() => {
-                if (confirm("¿Seguro que quiere cerrar sesión?")) {
-                  handleLogout();
-                }
-              }}
+              onClick={() => setConfirmLogoutOpen(true)}
             />
           ))}
         </div>
+
+        <ConfirmModal
+          open={confirmLogoutOpen}
+          title="¿Cerrar sesión?"
+          message="Se cerrará la sesión en este dispositivo."
+          loading={logoutLoading}
+          variant="danger"
+          onCancel={() => setConfirmLogoutOpen(false)}
+          onConfirm={handleLogout}
+        />
       </aside>
 
       <main className="admin-main">

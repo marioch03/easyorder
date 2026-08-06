@@ -61,3 +61,5 @@ UPDATE Usuario SET id_tenant = 1;
 ALTER TABLE Usuario MODIFY COLUMN id_tenant BIGINT NOT NULL;
 ALTER TABLE Usuario ADD CONSTRAINT fk_usuario_tenant FOREIGN KEY (id_tenant) REFERENCES Tenant(id);
 ALTER TABLE Usuario ADD CONSTRAINT uk_usuario_tenant_username UNIQUE (id_tenant, nombre);
+
+UPDATE Usuario SET id_tenant = 2 where nombre = 'tenant2';

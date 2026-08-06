@@ -54,11 +54,13 @@ export async function registrarUsuario(
   nombre: string,
   rol: string,
   clave: string,
+  tenantSlug: string,
 ) {
   const response = await privateAuthApi.post("/register", {
     nombre,
     rol,
     clave,
+    tenantSlug,
   });
   return response.data;
 }
