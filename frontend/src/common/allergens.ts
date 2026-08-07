@@ -6,114 +6,122 @@ const svg = (inner: string, color: string, strokeWidth = 1.8) =>
 export const alergenoIcons = {
   // Espiga de trigo: Dorado / Ámbar
   gluten: svg(
-    `<path d="M12 21V6"/>
-     <path d="M12 8c-1.5-1.5-3-1.5-4-.5M12 8c1.5-1.5 3-1.5 4-.5"/>
-     <path d="M12 11c-1.5-1.5-3-1.5-4-.5M12 11c1.5-1.5 3-1.5 4-.5"/>
-     <path d="M12 14c-1.5-1.5-3-1.5-4-.5M12 14c1.5-1.5 3-1.5 4-.5"/>
-     <path d="M12 6c0-1.5.8-2.5 2-3"/>`,
+    `<path d="M12 20V4"/>
+     <path d="M12 6c-2-1.5-4-1-4 1s2 2.5 4 1"/>
+     <path d="M12 6c2-1.5 4-1 4 1s-2 2.5-4 1"/>
+     <path d="M12 10c-2-1.5-4-1-4 1s2 2.5 4 1"/>
+     <path d="M12 10c2-1.5 4-1 4 1s-2 2.5-4 1"/>
+     <path d="M12 14c-2-1.5-4-1-4 1s2 2.5 4 1"/>
+     <path d="M12 14c2-1.5 4-1 4 1s-2 2.5-4 1"/>
+     <path d="M12 4l-2-2M12 4l2-2"/>`,
     "#D97706",
   ),
 
-  // Gamba: Rojo Coral
+  // Cangrejo / Crustáceo: Rojo Coral
   crustaceos: svg(
-    `<path d="M5 18c0-6 3-11 9-12 2 3 2 6 0 8-3 1-5 0-6-2"/>
-     <path d="M8 14l-3 4M11 15l-2.5 4.5M14 14.5l-2 4.5"/>
-     <path d="M17 6l2-2"/>
-     <circle cx="15.5" cy="6.5" r=".6" fill="currentColor" stroke="none"/>`,
+    `<path d="M12 16c-3.5 0-6.5-2-6.5-4.8 0-2.8 2.9-4.7 6.5-4.7s6.5 1.9 6.5 4.7c0 2.8-3 4.8-6.5 4.8z"/>
+     <path d="M6 11.2C4.2 10 3 8.2 3 6.8 3 5.3 4.5 4.5 5.8 5.8L7.5 8"/>
+     <path d="M18 11.2c1.8-1.2 3-3 3-4.4 0-1.5-1.5-2.3-2.8-1L16.5 8"/>
+     <path d="M7.5 15.5L6 18M10 16l-1 2.5M14 16l1 2.5M16.5 15.5L18 18"/>
+     <circle cx="9.5" cy="8.8" r=".7" fill="currentColor" stroke="none"/>
+     <circle cx="14.5" cy="8.8" r=".7" fill="currentColor" stroke="none"/>`,
     "#E11D48",
   ),
 
   // Huevo: Amarillo Yema
   huevos: svg(
-    `<path d="M12 21c4 0 6-3.5 6-7.5C18 8 14.5 3 12 3S6 8 6 13.5C6 17.5 8 21 12 21z"/>`,
+    `<path d="M12 3.5c-3.8 0-7 3.5-7 8.2 0 4.2 3.1 7.8 7 7.8s7-3.6 7-7.8c0-4.7-3.2-8.2-7-8.2z"/>
+     <circle cx="12" cy="13.2" r="2.8"/>`,
     "#F59E0B",
   ),
 
   // Pez: Azul Marino
   pescado: svg(
-    `<path d="M3 12c3-4 8-6 13-4 2-3 4-3 5-2-1 2-1 4 0 6-1 1-3 1-5-2-5 2-10 0-13-4z" transform="translate(0,0)"/>
-     <circle cx="7.5" cy="11" r=".6" fill="currentColor" stroke="none"/>`,
+    `<path d="M4 12c3-4 8.5-6 13.5-3.5 1.5-2.5 3-3 4.5-2.5-.5 2-.5 3.5.5 5.5-1 2-1 3.5-.5 5.5-1.5.5-3 0-4.5-2.5C12.5 18 7 16 4 12z"/>
+     <path d="M14.5 9.5c-1 1.5-1 3.5 0 5"/>
+     <circle cx="7.5" cy="11" r=".8" fill="currentColor" stroke="none"/>`,
     "#0284C7",
   ),
 
   // Cacahuete: Marrón Cáscara
   cacahuetes: svg(
-    `<path d="M9 4C6.5 4 5 6 5 8.5c0 1.5.8 2.3 1.8 3-1 .7-1.8 1.6-1.8 3.2 0 2.6 1.8 4.8 5 5.3 3.2-.5 5-2.7 5-5.3 0-1.6-.8-2.5-1.8-3.2 1-.7 1.8-1.5 1.8-3C15 6 13.5 4 11 4"/>
-     <path d="M9.2 8.6c.5.5 1.6.5 2.1 0M9.2 15.4c.5.5 2.5.5 3 0"/>`,
+    `<path d="M12 4.5c-2.2 0-3.8 1.5-3.8 3.3 0 1.3.7 2.3 1.7 2.9-1.2.8-1.9 2-1.9 3.6 0 2.3 1.8 4.2 4 4.2s4-1.9 4-4.2c0-1.6-.7-2.8-1.9-3.6 1-.6 1.7-1.6 1.7-2.9 0-1.8-1.6-3.3-3.8-3.3z"/>
+     <path d="M10 8c.8.6 3.2.6 4 0M9.5 14.5c1.2.8 3.8.8 5 0"/>`,
     "#854D0E",
   ),
 
   // Vaina de soja: Verde Lima
   soja: svg(
-    `<path d="M7 11c0-4 2-7 5-8 1 2 1 4 0 5.5-2 .5-3.5 2-3.5 4.5"/>
-     <path d="M9 8c-3 1-5 4-5 8 0 3 2 5 5 5s5-2.5 5-6c0-1.5-.5-2.5-1.3-3.2"/>
-     <circle cx="8.3" cy="14.5" r="1.3"/>
-     <circle cx="11" cy="17.5" r="1.3"/>`,
+    `<path d="M6 18c2.5 1 6.5.5 10.5-3.5S20 7.5 18 5c-3.5 0-8 2.5-11 6.5S4.5 16 6 18z"/>
+     <path d="M9 13.5c1.5-2 4-3.5 6.5-4.5"/>
+     <circle cx="9.5" cy="14.5" r="1.1" fill="currentColor"/>
+     <circle cx="13.5" cy="11" r="1.1" fill="currentColor"/>`,
     "#65A30D",
   ),
 
   // Botella de leche: Azul Lácteo
   leche: svg(
-    `<path d="M10 3h4l1 3-1.5 1.5v2L15 12v7a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-7l1.5-2.5v-2L9 6l1-3z"/>
-     <path d="M9 14h6"/>`,
+    `<path d="M10 3.5h4"/>
+     <path d="M10 3.5v2L8.5 8v10a1.5 1.5 0 0 0 1.5 1.5h4a1.5 1.5 0 0 0 1.5-1.5V8L14 5.5v-2"/>
+     <path d="M8.5 12.5c1.8 1 3.2-1 5 0"/>`,
     "#2563EB",
   ),
 
-  // Fruto de cáscara: Marrón Nuez
+  // Fruto de cáscara (Avellana/Nuez): Marrón Nuez
   frutosCascara: svg(
-    `<path d="M12 21c4.5-1 6-4.5 6-8 0-5-3-9-6-9s-6 4-6 9c0 3.5 1.5 7 6 8z"/>
-     <path d="M12 4v17M9 12c1 .8 2 .8 3 0M9 16c1 .8 2 .8 3 0"/>`,
+    `<path d="M12 19.5c-3.5-3.5-6.5-7-6.5-11 0-2.5 2.5-4.5 6.5-4.5s6.5 2 6.5 4.5c0 4-3 7.5-6.5 11z"/>
+     <path d="M5.8 8.5c1.8-1.2 4.2.2 6.2-.8 2 1 4.4-.4 6.2.8"/>
+     <path d="M12 4v15.5"/>`,
     "#78350F",
   ),
 
   // Apio: Verde Vegetal
   apio: svg(
-    `<path d="M9 21V9M12 21V7M15 21V9"/>
-     <path d="M9 9c-1-2-.5-4 1-5M15 9c1-2 .5-4-1-5M12 7c-1.5-1-2-3-1-5M12 7c1.5-1 2-3 1-5"/>`,
+    `<path d="M8 19.5V9c0-2-1-3.5-2.5-4.5M12 19.5V8c0-2.5 0-4.5 0-5.5M16 19.5V9c0-2 1-3.5 2.5-4.5"/>
+     <path d="M5.5 4.5C4 3.5 4 2 5.5 2S8 3 7.5 4.5M16.5 4.5C15 3 15 1.5 16.5 1.5S19 2.5 18.5 4.5"/>
+     <path d="M8 16h8"/>`,
     "#16A34A",
   ),
 
-  // Mostaza: Amarillo Mostaza
+  // Biberón de mostaza: Amarillo Mostaza
   mostaza: svg(
-    `<path d="M9 8h6l1 12a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2L9 8z"/>
-     <path d="M10 8V5a2 2 0 0 1 2-2 2 2 0 0 1 2 2v3"/>
-     <circle cx="10.8" cy="13" r=".7" fill="currentColor" stroke="none"/>
-     <circle cx="13.3" cy="14.5" r=".7" fill="currentColor" stroke="none"/>
-     <circle cx="11.5" cy="17" r=".7" fill="currentColor" stroke="none"/>`,
+    `<path d="M12 3v3M10.5 6h3l.5 3H10l.5-3z"/>
+     <path d="M9 9h6a1.5 1.5 0 0 1 1.5 1.5v8a2 2 0 0 1-2 2h-5a2 2 0 0 1-2-2v-8A1.5 1.5 0 0 1 9 9z"/>
+     <path d="M10.5 14c1 .8 2 .8 3 0"/>`,
     "#CA8A04",
   ),
 
   // Semillas de sésamo: Ocre / Tostado
   sesamo: svg(
-    `<ellipse cx="8" cy="9" rx="2" ry="1.1" transform="rotate(-25 8 9)"/>
-     <ellipse cx="15" cy="7.5" rx="2" ry="1.1" transform="rotate(15 15 7.5)"/>
-     <ellipse cx="7.5" cy="16" rx="2" ry="1.1" transform="rotate(10 7.5 16)"/>
-     <ellipse cx="15.5" cy="15" rx="2" ry="1.1" transform="rotate(-20 15.5 15)"/>
-     <ellipse cx="12" cy="12" rx="2" ry="1.1" transform="rotate(-5 12 12)"/>`,
+    `<path d="M12 4.5c-1.2 1.8-1.8 3.2-1.8 4.5 0 1.2.8 2 1.8 2s1.8-.8 1.8-2c0-1.3-.6-2.7-1.8-4.5z"/>
+     <path d="M6.5 11c-1.8 1.2-2.7 2.3-2.7 3.5 0 1.2.8 2 1.8 2 1.2 0 2.2-1 2.7-2.2.5-1.3.2-2.3-1.8-3.3z"/>
+     <path d="M17.5 11c1.8 1.2 2.7 2.3 2.7 3.5 0 1.2-.8 2-1.8 2-1.2 0-2.2-1-2.7-2.2-.5-1.3-.2-2.3 1.8-3.3z"/>`,
     "#A16207",
   ),
 
   // Sulfitos (Copa de vino): Púrpura / Morado
   sulfitos: svg(
-    `<path d="M7 4h10l-1 6a4 4 0 0 1-8 0L7 4z"/>
-     <path d="M12 14v5M9 21h6"/>
-     <path d="M9 2c0 1-1 1-1 2s1 1 1 2M13 2c0 1-1 1-1 2s1 1 1 2"/>`,
+    `<path d="M7 4.5h10l-1 5.5a4 4 0 0 1-8 0L7 4.5z"/>
+     <path d="M12 14v5M9 19h6"/>
+     <path d="M7.5 8h9"/>
+     <circle cx="10" cy="2.5" r=".6" fill="currentColor" stroke="none"/>
+     <circle cx="14" cy="2" r=".8" fill="currentColor" stroke="none"/>`,
     "#9333EA",
   ),
 
   // Altramuces: Amarillo Cítrico
   altramuces: svg(
-    `<path d="M12 3c-3.5 1-5.5 4-5.5 8 0 5 2.5 9 5.5 10 3-1 5.5-5 5.5-10 0-4-2-7-5.5-8z"/>
-     <circle cx="12" cy="9" r="1.2"/>
-     <circle cx="12" cy="13.5" r="1.2"/>
-     <circle cx="12" cy="18" r="1.2"/>`,
+    `<path d="M12 4.5c-4 0-7.2 3.1-7.2 7.5s3.2 7.5 7.2 7.5 7.2-3.1 7.2-7.5S16 4.5 12 4.5z"/>
+     <path d="M12 8a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>
+     <path d="M12 13.5v2.5"/>`,
     "#EAB308",
   ),
 
-  // Concha de moluscos: Índigo / Violeta
+  // Concha de molusco (Vieira): Índigo / Violeta
   moluscos: svg(
-    `<path d="M4 13c2.5-6 5-9 8-9s5.5 3 8 9c-2.5 2-5 3-8 3s-5.5-1-8-3z"/>
-     <path d="M12 4v12M8.5 5.5L9.5 16M15.5 5.5L14.5 16"/>`,
+    `<path d="M5 13.5c0-4.5 3.1-8.5 7-8.5s7 4 7 8.5c-2 1.5-4.5 2-7 2s-5-.5-7-2z"/>
+     <path d="M9.5 15.5l-1 3.5h7l-1-3.5"/>
+     <path d="M12 5v10.5M8.5 6.5L10 15.5M15.5 6.5L14 15.5"/>`,
     "#4F46E5",
   ),
 };
