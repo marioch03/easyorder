@@ -2,10 +2,8 @@ import { useState } from "react";
 import Modal from "react-modal";
 import QRCode from "react-qr-code";
 import { useParams } from "react-router-dom";
-import billIcon from "../../assets/bill.png";
-import closeIcon from "../../assets/close-window.png";
-import qrIcon from "../../assets/qr.png";
 import type { Cuenta } from "../menu/types/bill";
+import { icons } from "./icons";
 import ImageButton from "./ImageButton";
 import TableButton from "./TableButton";
 import type { MesaDTO } from "./tables";
@@ -196,7 +194,7 @@ export default function TablesPage() {
             <div className="modal-bottom-tables">
               {estadoMesaSeleccionada === "LIBRE" ? (
                 <ImageButton
-                  icon={qrIcon}
+                  icon={icons.qr}
                   label="Generar QR"
                   loading={qrLoading}
                   onClick={() => crearSesion(mesaSeleccionada)}
@@ -210,14 +208,14 @@ export default function TablesPage() {
                   </div>
                   <div className="button-group">
                     <ImageButton
-                      icon={closeIcon}
+                      icon={icons.logout}
                       label="Cerrar sesión"
                       variant="danger"
                       loading={qrLoading}
                       onClick={() => cerrarSesion(mesaSeleccionada)}
                     />
                     <ImageButton
-                      icon={billIcon}
+                      icon={icons.cuenta}
                       label="Ver cuenta"
                       loading={cuentaLoading}
                       onClick={() => obtenerCuenta(mesaSeleccionada)}

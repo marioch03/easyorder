@@ -252,8 +252,7 @@
  
 /* --- Botones de acción (QR / cerrar sesión / ver cuenta / crear mesa) --- */
  
-.image-button,
-.create-table-button {
+.image-button {
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
@@ -276,8 +275,7 @@
   background: linear-gradient(135deg, var(--color-danger), var(--color-danger-dark));
 }
  
-.image-button:hover,
-.create-table-button:hover {
+.image-button:hover{
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
