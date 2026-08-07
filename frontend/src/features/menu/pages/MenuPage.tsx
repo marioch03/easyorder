@@ -3,12 +3,15 @@ import { useSession } from "../../session/useSession";
 import AllergenLegendModal from "../components/AllergenLegendModal"; // 1. Importamos la leyenda
 import ProductCard from "../components/ProductCard";
 import ProductModal from "../components/ProductModal";
+import { customerIcons } from "../customerIcons";
 import { useMenuData } from "../hooks/useMenuData";
 import "../styles.css";
-import type { Alergeno, Product } from "../types/menu";
+import type { Alergeno, ProductDTO } from "../types/menu";
 
 export default function MenuPage() {
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<ProductDTO | null>(
+    null,
+  );
   const [isLegendOpen, setIsLegendOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
   const categoryRefs = useRef<Record<number, HTMLElement | null>>({});
@@ -106,7 +109,12 @@ export default function MenuPage() {
       <div className="sticky-header">
         <div className="search-container">
           <div className="search-input-wrapper">
-            <span className="search-icon">🔍</span>
+            <img
+              src={customerIcons.search}
+              className="search-icon"
+              alt=""
+              aria-hidden="true"
+            />
             <input
               type="text"
               placeholder="¿Qué te apetece hoy?"
@@ -119,7 +127,7 @@ export default function MenuPage() {
                 className="clear-search"
                 onClick={() => setSearchQuery("")}
               >
-                ✕
+                <img src={customerIcons.clear} alt="" aria-hidden="true" />
               </button>
             )}
           </div>
@@ -129,7 +137,12 @@ export default function MenuPage() {
             onClick={() => setIsLegendOpen(true)}
             title="Leyenda de alérgenos"
           >
-            ℹ️
+            <img
+              src={customerIcons.info}
+              className="info-icon"
+              alt=""
+              aria-hidden="true"
+            />
           </button>
         </div>
 

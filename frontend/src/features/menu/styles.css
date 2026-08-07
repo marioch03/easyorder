@@ -1018,3 +1018,54 @@
   animation: slideUp 0.35s ease;
   padding-bottom: calc(24px + env(safe-area-inset-bottom));
 }
+
+/* --- Ajustes para los iconos SVG de búsqueda y leyenda --- */
+
+.search-icon,
+.clear-search img,
+.info-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  display: block;
+}
+
+.search-icon {
+  margin-right: 8px;
+  opacity: 0.5;
+  flex-shrink: 0; /* Evita que la lupa se aplaste si el texto es muy largo */
+}
+
+/* El botón de la cruz sigue siendo redondo con fondo gris */
+.clear-search {
+  background: #e2e2e2;
+  border: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Ajustes mínimos para el botón de la leyenda para que cuadre perfecto con el icono */
+.allergen-legend-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background-color: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 50%; /* Lo hacemos redondito para que pegue con la i */
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.allergen-legend-btn:hover {
+  background-color: #e2e8f0;
+}

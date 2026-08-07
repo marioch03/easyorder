@@ -1,7 +1,4 @@
-// MenuBottomNav.tsx
-import billIcon from "../../../assets/bill.png";
-import cartIcon from "../../../assets/cart.png";
-import menuIcon from "../../../assets/menu.png";
+import { customerIcons } from "../customerIcons";
 
 type MenuBottomNavProps = {
   activeSection: string;
@@ -9,12 +6,15 @@ type MenuBottomNavProps = {
 };
 
 const BUTTONS = [
-  { icon: menuIcon, label: "Menu", key: "menu" },
-  { icon: cartIcon, label: "Carrito", key: "carrito" },
-  { icon: billIcon, label: "Cuenta", key: "cuenta" },
+  { icon: customerIcons.menu, label: "Menu", key: "menu" },
+  { icon: customerIcons.cart, label: "Carrito", key: "carrito" },
+  { icon: customerIcons.bill, label: "Cuenta", key: "cuenta" },
 ];
 
-export default function MenuBottomNav({ activeSection, setActiveSection }: MenuBottomNavProps) {
+export default function MenuBottomNav({
+  activeSection,
+  setActiveSection,
+}: MenuBottomNavProps) {
   return (
     <nav className="bottom-nav">
       {BUTTONS.map((btn) => (
@@ -22,6 +22,7 @@ export default function MenuBottomNav({ activeSection, setActiveSection }: MenuB
           key={btn.key}
           className={`bottom-nav-button ${activeSection === btn.key ? "active" : ""}`}
           onClick={() => setActiveSection(btn.key)}
+          type="button"
         >
           <span className="nav-icon-badge">
             <img src={btn.icon} alt="" aria-hidden="true" />

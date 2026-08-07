@@ -208,7 +208,7 @@ export default function TablesPage() {
                   </div>
                   <div className="button-group">
                     <ImageButton
-                      icon={icons.logout}
+                      icon={icons.close}
                       label="Cerrar sesión"
                       variant="danger"
                       loading={qrLoading}
