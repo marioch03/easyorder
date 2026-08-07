@@ -177,11 +177,13 @@ export default function MenuPage() {
                   onClick={setSelectedProduct}
                   product={{
                     id: product.id,
-                    name: product.nombre,
-                    price: product.precio,
-                    description: product.descripcion ?? "",
-                    allergens: product.alergenos ?? [],
-                    imageUrl: product.imagen ?? "food.png",
+                    nombre: product.nombre,
+                    precio: product.precio,
+                    descripcion: product.descripcion ?? "",
+                    alergenos: product.alergenos ?? [],
+                    imagen: product.imagen ?? "food.png",
+                    tipoId: product.tipoId,
+                    disponible: product.disponible,
                   }}
                 />
               ))}

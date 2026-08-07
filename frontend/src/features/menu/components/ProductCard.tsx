@@ -1,10 +1,10 @@
 import { getAlergenoIcon } from "../../../common/allergens";
 import "../styles.css";
-import type { Product } from "../types/menu";
+import type { ProductDTO } from "../types/menu";
 
 type ProductCardProps = {
-  product: Product;
-  onClick: (product: Product) => void;
+  product: ProductDTO;
+  onClick: (product: ProductDTO) => void;
 };
 
 const BASE_IMAGE_URL = "/images/";
@@ -14,13 +14,13 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
     <div className="product-card" onClick={() => onClick(product)}>
       <div className="product-content">
         <div className="product-info">
-          <span className="product-name">{product.name}</span>
-          <span className="product-price">€{product.price.toFixed(2)}</span>
-          <span className="product-description">{product.description}</span>
+          <span className="product-name">{product.nombre}</span>
+          <span className="product-price">€{product.precio.toFixed(2)}</span>
+          <span className="product-description">{product.descripcion}</span>
 
-          {product.allergens.length > 0 && (
+          {product.alergenos.length > 0 && (
             <div className="product-allergens">
-              {product.allergens.map((alergeno) => {
+              {product.alergenos.map((alergeno) => {
                 const icon = getAlergenoIcon(alergeno.nombre);
                 if (!icon) return null;
 
@@ -46,8 +46,8 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
 
         <div className="product-image-wrapper">
           <img
-            src={BASE_IMAGE_URL + product.imageUrl}
-            alt={product.name}
+            src={BASE_IMAGE_URL + product.imagen}
+            alt={product.nombre}
             className="product-image"
           />
         </div>

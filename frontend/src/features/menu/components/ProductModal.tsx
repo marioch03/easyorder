@@ -3,10 +3,10 @@ import { getAlergenoIcon } from "../../../common/allergens";
 import type { CartItem } from "../../cart/cart";
 import { useCart } from "../../cart/useCart";
 import "../styles.css";
-import type { Product } from "../types/menu";
+import type { ProductDTO } from "../types/menu";
 
 type Props = {
-  product: Product | null;
+  product: ProductDTO | null;
   onClose: () => void;
 };
 
@@ -27,10 +27,10 @@ export default function ProductModal({ product, onClose }: Props) {
 
     const item: CartItem = {
       id: product.id,
-      name: product.name,
-      price: product.price,
+      name: product.nombre,
+      price: product.precio,
       quantity: quantity,
-      image: product.imageUrl,
+      image: product.imagen ? product.imagen : "food.png",
       note: note,
     };
 
@@ -46,26 +46,26 @@ export default function ProductModal({ product, onClose }: Props) {
         <div className="drag-indicator"></div>
 
         <div className="modal-header">
-          <h2>{product.name}</h2>
+          <h2>{product.nombre}</h2>
           <button className="close-btn" onClick={onClose}>
             ✕
           </button>
         </div>
         <div className="image-wrapper-modal">
           <img
-            src={BASE_IMAGE_URL + product.imageUrl}
-            alt={product.name}
+            src={BASE_IMAGE_URL + product.imagen}
+            alt={product.nombre}
             className="modal-image"
           />
         </div>
         <h3>Descripción:</h3>
-        <p className="modal-description">{product.description}</p>
+        <p className="modal-description">{product.descripcion}</p>
 
-        {product.allergens && product.allergens.length > 0 && (
+        {product.alergenos && product.alergenos.length > 0 && (
           <div className="modal-allergens-section">
             <h3>Alérgenos:</h3>
             <div className="product-allergens">
-              {product.allergens.map((item, index) => {
+              {product.alergenos.map((item, index) => {
                 const iconSrc = getAlergenoIcon(item.nombre);
                 if (!iconSrc) return null;
                 const isTraza = item.tipo === "PUEDE_CONTENER_TRAZAS";
@@ -94,7 +94,7 @@ export default function ProductModal({ product, onClose }: Props) {
           </div>
 
           <span className="modal-price">
-            €{(product.price * quantity).toFixed(2)}
+            €{(product.precio * quantity).toFixed(2)}
           </span>
         </div>
         <div className="modal-note">
