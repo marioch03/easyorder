@@ -1,7 +1,9 @@
+import { icons, type ManagementIconKey } from "./icons";
 import "./styles.css";
 
 type SidebarButtonProps = {
-  icon: string;
+  /** Nombre del icono definido en icons.ts ("table") o una URL/Data URI directa */
+  icon: ManagementIconKey | string;
   label: string;
   onClick?: () => void;
   active?: boolean;
@@ -15,6 +17,8 @@ function SidebarButton({
   active = false,
   variant = "default",
 }: SidebarButtonProps) {
+  const iconSrc = icon in icons ? icons[icon as ManagementIconKey] : icon;
+
   const classNames = [
     "sidebar-button",
     variant === "danger" ? "danger" : "",
@@ -26,7 +30,7 @@ function SidebarButton({
   return (
     <button className={classNames} onClick={onClick} type="button">
       <span className="sidebar-icon-badge">
-        <img src={icon} alt="" aria-hidden="true" />
+        <img src={iconSrc} alt="" aria-hidden="true" />
       </span>
       <span>{label}</span>
     </button>

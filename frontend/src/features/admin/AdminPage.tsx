@@ -55,6 +55,7 @@ function AdminPage() {
     setUsuarios,
   } = useAdminData();
   const usuariosActivos = usuarios.filter((u) => u.activo).length;
+
   const handleSelect = (action: (typeof ACTIONS)[number]) => {
     setActiveKey(action.key === activeKey ? null : action.key);
   };
@@ -76,19 +77,20 @@ function AdminPage() {
   };
 
   const logActivity = (label: string, danger = false) => {
-    setActivity((prev) =>
-      [
-        {
-          id: Date.now(),
-          label,
-          danger,
-          time: new Date().toLocaleTimeString("es-ES", {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-        },
-        ...prev,
-      ].slice(0, 4),
+    setActivity(
+      (prev) =>
+        [
+          {
+            id: Date.now(),
+            label,
+            danger,
+            time: new Date().toLocaleTimeString("es-ES", {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          },
+          ...prev,
+        ].slice(0, 5), // Guardamos las 5 más recientes
     );
   };
 
@@ -98,7 +100,8 @@ function AdminPage() {
     if (!activeKey) {
       return (
         <div className="action-empty">
-          Selecciona una acción en la barra lateral para empezar.
+          <div className="empty-icon">👈</div>
+          <p>Selecciona una acción en la barra lateral para empezar.</p>
         </div>
       );
     }
@@ -131,11 +134,9 @@ function AdminPage() {
             onConfirm={async (payload) => {
               try {
                 await eliminarMesa(Number(payload.numero));
-
                 setMesas((prev) =>
                   prev.filter((m) => m.numero !== Number(payload.numero)),
                 );
-
                 logActivity(`Mesa ${payload.numero} eliminada`, true);
                 closeForm();
               } catch (error) {
@@ -175,11 +176,9 @@ function AdminPage() {
             onConfirm={async (payload) => {
               try {
                 const productoActualizado = await editarProducto(payload);
-
                 logActivity(
                   `Producto "${productoActualizado.nombre}" modificado`,
                 );
-
                 closeForm();
               } catch (error) {
                 console.error(error);
@@ -210,7 +209,6 @@ function AdminPage() {
                   payload.clave,
                   currentSlug,
                 );
-
                 logActivity(
                   `Usuario ${payload.nombre} registrado, Rol: "${payload.rol}"`,
                   true,
@@ -230,13 +228,10 @@ function AdminPage() {
             onCancel={closeForm}
             onConfirm={async ({ id }) => {
               await deshabilitarUsuario(id);
-
               setUsuarios((prev) =>
                 prev.map((u) => (u.id === id ? { ...u, activo: false } : u)),
               );
-
               logActivity(`Usuario inhabilitado correctamente`, true);
-
               closeForm();
             }}
           />
@@ -251,51 +246,56 @@ function AdminPage() {
       <aside className="admin-sidebar">
         <div className="admin-brand">
           <div className="mark">PT</div>
-          <h1>PdTú</h1>
-          <p>Panel de administración</p>
+          <div className="brand-text">
+            <h1>PdTú</h1>
+            <p>Admin Workspace</p>
+          </div>
         </div>
 
-        <div className="admin-section-label">Mesas</div>
-        <div className="admin-section">
-          {tableActions.map((a) => (
-            <AdminButton
-              key={a.key}
-              icon={a.icon}
-              label={a.label}
-              variant={a.variant}
-              active={activeKey === a.key}
-              onClick={() => handleSelect(a)}
-            />
-          ))}
+        <div className="admin-nav">
+          <div className="admin-section-label">Gestión de Mesas</div>
+          <div className="admin-section">
+            {tableActions.map((a) => (
+              <AdminButton
+                key={a.key}
+                icon={a.icon}
+                label={a.label}
+                variant={a.variant}
+                active={activeKey === a.key}
+                onClick={() => handleSelect(a)}
+              />
+            ))}
+          </div>
+
+          <div className="admin-section-label">Catálogo</div>
+          <div className="admin-section">
+            {catalogActions.map((a) => (
+              <AdminButton
+                key={a.key}
+                icon={a.icon}
+                label={a.label}
+                variant={a.variant}
+                active={activeKey === a.key}
+                onClick={() => handleSelect(a)}
+              />
+            ))}
+          </div>
+
+          <div className="admin-section-label">Personal</div>
+          <div className="admin-section">
+            {staffActions.map((a) => (
+              <AdminButton
+                key={a.key}
+                icon={a.icon}
+                label={a.label}
+                variant={a.variant}
+                active={activeKey === a.key}
+                onClick={() => handleSelect(a)}
+              />
+            ))}
+          </div>
         </div>
 
-        <div className="admin-section-label">Catálogo</div>
-        <div className="admin-section">
-          {catalogActions.map((a) => (
-            <AdminButton
-              key={a.key}
-              icon={a.icon}
-              label={a.label}
-              variant={a.variant}
-              active={activeKey === a.key}
-              onClick={() => handleSelect(a)}
-            />
-          ))}
-        </div>
-
-        <div className="admin-section-label">Personal</div>
-        <div className="admin-section">
-          {staffActions.map((a) => (
-            <AdminButton
-              key={a.key}
-              icon={a.icon}
-              label={a.label}
-              variant={a.variant}
-              active={activeKey === a.key}
-              onClick={() => handleSelect(a)}
-            />
-          ))}
-        </div>
         <div className="logout-section">
           {logoutActions.map((a) => (
             <AdminButton
@@ -322,19 +322,21 @@ function AdminPage() {
 
       <main className="admin-main">
         <div className="admin-header">
-          <div>
-            <h2>Panel de administración</h2>
+          <div className="header-titles">
+            <h2>Panel de Administración</h2>
             <p className="subtitle">
               Gestiona mesas, catálogo y personal desde un mismo lugar.
             </p>
           </div>
-          <span className="date-pill">
-            {new Date().toLocaleDateString("es-ES", {
-              weekday: "long",
-              day: "numeric",
-              month: "long",
-            })}
-          </span>
+          <div className="header-widgets">
+            <span className="date-pill">
+              {new Date().toLocaleDateString("es-ES", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+              })}
+            </span>
+          </div>
         </div>
 
         <div className="stat-grid">
@@ -349,37 +351,41 @@ function AdminPage() {
           />
         </div>
 
-        <section className="action-container">
-          {activeKey && (
-            <>
-              <h3>{ACTION_META[activeKey].title}</h3>
-              <p className="action-hint">{ACTION_META[activeKey].hint}</p>
-            </>
-          )}
-          {renderActionBody()}
-        </section>
+        <div className="admin-content-grid">
+          <section className="action-container">
+            {activeKey && (
+              <div className="action-header">
+                <h3>{ACTION_META[activeKey].title}</h3>
+                <p className="action-hint">{ACTION_META[activeKey].hint}</p>
+              </div>
+            )}
+            <div className="action-body">{renderActionBody()}</div>
+          </section>
 
-        <section className="activity-panel">
-          <h3>Actividad reciente</h3>
-          {activity.length === 0 ? (
-            <div className="activity-empty">
-              Sin acciones registradas todavía.
-            </div>
-          ) : (
-            <ul className="activity-list">
-              {activity.map((entry) => (
-                <li
-                  key={entry.id}
-                  className={`activity-item${entry.danger ? " danger" : ""}`}
-                >
-                  <span className="dot" />
-                  <span>{entry.label}</span>
-                  <time>{entry.time}</time>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+          <section className="activity-panel">
+            <h3>Actividad reciente</h3>
+            {activity.length === 0 ? (
+              <div className="activity-empty">
+                Sin acciones registradas todavía.
+              </div>
+            ) : (
+              <ul className="activity-list">
+                {activity.map((entry) => (
+                  <li
+                    key={entry.id}
+                    className={`activity-item ${entry.danger ? "danger" : ""}`}
+                  >
+                    <span className="activity-dot" />
+                    <div className="activity-content">
+                      <span className="activity-label">{entry.label}</span>
+                      <time className="activity-time">{entry.time}</time>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </div>
       </main>
     </div>
   );

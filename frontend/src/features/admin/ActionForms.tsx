@@ -13,11 +13,6 @@ import type {
   RemoveUserFormProps,
 } from "./admin";
 
-/* -------------------------------------------------------------
-   Listas de opciones — placeholders. Sustitúyelas por las que
-   maneje tu app (puede que ya las tengas en otro store/endpoint).
-   ------------------------------------------------------------- *
-
 /* ================= Añadir mesa ================= */
 export function CreateTableForm({
   onConfirm,
@@ -345,16 +340,16 @@ export function EditProductForm({
   );
 
   const seleccionarProducto = (producto: ProductoDTO) => {
-  setProductoSeleccionado(producto);
+    setProductoSeleccionado(producto);
 
-  setQuery(producto.nombre);
+    setQuery(producto.nombre);
 
-  setNombre(producto.nombre);
-  setDescripcion(producto.descripcion ?? "");
-  setPrecio(producto.precio);
-  setTipoId(producto.tipoId);
-  setActivo(producto.disponible);
-};
+    setNombre(producto.nombre);
+    setDescripcion(producto.descripcion ?? "");
+    setPrecio(producto.precio);
+    setTipoId(producto.tipoId);
+    setActivo(producto.disponible);
+  };
 
   return (
     <form

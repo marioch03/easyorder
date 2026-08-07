@@ -1,9 +1,7 @@
 import { useState } from "react";
-import logoutIcon from "../../assets/logout.png";
-import ordersIcon from "../../assets/orders.png";
-import tablesIcon from "../../assets/tables.png";
 import ConfirmModal from "../../common/ConfirmModal";
 import SidebarButton from "./SidebarButton";
+import { icons } from "./icons";
 import "./styles.css";
 
 type SidebarProps = {
@@ -38,21 +36,21 @@ function Sidebar({ activeSection, onSelectSection, onLogout }: SidebarProps) {
 
       <nav className="sidebar-nav">
         <SidebarButton
-          icon={tablesIcon}
+          icon={icons.tables}
           label="Mesas"
           active={activeSection === "mesas"}
           onClick={() => onSelectSection("mesas")}
         />
 
         <SidebarButton
-          icon={ordersIcon}
+          icon={icons.orders}
           label="Pedidos"
           active={activeSection === "pedidos"}
           onClick={() => onSelectSection("pedidos")}
         />
 
         <SidebarButton
-          icon={tablesIcon}
+          icon={icons.comandas}
           label="Comandas"
           active={activeSection === "comandas"}
           onClick={() => onSelectSection("comandas")}
@@ -61,7 +59,7 @@ function Sidebar({ activeSection, onSelectSection, onLogout }: SidebarProps) {
 
       <div className="sidebar-footer">
         <SidebarButton
-          icon={logoutIcon}
+          icon={icons.logout}
           label="Salir"
           variant="danger"
           onClick={() => setConfirmLogoutOpen(true)}
@@ -80,4 +78,5 @@ function Sidebar({ activeSection, onSelectSection, onLogout }: SidebarProps) {
     </div>
   );
 }
+
 export default Sidebar;
