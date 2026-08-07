@@ -21,6 +21,7 @@ export default function ComandasPage() {
   const [notaAbierta, setNotaAbierta] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
   const [enviarError, setEnviarError] = useState<string | null>(null);
+  const [mostrarTicketMovil, setMostrarTicketMovil] = useState(false); // <--- NUEVO
 
   const productosPorTipo = useMemo(
     () =>
@@ -103,11 +104,6 @@ export default function ComandasPage() {
     setLineas((prev) => prev.map((l) => (l.key === key ? { ...l, nota } : l)));
   };
 
-  // Antes, escribir una nota en una línea agrupada (cantidad > 1) se la
-  // aplicaba a TODAS las unidades de esa línea, porque solo hay un campo
-  // `nota` por línea. Al abrir el editor, si hay más de 1 unidad, separamos
-  // 1 en una línea propia (con su propia `key`) y dejamos el resto agrupado
-  // tal cual — así la nota solo afecta a la unidad que de verdad la lleva.
   const abrirNota = (linea: LineaComanda) => {
     if (linea.cantidad > 1) {
       const nuevaKey = `${linea.productoId}-${Date.now()}`;
@@ -218,10 +214,45 @@ export default function ComandasPage() {
         </div>
       </div>
 
+      <div className="mobile-floating-bar">
+        <div className="mobile-floating-info">
+          <span className="mobile-floating-qty">{totalUnidades} artículos</span>
+          <span className="mobile-floating-total">{total.toFixed(2)} €</span>
+        </div>
+        <button
+          className="mobile-floating-btn"
+          onClick={() => setMostrarTicketMovil(true)}
+        >
+          Ver Comanda
+        </button>
+      </div>
+
       {/* ---------- Ticket de la comanda ---------- */}
-      <aside className="comanda-ticket">
+      <aside className={`comanda-ticket ${mostrarTicketMovil ? "open" : ""}`}>
         <div className="comanda-ticket-header">
-          <h2>Comanda</h2>
+          <div className="comanda-ticket-header-title">
+            {/* NUEVO: Botón de volver para móvil */}
+            <button
+              type="button"
+              className="mobile-close-ticket"
+              onClick={() => setMostrarTicketMovil(false)}
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </button>
+            <h2>Comanda</h2>
+          </div>
+
           {lineas.length > 0 && (
             <button
               type="button"

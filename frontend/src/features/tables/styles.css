@@ -1,29 +1,26 @@
-
-
 /* --- Leyenda de estados --- */
- 
 .table-legend {
   display: flex;
-  gap: 20px;
+  gap: 12px; /* Reducido para ahorrar espacio */
   flex-wrap: wrap;
-  margin-bottom: 22px;
+  margin-bottom: 16px;
 }
  
 .table-legend-item {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 10px; /* Texto más compacto */
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--color-primary-dark);
-  opacity: 0.7;
+  opacity: 0.8;
 }
  
 .table-legend-dot {
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   box-shadow: var(--shadow-sm);
 }
@@ -34,17 +31,16 @@
 .table-legend-dot.gray { background: #b8b8b8; }
  
 /* --- Zonas y mesas --- */
- 
 .zones-container {
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 16px; /* Menor espacio entre zonas */
 }
  
 .zone-group {
   background: var(--color-background-secondary);
-  border-radius: var(--radius-lg);
-  padding: 22px 26px 28px;
+  border-radius: var(--radius-md); /* Suavizado, menos espacio desperdiciado */
+  padding: 16px 20px; /* Reducido drásticamente */
   box-shadow: var(--shadow-sm);
   border: 1px solid rgba(100, 130, 173, 0.12);
 }
@@ -52,12 +48,12 @@
 .zone-title {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 19px;
+  font-size: 16px; /* Más sutil */
   color: black;
-  margin: 0 0 18px;
+  margin: 0 0 14px;
 }
  
 .zone-title::after {
@@ -69,8 +65,9 @@
  
 .tables-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
-  gap: 16px;
+  /* Reducimos el tamaño mínimo de la mesa a 86px para que quepan más por fila */
+  grid-template-columns: repeat(auto-fill, minmax(86px, 1fr));
+  gap: 12px;
 }
  
 .table-button {
@@ -78,72 +75,71 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 2px;
   width: 100%;
   aspect-ratio: 1 / 1;
-  min-height: 92px;
+  min-height: auto; /* Dejamos que el aspect-ratio mande */
   border: none;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-family: var(--font-body);
   box-shadow: var(--shadow-sm);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
  
 .table-button:hover {
-  transform: translateY(-3px) scale(1.02);
+  transform: translateY(-2px) scale(1.02);
   box-shadow: var(--shadow-md);
 }
  
 .table-button:active {
-  transform: translateY(-1px) scale(1);
+  transform: translateY(0) scale(1);
 }
  
 .table-number {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 26px;
+  font-size: 22px; /* Reducido de 26px */
   line-height: 1;
 }
  
 .table-status-label {
   font-family: var(--font-mono);
-  font-size: 9.5px;
-  letter-spacing: 0.07em;
+  font-size: 8.5px;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  opacity: 0.75;
+  opacity: 0.85;
 }
  
+/* Colores de las mesas */
 .table-button.green {
   background: linear-gradient(160deg, #c2edb2 0%, var(--color-free) 100%);
   color: #1f4a19;
 }
- 
 .table-button.red {
   background: linear-gradient(160deg, var(--color-occupied) 0%, #c23f3f 100%);
   color: var(--color-background-secondary);
 }
- 
 .table-button.yellow {
   background: linear-gradient(160deg, #f8c876 0%, var(--color-preparing) 100%);
   color: #5c3a05;
 }
- 
 .table-button.gray {
   background: linear-gradient(160deg, #dcdcdc 0%, #b8b8b8 100%);
   color: #333;
 }
  
+/* --- Modales --- */
 .modal-center-tables {
-  padding: 18px 22px;
-  font-size: 14px;
+  padding: 16px 20px;
+  font-size: 13.5px;
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
  
 .modal-center-tables p {
-  margin: 6px 0;
+  margin: 4px 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -151,71 +147,29 @@
 }
  
 .modal-bottom-tables {
-  padding: 8px 22px 24px;
+  padding: 8px 20px 20px;
   text-align: center;
 }
  
-.modal-center-tables input,
-.modal-center-tables select {
-  width: 100%;
-  padding: 10px 12px;
-  margin: 6px 0;
-  border: 1px solid rgba(100, 130, 173, 0.3);
-  border-radius: var(--radius-sm);
-  font-family: var(--font-body);
-  font-size: 14px;
-  outline: none;
-  background-color: #fff;
-  color: var(--color-text);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
- 
-.modal-center-tables input:hover,
-.modal-center-tables select:hover {
-  border-color: var(--color-secondary);
-}
- 
-.modal-center-tables input:focus,
-.modal-center-tables select:focus {
-  border-color: var(--color-secondary-dark);
-  box-shadow: 0 0 0 3px rgba(100, 130, 173, 0.15);
-}
- 
-.modal-center-tables input::placeholder {
-  color: var(--color-primary-dark);
-  opacity: 0.4;
-}
- 
-.modal-center-tables select {
-  cursor: pointer;
-  appearance: none;
-}
- 
-.modal-center-tables select:invalid {
-  color: var(--color-primary-dark);
-  opacity: 0.5;
-}
- 
 /* --- QR --- */
- 
 .qr-actions {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
   align-items: center;
 }
  
 .qr-code-frame {
   background: #fff;
-  padding: 16px;
+  padding: 12px;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
   border: 1px solid rgba(100, 130, 173, 0.15);
 }
  
 .qr-actions svg {
-  width: 180px;
-  height: 180px;
+  width: 140px; /* Reducido para que el modal no ocupe toda la pantalla */
+  height: 140px;
   display: block;
 }
  
@@ -225,16 +179,16 @@
   gap: 10px;
   justify-content: center;
   flex-wrap: wrap;
+  width: 100%;
 }
  
 /* --- Cuenta / pedido --- */
- 
 .pedido-items {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 16px 22px;
-  max-height: 260px;
+  gap: 6px;
+  padding: 12px 20px;
+  max-height: 240px;
   overflow-y: auto;
 }
  
@@ -242,31 +196,30 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 12px;
-  background: white;
+  padding: 8px 12px;
+  background: rgba(100, 130, 173, 0.05);
   border-radius: var(--radius-sm);
-  font-size: 13.5px;
+  font-size: 13px;
   color: var(--color-text);
 }
  
- 
-/* --- Botones de acción (QR / cerrar sesión / ver cuenta / crear mesa) --- */
- 
+/* --- Botones de acción --- */
 .image-button {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
+  justify-content: center;
+  gap: 8px;
   width: auto;
-  max-width: 260px;
-  padding: 10px 16px;
+  min-width: 130px;
+  padding: 8px 14px;
   border: none;
   border-radius: var(--radius-sm);
   background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
   color: var(--color-background-secondary);
   cursor: pointer;
   font-family: var(--font-body);
-  font-size: 0.95rem;
-  font-weight: 700;
+  font-size: 13px;
+  font-weight: 600;
   box-shadow: var(--shadow-sm);
   transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
 }
@@ -275,7 +228,7 @@
   background: linear-gradient(135deg, var(--color-danger), var(--color-danger-dark));
 }
  
-.image-button:hover{
+.image-button:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
@@ -283,85 +236,64 @@
 .image-button:disabled {
   opacity: 0.65;
   cursor: not-allowed;
-  transform: none;
-  box-shadow: var(--shadow-sm);
+  box-shadow: none;
 }
  
 .image-button img {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   object-fit: contain;
 }
  
-.image-button span {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
- 
-.loader {
-  width: 18px;
-  height: 18px;
-  border: 2px solid var(--color-background-secondary);
-  border-bottom-color: transparent;
-  border-radius: 50%;
-  display: inline-block;
-  box-sizing: border-box;
-  animation: rotation 0.8s linear infinite;
-}
- 
-@keyframes rotation {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
- 
-/* --- FAB añadir mesa --- */
- 
-.add-table-button {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  border: none;
-  font-size: 30px;
-  font-weight: 600;
-  cursor: pointer;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-  color: var(--color-background-secondary);
-  box-shadow: var(--shadow-md);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
- 
-.add-table-button:hover {
-  transform: scale(1.08);
-  box-shadow: 0 14px 32px rgba(67, 93, 128, 0.3);
-}
-
+/* Manejo de errores */
 .action-error {
-  margin: 20px 0 6px;
+  margin: 16px 0 0;
   padding: 8px 12px;
   border-radius: var(--radius-sm);
   background: rgba(181, 101, 79, 0.12);
   border: 1px solid rgba(181, 101, 79, 0.3);
   color: var(--color-danger-dark);
-  font-size: 12.5px;
+  font-size: 12px;
   text-align: left;
 }
- 
-@media (max-width: 640px) {
+
+/* =========================================================
+   ADAPTACIÓN MÓVIL EXTREMA (Pantallas pequeñas)
+   ========================================================= */
+@media (max-width: 768px) {
   .main-container {
-    padding: 20px 16px 32px;
+    /* CLAVE: Añadimos 90px de padding debajo para que la nueva 
+       barra de navegación inferior no tape la última fila de mesas */
+    padding: 16px 12px 90px; 
   }
  
   .zone-group {
-    padding: 18px 16px 22px;
+    padding: 12px;
   }
  
   .tables-container {
-    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
-    gap: 12px;
+    /* Las mesas se vuelven aún más pequeñas para móviles (mínimo 72px) */
+    grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+    gap: 8px;
+  }
+ 
+  .table-number {
+    font-size: 18px;
+  }
+ 
+  .table-status-label {
+    font-size: 7.5px;
+    letter-spacing: 0;
+  }
+
+  /* Modales en móvil: Botones grandes y fáciles de tocar */
+  .button-group {
+    flex-direction: column; 
+  }
+
+  .image-button {
+    width: 100%; /* Botones ocupan todo el ancho para facilitar el 'tap' */
+    padding: 12px;
+    font-size: 14px;
   }
 }
- 

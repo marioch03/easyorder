@@ -1,6 +1,6 @@
-/* Este archivo asume que index.css ya está cargado globalmente
-   (variables de :root y estilos de body), igual que en el admin. */
-
+/* =========================================================
+   LAYOUT PRINCIPAL
+   ========================================================= */
 .app-layout {
   display: flex;
   height: 100vh;
@@ -17,16 +17,15 @@
 }
 
 /* =========================================================
-   BARRA LATERAL (rail de iconos)
+   BARRA LATERAL (Escritorio - Reducida para ahorrar espacio)
    ========================================================= */
-
 .sidebar-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   height: 100%;
-  width: 144px;
-  padding: 20px 0 24px;
+  width: 96px; /* Reducido de 144px a 96px */
+  padding: 16px 0 20px;
   background: linear-gradient(
     180deg,
     var(--color-primary) 0%,
@@ -34,32 +33,33 @@
   );
   box-shadow: var(--shadow-md);
   box-sizing: border-box;
+  z-index: 10;
 }
 
 .app-logo {
-  width: 104px;
-  height: 104px;
+  width: 64px; /* Reducido para ahorrar espacio */
+  height: 64px;
   border-radius: var(--radius-md);
   background: transparent;
-  border: none;
   display: flex;
-  align-items: top;
+  align-items: center;
   justify-content: center;
   overflow: hidden;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
   flex-shrink: 0;
 }
 
 .app-logo img {
-  width: 85px;
-  height: 85px;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
 }
 
 .sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+  width: 100%;
 }
 
 .sidebar-footer {
@@ -72,48 +72,46 @@
 }
 
 /* --- Botón de la barra lateral --- */
-
 .sidebar-button {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 4px; /* Espacio reducido entre icono y texto */
   width: 100%;
-  padding: 12px 6px;
+  padding: 8px 4px;
   border: none;
-  border-radius: var(--radius-md);
   background: transparent;
   color: var(--color-background-secondary);
   font-family: var(--font-body);
   font-weight: 600;
-  font-size: 14px;
-  letter-spacing: 0.01em;
+  font-size: 11px; /* Texto más pequeño y sutil */
+  letter-spacing: 0.02em;
   text-align: center;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition: transform 0.2s ease;
 }
 
 .sidebar-icon-badge {
-  width: 84px;
-  height: 84px;
+  width: 48px; /* Iconos más compactos (antes 84px) */
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: 14px; /* Forma de app moderna en lugar de círculo gigante */
   background: rgba(245, 237, 237, 0.12);
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
 }
 
 .sidebar-icon-badge img {
-  width: 44px;
-  height: 44px;
+  width: 24px; /* Reducido acorde al badge */
+  height: 24px;
   object-fit: contain;
-  opacity: 0.9;
+  opacity: 0.85;
 }
 
 .sidebar-button span:last-child {
-  opacity: 0.85;
+  opacity: 0.7;
 }
 
 .sidebar-button:hover {
@@ -124,14 +122,9 @@
   background: rgba(245, 237, 237, 0.22);
 }
 
-.sidebar-button:focus-visible {
-  outline: 2px solid var(--color-primary-dark);
-  outline-offset: 2px;
-}
-
 .sidebar-button.active .sidebar-icon-badge {
   background: var(--color-primary-dark);
-  box-shadow: var(--shadow-sm);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .sidebar-button.active .sidebar-icon-badge img {
@@ -142,51 +135,100 @@
   opacity: 1;
 }
 
-/* Botón de salir: mismo estilo en reposo, tono de aviso al interactuar */
+/* Botón de salir */
 .sidebar-button.danger .sidebar-icon-badge {
   background: var(--color-danger);
 }
 .sidebar-button.danger:hover .sidebar-icon-badge {
   background: linear-gradient(135deg, var(--color-danger), var(--color-danger-dark));
 }
-
 .sidebar-button.danger:hover span:last-child {
   opacity: 1;
 }
-
-
 /* =========================================================
-   RESPONSIVE
+   RESPONSIVE (Móviles - Bottom Navigation Bar)
    ========================================================= */
 
-@media (max-width: 720px) {
+@media (max-width: 768px) {
   .app-layout {
-    flex-direction: column;
+    /* LA CLAVE: column-reverse invierte el HTML visualmente. 
+       Pone el Sidebar (que está primero en el código) abajo, y el Main arriba */
+    flex-direction: column-reverse; 
+  }
+
+  .main-content {
+    flex: 1;
+    overflow-y: auto; /* Permite hacer scroll en los pedidos/mesas sin mover la barra inferior */
+    overflow-x: hidden;
   }
 
   .sidebar-container {
     width: 100%;
-    height: auto;
+    height: 72px;
     flex-direction: row;
-    padding: 12px 16px;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08); /* Sombra hacia arriba más pronunciada */
+    z-index: 1000;
+    flex-shrink: 0; /* IMPIDE que la barra inferior se aplaste si la pantalla es pequeña */
   }
 
   .app-logo {
-    margin-bottom: 0;
-    margin-right: 16px;
+    display: none;
   }
 
   .sidebar-nav {
     flex-direction: row;
+    gap: 0;
+    height: 100%;
+    flex: 1;
+    justify-content: space-evenly;
+    align-items: center;
   }
 
   .sidebar-footer {
     margin-top: 0;
-    margin-left: auto;
     padding-top: 0;
+    width: auto;
     border-top: none;
     border-left: 1px solid rgba(245, 237, 237, 0.18);
-    padding-left: 16px;
+    height: 60%;
+    display: flex;
+    align-items: center;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .sidebar-button {
+    width: auto;
+    flex: 1;
+    padding: 4px;
+  }
+
+  .sidebar-icon-badge {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+
+  .sidebar-icon-badge img {
+    width: 20px;
+    height: 20px;
+  }
+
+  .sidebar-button:hover {
+    transform: none;
+  }
+
+  /* Ajustes del banner para móvil en el mismo breakpoint */
+  .page-banner {
+    padding: 16px 20px;
+    flex-wrap: wrap;
+    flex-shrink: 0; /* Evita que el banner se aplaste */
+    position: sticky; /* Opcional: lo mantiene pegado arriba al hacer scroll */
+    top: 0;
+    z-index: 10;
   }
 }
 

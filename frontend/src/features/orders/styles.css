@@ -4,25 +4,25 @@
 
 .orders-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); 
-  gap: 38px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 36px;
   width: 100%;
 }
 
 .pedidos-section {
-  margin-bottom: 22px;
+  margin-bottom: 20px;
 }
 
 .pedidos-section-title {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 17px;
+  font-size: 16px;
   color: var(--color-primary-dark);
-  opacity: 0.75;
-  margin: 0 0 10px;
+  opacity: 0.8;
+  margin: 0 0 12px;
 }
 
 .pedidos-section-title.listos {
@@ -32,13 +32,13 @@
 
 .pedidos-section-count {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   color: var(--color-primary-dark);
   background: rgba(100, 130, 173, 0.12);
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
   border-radius: 999px;
   display: flex;
   align-items: center;
@@ -52,30 +52,29 @@
 
 .order-legend {
   display: flex;
-  gap: 20px;
+  gap: 12px;
   flex-wrap: wrap;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
 .order-legend-item {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 10px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--color-primary-dark);
-  opacity: 0.7;
+  opacity: 0.8;
 }
 
 .order-legend-dot {
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   box-shadow: var(--shadow-sm);
 }
-
 
 /* =========================================================
    2. TARJETA DE PEDIDO (.pedido-card)
@@ -84,11 +83,11 @@
 .pedido-card {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   width: 100%;
   background: var(--color-background-secondary);
   border-radius: var(--radius-md);
-  padding: 12px 14px;
+  padding: 10px 12px;
   box-shadow: var(--shadow-sm);
   border: 1px solid rgba(100, 130, 173, 0.12);
   border-left: 3px solid var(--color-success);
@@ -120,65 +119,40 @@
 .pedido-mesa {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 17px;
+  font-size: 15px;
   color: var(--color-text);
+  white-space: nowrap;
 }
 
 .pedido-meta {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: 10px;
   color: var(--color-primary-dark);
-  opacity: 0.65;
+  opacity: 0.75;
 }
 
 .pedido-id {
-  opacity: 0.7;
+  opacity: 0.8;
 }
 
 .pedido-items-count {
   flex: 1;
 }
 
-.pedido-center {
-  margin-top: 8px;
-  color: black;
-  opacity: 0.75;
-  font-family: var(--font-body);
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.pedido-center span {
-  font-weight: 600;
-  opacity: 1;
-}
-
-.pedido-bottom {
-  margin-top: 8px;
-  padding-top: 10px;
-  border-top: 1px dashed rgba(100, 130, 173, 0.2);
-}
-
 .pedido-tiempo {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.03em;
   color: var(--color-primary-dark);
   opacity: 1;
 }
 
-.pedido-tiempo.warning {
-  color: #a15c00;
-}
-
-.pedido-tiempo.urgent {
-  color: var(--color-occupied);
-}
-
+.pedido-tiempo.warning { color: #a15c00; }
+.pedido-tiempo.urgent { color: var(--color-occupied); }
 
 /* =========================================================
    3. BADGES Y ESTADOS
@@ -186,10 +160,10 @@
 
 .pedido-estado {
   flex-shrink: 0;
-  padding: 3px 9px;
+  padding: 3px 6px;
   border-radius: 999px;
   font-family: var(--font-mono);
-  font-size: 9.5px;
+  font-size: 8.5px;
   font-weight: 700;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -202,8 +176,9 @@
 
 .order-state {
   color: white;
+  font-size: 10px;
+  padding: 4px 8px;
 }
-
 
 /* =========================================================
    4. ESTADO VACÍO
@@ -216,41 +191,37 @@
   justify-content: center;
   text-align: center;
   gap: 6px;
-  padding: 60px 20px;
+  padding: 40px 20px;
   color: var(--color-primary-dark);
 }
 
 .empty-orders-icon {
-  width: 52px;
-  height: 52px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, var(--color-success), #1e8449);
   color: var(--color-background-secondary);
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   box-shadow: var(--shadow-sm);
 }
 
-.empty-orders-icon svg {
-  width: 24px;
-  height: 24px;
-}
+.empty-orders-icon svg { width: 22px; height: 22px; }
 
 .empty-orders-state h2 {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 21px;
+  font-size: 18px;
   margin: 0;
 }
 
 .empty-orders-state p {
-  font-size: 13.5px;
-  opacity: 0.65;
+  font-size: 13px;
+  opacity: 0.7;
   margin: 0;
 }
-
 
 /* =========================================================
    5. MODAL DETALLE DE PEDIDO
@@ -260,7 +231,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18px 22px;
+  padding: 14px 20px;
   font-family: var(--font-body);
   font-size: 14px;
   color: black;
@@ -268,27 +239,20 @@
 
 .modal-bottom-orders {
   display: flex;
+  flex-direction: column;
+  gap: 10px;
   align-items: center;
   justify-content: center;
-  padding: 14px 22px 22px;
+  padding: 14px 20px 20px;
   border-top: 1px solid rgba(100, 130, 173, 0.15);
-  text-align: right;
-}
-
-.modal-bottom-orders h3 {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 19px;
-  color: black;
-  margin: 0;
 }
 
 .order-detail-list {
   display: flex;
   flex-direction: column;
-  margin: 2px 22px 18px;
+  margin: 0 20px 16px;
   padding: 0;
-  max-height: 300px;
+  max-height: 280px;
   overflow-y: auto;
   background: #fff;
   border-radius: var(--radius-md);
@@ -296,10 +260,7 @@
   box-shadow: var(--shadow-sm);
 }
 
-.order-detail-list::-webkit-scrollbar {
-  width: 6px;
-}
-
+.order-detail-list::-webkit-scrollbar { width: 6px; }
 .order-detail-list::-webkit-scrollbar-thumb {
   background: var(--color-secondary);
   border-radius: 10px;
@@ -309,31 +270,29 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 13px 16px;
+  padding: 10px 14px;
   background: #fff;
   border-bottom: 1px solid rgba(100, 130, 173, 0.12);
 }
 
-.order-detail-item:last-child {
-  border-bottom: none;
-}
+.order-detail-item:last-child { border-bottom: none; }
 
 .order-detail-line {
   display: flex;
   align-items: baseline;
-  gap: 10px;
+  gap: 8px;
   font-family: var(--font-body);
   font-weight: 600;
-  font-size: 14.5px;
+  font-size: 13.5px;
   color: var(--color-text);
 }
 
 .order-detail-qty {
   flex-shrink: 0;
-  min-width: 26px;
+  min-width: 22px;
   font-family: var(--font-mono);
   font-weight: 700;
-  font-size: 13px;
+  font-size: 12.5px;
   color: var(--color-primary-dark);
 }
 
@@ -341,87 +300,64 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 7px 10px;
+  padding: 6px 10px;
   border-radius: var(--radius-sm);
   background: rgba(245, 166, 35, 0.14);
   border: 1px solid rgba(245, 166, 35, 0.35);
   color: #7a4a06;
-  font-size: 12.5px;
-  line-height: 1.4;
+  font-size: 12px;
+  line-height: 1.3;
 }
-
-.nota-label {
-  flex-shrink: 0;
-  font-family: var(--font-mono);
-  font-weight: 700;
-  text-transform: uppercase;
-  font-size: 10px;
-  letter-spacing: 0.05em;
-}
-
 
 /* =========================================================
    6. BOTONES Y ACCIONES
    ========================================================= */
 
 .servido-button {
-  width: 200px;
-  padding: 11px 14px;
+  width: auto;
+  min-width: 200px;
+  padding: 10px 14px;
   border: none;
   border-radius: var(--radius-sm);
   background: linear-gradient(135deg, var(--color-success), #1e8449);
   color: var(--color-background-secondary);
   cursor: pointer;
   font-family: var(--font-body);
-  font-size: 0.95rem;
+  font-size: 13px;
   font-weight: 700;
   box-shadow: var(--shadow-sm);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.servido-button:hover {
+.servido-button:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
-}
-
-.servido-button:active {
-  transform: translateY(0);
 }
 
 .servido-button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
-  transform: none;
 }
 
 .pedido-quick-serve {
-  margin-top: 2px;
-  padding: 7px;
+  margin-top: 4px;
+  padding: 8px; /* Más grande para facilitar el toque */
   border: none;
   border-radius: var(--radius-sm);
   background: linear-gradient(135deg, var(--color-success), #1e8449);
   color: white;
   font-family: var(--font-body);
   font-weight: 700;
-  font-size: 12px;
+  font-size: 11.5px;
   cursor: pointer;
   box-shadow: var(--shadow-sm);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.pedido-quick-serve:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-}
-
-.pedido-quick-serve:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
+  width: 100%;
 }
 
 .item-check {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   border: 1.5px solid var(--color-success);
   display: inline-flex;
@@ -432,63 +368,69 @@
   transition: background 0.15s ease, border-color 0.15s ease;
 }
 
-.item-check svg {
-  width: 14px;
-  height: 14px;
-}
-
+.item-check svg { width: 12px; height: 12px; }
 .item-check.checked {
   background: var(--color-success);
   border-color: var(--color-success);
   color: #fff;
 }
 
-.order-detail-item.item-servido {
-  opacity: 0.7;
-}
+.order-detail-item.item-servido { opacity: 0.6; }
 
 .item-servido-button {
-  margin-top: 6px;
-  padding: 6px 14px;
-  border-radius: 6px;
+  margin-top: 4px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
   border: none;
-  font-size: 0.85rem;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
 }
 
-/* Estado: aún no servido -> se puede pulsar */
 .item-servido-button:not(:disabled) {
   background: var(--color-primary);
   color: #fff;
-}
-
-.item-servido-button:not(:disabled):hover {
-  background: var(--color-primary-dark);
 }
 
 .item-servido-button:disabled {
   background: transparent;
   color: var(--color-success);
   border: 1.5px solid var(--color-success);
-  opacity: 0.6;
+  opacity: 0.7;
   cursor: not-allowed;
 }
 
 /* =========================================================
-   7. ADAPTABILIDAD / MEDIA QUERIES
+   7. ADAPTABILIDAD / MEDIA QUERIES (MÓVIL)
    ========================================================= */
 
-@media (max-width: 640px) {
-  .orders-container {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+@media (max-width: 768px) {
+  .main-container {
+    /* CLAVE: Espacio inferior para la barra de navegación móvil */
+    padding: 16px 36px 90px; 
   }
-}
 
-@media (max-width: 420px) {
   .orders-container {
-    grid-template-columns: 1fr;
+    /* Ajuste para móviles: Mínimo 130px asegura 2 columnas en casi todos los teléfonos */
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 28px;
+  }
+  
+  .pedido-card {
+    padding: 10px;
+  }
+
+  /* Botones 100% de ancho en el modal para facilitar el 'tap' con el pulgar */
+  .servido-button {
+    width: 100%;
+    padding: 14px;
+    font-size: 14px;
+  }
+
+  .item-servido-button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 8px;
   }
 }
