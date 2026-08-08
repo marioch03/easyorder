@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-public record PedidoItemDTO(
+public record CrearPedidoItemDTO(
     Long id,
 
     @NotNull(message = "El ID del producto es obligatorio") Long idProducto,
@@ -24,5 +24,5 @@ public record PedidoItemDTO(
 
     boolean servido,
 
-    List<PedidoItem_ModificadorDTO> modificadores) {
+    List<Long> modificadores) {
 }

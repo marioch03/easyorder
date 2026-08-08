@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getAlergenoIcon } from "../../../common/allergens";
+import type { ModificadorDTO } from "../../../common/types";
 import type { CartItem } from "../../cart/cart";
 import { useCart } from "../../cart/useCart";
 import "../styles.css";
@@ -15,23 +16,81 @@ const BASE_IMAGE_URL = "/images/";
 export default function ProductModal({ product, onClose }: Props) {
   const [quantity, setQuantity] = useState(1);
   const [note, setNote] = useState("");
+  const [selectedModifiers, setSelectedModifiers] = useState<
+    Record<number, ModificadorDTO[]>
+  >({});
   const { addItem } = useCart();
 
   useEffect(() => {
     setQuantity(1);
     setNote("");
+    setSelectedModifiers({});
   }, [product]);
 
+  const handleModifierToggle = (
+    groupId: number,
+    mod: ModificadorDTO,
+    max: number,
+  ) => {
+    setSelectedModifiers((prev) => {
+      const currentGroupSelections = prev[groupId] || [];
+      const isAlreadySelected = currentGroupSelections.some(
+        (m) => m.id === mod.id,
+      );
+
+      if (isAlreadySelected) {
+        // Si ya está seleccionado, lo quitamos
+        return {
+          ...prev,
+          [groupId]: currentGroupSelections.filter((m) => m.id !== mod.id),
+        };
+      } else {
+        // Si no está seleccionado, intentamos añadirlo
+        if (max === 1) {
+          // Comportamiento Radio Button (reemplaza el anterior)
+          return { ...prev, [groupId]: [mod] };
+        } else if (currentGroupSelections.length < max) {
+          // Comportamiento Checkbox (añade a la lista)
+          return { ...prev, [groupId]: [...currentGroupSelections, mod] };
+        }
+        // Si ya llegó al máximo, no hacemos nada
+        return prev;
+      }
+    });
+  };
+
+  const isSelectionValid = useMemo(() => {
+    if (!product?.gruposModificadores) return true;
+    return product.gruposModificadores.every((grupo) => {
+      const seleccionados = selectedModifiers[grupo.id]?.length || 0;
+      return seleccionados >= grupo.seleccionMinima;
+    });
+  }, [product, selectedModifiers]);
+
+  const { unitPrice, totalPrice } = useMemo(() => {
+    if (!product) return { unitPrice: 0, totalPrice: 0 };
+
+    const extraPrice = Object.values(selectedModifiers)
+      .flat()
+      .reduce((sum, mod) => sum + mod.precioExtra, 0);
+
+    const unit = product.precio + extraPrice;
+    return { unitPrice: unit, totalPrice: unit * quantity };
+  }, [product, selectedModifiers, quantity]);
+
   const handleAdd = () => {
-    if (!product) return;
+    if (!product || !isSelectionValid) return;
+
+    const flatModifiers = Object.values(selectedModifiers).flat();
 
     const item: CartItem = {
       id: product.id,
       name: product.nombre,
-      price: product.precio,
+      price: unitPrice,
       quantity: quantity,
       image: product.imagen ? product.imagen : "food.png",
       note: note,
+      modifiers: flatModifiers,
     };
 
     addItem(item);
@@ -97,6 +156,75 @@ export default function ProductModal({ product, onClose }: Props) {
             €{(product.precio * quantity).toFixed(2)}
           </span>
         </div>
+
+        {product.gruposModificadores &&
+          product.gruposModificadores.length > 0 && (
+            <div className="modal-modifiers-section">
+              {product.gruposModificadores.map((grupo) => {
+                const seleccionados = selectedModifiers[grupo.id] || [];
+                const isRequired = grupo.seleccionMinima > 0;
+                const hasMetMinimum =
+                  seleccionados.length >= grupo.seleccionMinima;
+
+                return (
+                  <div key={grupo.id} className="modifier-group">
+                    <div className="modifier-group-header">
+                      <h3>{grupo.nombre}</h3>
+                      <span className="modifier-rules">
+                        {isRequired ? (
+                          <span
+                            style={{ color: hasMetMinimum ? "green" : "red" }}
+                          >
+                            Obligatorio (Elige {grupo.seleccionMinima})
+                          </span>
+                        ) : (
+                          <span>Opcional (Máx {grupo.seleccionMaxima})</span>
+                        )}
+                      </span>
+                    </div>
+
+                    <div className="modifier-options">
+                      {grupo.modificadores.map((mod) => {
+                        const isSelected = seleccionados.some(
+                          (m) => m.id === mod.id,
+                        );
+
+                        return (
+                          <label
+                            key={mod.id}
+                            className={`modifier-option ${isSelected ? "selected" : ""}`}
+                          >
+                            <input
+                              type={
+                                grupo.seleccionMaxima === 1
+                                  ? "radio"
+                                  : "checkbox"
+                              }
+                              name={`grupo-${grupo.id}`}
+                              checked={isSelected}
+                              onChange={() =>
+                                handleModifierToggle(
+                                  grupo.id,
+                                  mod,
+                                  grupo.seleccionMaxima,
+                                )
+                              }
+                            />
+                            <span className="mod-name">{mod.nombre}</span>
+                            {mod.precioExtra > 0 && (
+                              <span className="mod-price">
+                                +€{mod.precioExtra.toFixed(2)}
+                              </span>
+                            )}
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         <div className="modal-note">
           <h3>Nota adicional</h3>
 

@@ -277,9 +277,9 @@ VALUES
 /*!40000 ALTER TABLE `ProductoTipo` ENABLE KEYS */;
 UNLOCK TABLES;
 
-DROP TABLE IF EXISTS `ProductoAlergeno`;
+DROP TABLE IF EXISTS `Producto_Alergeno`;
 
-CREATE TABLE `ProductoAlergeno` (
+CREATE TABLE `Producto_Alergeno` (
     id_producto BIGINT NOT NULL,
     id_alergeno BIGINT NOT NULL,
     tipo ENUM('CONTIENE', 'PUEDE_CONTENER_TRAZAS') NOT NULL DEFAULT 'CONTIENE',
@@ -290,9 +290,9 @@ CREATE TABLE `ProductoAlergeno` (
         FOREIGN KEY (id_alergeno) REFERENCES Alergeno(id) ON DELETE CASCADE
 );
 
-LOCK TABLES `ProductoAlergeno` WRITE;
+LOCK TABLES `Producto_Alergeno` WRITE;
 
-INSERT INTO `ProductoAlergeno` (`id_producto`, `id_alergeno`, `tipo`) VALUES
+INSERT INTO `Producto_Alergeno` (`id_producto`, `id_alergeno`, `tipo`) VALUES
   -- Cerveza (ID 4): Gluten
   (4, 1, 'CONTIENE'),
   
@@ -350,10 +350,9 @@ INSERT INTO `ProductoAlergeno` (`id_producto`, `id_alergeno`, `tipo`) VALUES
   (22, 7, 'CONTIENE'),
   (22, 8, 'PUEDE_CONTENER_TRAZAS');
 
-/*!40000 ALTER TABLE `ProductoAlergeno` ENABLE KEYS */;
 UNLOCK TABLES;
 
-CREATE INDEX idx_producto_alergeno_producto ON ProductoAlergeno (id_producto);
+CREATE INDEX idx_producto_alergeno_producto ON Producto_Alergeno (id_producto);
 
 # Volcado de tabla Sesion
 # ------------------------------------------------------------

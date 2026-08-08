@@ -247,7 +247,7 @@ export default function OrderPage() {
               {pedidoSeleccionado.items.map((item) => (
                 <div
                   className={`order-detail-item ${item.servido ? "item-servido" : ""}`}
-                  key={item.idProducto}
+                  key={item.id}
                 >
                   <div className="order-detail-line">
                     <span className="order-detail-qty">{item.cantidad}×</span>
@@ -271,9 +271,17 @@ export default function OrderPage() {
                     </span>
                   </div>
 
+                  {item.modificadores && item.modificadores.length > 0 && (
+                    <ul className="order-detail-modifiers">
+                      {item.modificadores.map((mod) => (
+                        <li key={mod.id}>+ {mod.nombre}</li>
+                      ))}
+                    </ul>
+                  )}
+
                   {item.nota && (
                     <div className="order-detail-note">
-                      <span>{item.nota}</span>
+                      <span>Nota: {item.nota}</span>
                     </div>
                   )}
 

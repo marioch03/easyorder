@@ -220,6 +220,25 @@
   transform: scale(0.96);
 }
 
+.kds-modifiers-list {
+  list-style-type: none;
+  margin: 4px 0 8px 32px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kds-modifiers-list li {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.kds-ticket-card.late .kds-modifiers-list li {
+  color: #7f1d1d;
+}
+
 /* =========================================================
    RESPONSIVE
    ========================================================= */

@@ -1,10 +1,7 @@
-export type PedidoDTO = {
-  idPedido: number;
-  idSesion: number;
-  numeroMesa: number;
-  nombreEstado: string;
-  createdAt: string;
-  items: PedidoItemDTO[];
+export type PedidoItemModificadorDTO = {
+  id: number;
+  nombre: string;
+  precioAplicado: number;
 };
 
 export type PedidoItemDTO = {
@@ -16,6 +13,16 @@ export type PedidoItemDTO = {
   nota: string | null;
   listoParaServir: boolean;
   servido: boolean;
+  modificadores?: PedidoItemModificadorDTO[];
+};
+
+export type PedidoDTO = {
+  idPedido: number;
+  idSesion: number;
+  numeroMesa: number;
+  nombreEstado: string;
+  createdAt: string;
+  items: PedidoItemDTO[];
 };
 
 export const EstadoPedido = {
@@ -23,5 +30,3 @@ export const EstadoPedido = {
   PARCIAL: "PARCIAL",
   LISTO: "LISTO",
 } as const;
-
-export type EstadoPedido = (typeof EstadoPedido)[keyof typeof EstadoPedido];

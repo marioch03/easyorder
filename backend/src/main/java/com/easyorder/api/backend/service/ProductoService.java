@@ -7,19 +7,24 @@ import java.util.stream.Collectors;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.easyorder.api.backend.dto.AlergenoDTO;
 import com.easyorder.api.backend.dto.EditarProductoDTO;
+import com.easyorder.api.backend.dto.GrupoModificadorDTO;
+import com.easyorder.api.backend.dto.ModificadorDTO;
 import com.easyorder.api.backend.dto.ProductoComandaDTO;
 import com.easyorder.api.backend.dto.ProductoDTO;
 import com.easyorder.api.backend.dto.ProductoTipoDTO;
 import com.easyorder.api.backend.exception.NoEncontradoException;
+import com.easyorder.api.backend.model.GrupoModificador;
 import com.easyorder.api.backend.model.Producto;
 import com.easyorder.api.backend.model.ProductoTipo;
 import com.easyorder.api.backend.model.ZonaTrabajo;
-import com.easyorder.api.backend.repository.ProductoAlergenoRepository;
 import com.easyorder.api.backend.repository.ProductoRepository;
 import com.easyorder.api.backend.repository.ProductoTipoRepository;
+import com.easyorder.api.backend.repository.Producto_AlergenoRepository;
+import com.easyorder.api.backend.repository.Producto_GrupoModificadorRepository;
 import com.easyorder.api.backend.repository.ZonaTrabajoRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -28,102 +33,130 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ProductoService {
 
-        private final ProductoRepository productoRepository;
+	private final ProductoRepository productoRepository;
 
-        private final ProductoTipoRepository productoTipoRepository;
+	private final ProductoTipoRepository productoTipoRepository;
 
-        private final ZonaTrabajoRepository zonaTrabajoRepository;
+	private final ZonaTrabajoRepository zonaTrabajoRepository;
 
-        private final ProductoAlergenoRepository productoAlergenoRepository;
+	private final Producto_AlergenoRepository productoAlergenoRepository;
 
-        public List<ProductoDTO> findAll() {
-                List<Producto> productos = productoRepository.findAll();
+	private final Producto_GrupoModificadorRepository producto_GrupoModificadorRepository;
 
-                List<Long> productoIds = productos.stream().map(Producto::getId).toList();
+	@Transactional(readOnly = true)
+	public List<ProductoDTO> findAll() {
+		List<Producto> productos = productoRepository.findAll();
 
-                Map<Long, List<AlergenoDTO>> alergenosPorProducto = productoAlergenoRepository
-                                .findByProducto_IdIn(productoIds).stream()
-                                .collect(Collectors.groupingBy(
-                                                pa -> pa.getProducto().getId(),
-                                                Collectors.mapping(
-                                                                pa -> new AlergenoDTO(pa.getAlergeno().getNombre(),
-                                                                                pa.getTipo()),
-                                                                Collectors.toList())));
+		List<Long> productoIds = productos.stream().map(Producto::getId).toList();
 
-                return productos.stream()
-                                .map(producto -> new ProductoDTO(
-                                                producto.getId(),
-                                                producto.getNombre(),
-                                                producto.getDescripcion(),
-                                                producto.getPrecio().doubleValue(),
-                                                producto.isDisponible(),
-                                                producto.getImagen(),
-                                                producto.getTipo().getId(),
-                                                alergenosPorProducto.getOrDefault(producto.getId(), List.of())))
-                                .collect(Collectors.toList());
-        }
+		// 1. Mapeo de alérgenos (ya lo tenías)
+		Map<Long, List<AlergenoDTO>> alergenosPorProducto = productoAlergenoRepository
+				.findByProducto_IdIn(productoIds).stream()
+				.collect(Collectors.groupingBy(
+						pa -> pa.getProducto().getId(),
+						Collectors.mapping(
+								pa -> new AlergenoDTO(pa.getAlergeno().getNombre(), pa.getTipo()),
+								Collectors.toList())));
 
-        public List<ProductoComandaDTO> getProductosSimplificados() {
-                return productoRepository.findAll().stream()
-                                .map(producto -> new ProductoComandaDTO(
-                                                producto.getId(),
-                                                producto.getNombre(),
-                                                producto.getPrecio(),
-                                                producto.getTipo().getId(),
-                                                producto.isDisponible()))
-                                .collect(Collectors.toList());
-        }
+		Map<Long, List<GrupoModificadorDTO>> gruposPorProducto = producto_GrupoModificadorRepository
+				.findByProducto_IdIn(productoIds).stream()
+				.collect(Collectors.groupingBy(
+						pgm -> pgm.getProducto().getId(),
+						Collectors.mapping(
+								pgm -> mapearAGrupoDTO(pgm.getGrupo()),
+								Collectors.toList())));
 
-        public Producto getProducto(Long id) {
-                return productoRepository.findById(id)
-                                .orElseThrow(() -> new NoEncontradoException("Producto no encontrado. ID: " + id));
-        }
+		return productos.stream()
+				.map(producto -> new ProductoDTO(
+						producto.getId(),
+						producto.getNombre(),
+						producto.getDescripcion(),
+						producto.getPrecio().doubleValue(),
+						producto.isDisponible(),
+						producto.getImagen(),
+						producto.getTipo().getId(),
+						alergenosPorProducto.getOrDefault(producto.getId(), List.of()),
+						gruposPorProducto.getOrDefault(producto.getId(), List.of())))
+				.collect(Collectors.toList());
+	}
 
-        public Producto save(Producto producto) {
-                return productoRepository.save(producto);
-        }
+	private GrupoModificadorDTO mapearAGrupoDTO(GrupoModificador grupo) {
+		List<ModificadorDTO> modificadores = grupo.getModificadores().stream()
+				.map(m -> new ModificadorDTO(
+						m.getId(),
+						m.getNombre(),
+						m.getPrecioExtra()))
+				.collect(Collectors.toList());
 
-        public void deleteById(Long id) {
-                productoRepository.deleteById(id);
-        }
+		return new GrupoModificadorDTO(
+				grupo.getId(),
+				grupo.getNombre(),
+				grupo.getSeleccionMinima(),
+				grupo.getSeleccionMaxima(),
+				modificadores);
+	}
 
-        public List<Producto> findByNombreContainingIgnoreCase(String nombre) {
-                return productoRepository.findByNombreContainingIgnoreCase(nombre);
-        }
+	public List<ProductoComandaDTO> getProductosSimplificados() {
+		return productoRepository.findAll().stream()
+				.map(producto -> new ProductoComandaDTO(
+						producto.getId(),
+						producto.getNombre(),
+						producto.getPrecio(),
+						producto.getTipo().getId(),
+						producto.isDisponible()))
+				.collect(Collectors.toList());
+	}
 
-        public List<ProductoTipoDTO> getTipos() {
-                return productoTipoRepository.findAll().stream()
-                                .map(tipo -> new ProductoTipoDTO(tipo.getId(), tipo.getNombre()))
-                                .collect(Collectors.toList());
-        }
+	public Producto getProducto(Long id) {
+		return productoRepository.findById(id)
+				.orElseThrow(() -> new NoEncontradoException("Producto no encontrado. ID: " + id));
+	}
 
-        @CacheEvict(value = "productos", allEntries = true)
-        public Producto editarProducto(Long id, EditarProductoDTO dto) {
+	public Producto save(Producto producto) {
+		return productoRepository.save(producto);
+	}
 
-                Producto producto = productoRepository.findById(id)
-                                .orElseThrow(() -> new NoEncontradoException(
-                                                "Producto no encontrado. ID: " + id));
+	public void deleteById(Long id) {
+		productoRepository.deleteById(id);
+	}
 
-                ProductoTipo tipo = productoTipoRepository.findById(dto.tipoId())
-                                .orElseThrow(() -> new NoEncontradoException(
-                                                "ProductoTipo no encontrado. ID: " + id));
+	public List<Producto> findByNombreContainingIgnoreCase(String nombre) {
+		return productoRepository.findByNombreContainingIgnoreCase(nombre);
+	}
 
-                producto.setId(dto.id());
-                producto.setNombre(dto.nombre());
-                producto.setDescripcion(dto.descripcion());
-                producto.setPrecio(BigDecimal.valueOf(dto.precio()));
-                producto.setDisponible(dto.activo());
-                producto.setTipo(tipo);
+	public List<ProductoTipoDTO> getTipos() {
+		return productoTipoRepository.findAll().stream()
+				.map(tipo -> new ProductoTipoDTO(tipo.getId(), tipo.getNombre()))
+				.collect(Collectors.toList());
+	}
 
-                return productoRepository.save(producto);
-        }
+	@CacheEvict(value = "productos", allEntries = true)
+	public Producto editarProducto(Long id, EditarProductoDTO dto) {
 
-        public List<ProductoTipoDTO> getTiposKds(String nombreZonaTrabajo) {
-                ZonaTrabajo zonaTrabajo = zonaTrabajoRepository.findByNombre(nombreZonaTrabajo)
-                                .orElseThrow(() -> new NoEncontradoException(nombreZonaTrabajo));
+		Producto producto = productoRepository.findById(id)
+				.orElseThrow(() -> new NoEncontradoException(
+						"Producto no encontrado. ID: " + id));
 
-                return productoTipoRepository.findByZonaTrabajo(zonaTrabajo).stream()
-                                .map(tipo -> new ProductoTipoDTO(tipo.getId(), tipo.getNombre()))
-                                .collect(Collectors.toList());
-        }
+		ProductoTipo tipo = productoTipoRepository.findById(dto.tipoId())
+				.orElseThrow(() -> new NoEncontradoException(
+						"ProductoTipo no encontrado. ID: " + id));
+
+		producto.setId(dto.id());
+		producto.setNombre(dto.nombre());
+		producto.setDescripcion(dto.descripcion());
+		producto.setPrecio(BigDecimal.valueOf(dto.precio()));
+		producto.setDisponible(dto.activo());
+		producto.setTipo(tipo);
+
+		return productoRepository.save(producto);
+	}
+
+	public List<ProductoTipoDTO> getTiposKds(String nombreZonaTrabajo) {
+		ZonaTrabajo zonaTrabajo = zonaTrabajoRepository.findByNombre(nombreZonaTrabajo)
+				.orElseThrow(() -> new NoEncontradoException(nombreZonaTrabajo));
+
+		return productoTipoRepository.findByZonaTrabajo(zonaTrabajo).stream()
+				.map(tipo -> new ProductoTipoDTO(tipo.getId(), tipo.getNombre()))
+				.collect(Collectors.toList());
+	}
 }

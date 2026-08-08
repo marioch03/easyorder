@@ -184,6 +184,7 @@ export default function MenuPage() {
                     imagen: product.imagen ?? "food.png",
                     tipoId: product.tipoId,
                     disponible: product.disponible,
+                    gruposModificadores: product.gruposModificadores,
                   }}
                 />
               ))}

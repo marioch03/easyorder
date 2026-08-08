@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import type { OrderDTO, OrderItemDTO } from "../../../common/types";
+import { getCartLineId } from "../../cart/CartProvider";
 import { useCart } from "../../cart/useCart";
 import { useSession } from "../../session/useSession";
 import { crearPedido } from "../services/cartService";
@@ -16,8 +17,8 @@ export function useCartData(sessionCode: string | null) {
     [cart],
   );
 
-  const increaseQuantity = (id: number) => {
-    const item = cart.find((i) => i.id === id);
+  const increaseQuantity = (cartLineId: string) => {
+    const item = cart.find((i) => getCartLineId(i) === cartLineId);
 
     if (item) {
       addItem({
@@ -27,8 +28,8 @@ export function useCartData(sessionCode: string | null) {
     }
   };
 
-  const decreaseQuantity = (id: number) => {
-    decreaseItem(id);
+  const decreaseQuantity = (cartLineId: string) => {
+    decreaseItem(cartLineId);
   };
 
   const realizarPedido = async () => {
@@ -41,8 +42,10 @@ export function useCartData(sessionCode: string | null) {
           cantidad: item.quantity,
           precioUnitario: item.price,
           nota: item.note || "",
+          modificadores: item.modifiers?.map((m) => m.id) || [],
         }),
       ),
+      total: total,
     };
 
     await crearPedido(order);

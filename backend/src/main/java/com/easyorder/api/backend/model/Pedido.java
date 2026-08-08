@@ -1,5 +1,6 @@
 package com.easyorder.api.backend.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -59,14 +60,19 @@ public class Pedido {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "total", nullable = false, precision = 10, scale = 2)
+    @Builder.Default
+    private BigDecimal total = BigDecimal.ZERO;
+
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     @Builder.Default
     private Set<PedidoItem> items = new HashSet<>();
 
-    public Pedido(Sesion sesion, PedidoEstado estado) {
+    public Pedido(Sesion sesion, PedidoEstado estado, BigDecimal total) {
         this.sesion = sesion;
         this.estado = estado;
+        this.total = total;
     }
 
 }

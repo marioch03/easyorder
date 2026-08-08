@@ -1,3 +1,5 @@
+import type { ModificadorDTO } from "../../common/types";
+
 export type CartItem = {
   id: number;
   name: string;
@@ -5,12 +7,13 @@ export type CartItem = {
   quantity: number;
   image?: string;
   note?: string;
+  modifiers?: ModificadorDTO[];
 };
 
 export type CartContextType = {
   items: CartItem[];
   addItem: (item: CartItem) => void;
-  decreaseItem: (id: number) => void;
-  removeItem: (id: number) => void;
+  decreaseItem: (cartLineId: string) => void;
+  removeItem: (cartLineId: string) => void;
   clearCart: () => void;
 };

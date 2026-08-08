@@ -21,4 +21,6 @@ public class ProductoDTO implements Serializable {
 	private String imagen;
 	private long tipoId;
 	private List<AlergenoDTO> alergenos;
+	List<GrupoModificadorDTO> gruposModificadores;
+
 }

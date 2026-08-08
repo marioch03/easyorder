@@ -43,27 +43,48 @@ export default function CartPage() {
       <div className="cart-items-wrapper">
         {cart.length === 0 && <p>Tu carrito está vacío</p>}
 
-        {cart.map((item) => (
-          <div key={item.id} className="cart-item">
-            <img src={BASE_IMAGE_URL + item.image} alt={item.name} />
+        {cart.map((item) => {
+          // 1. GENERAMOS EL ID ÚNICO DE LA LÍNEA PARA REACT Y PARA SUMAR/RESTAR
+          const modsString =
+            item.modifiers
+              ?.map((m) => m.id)
+              .sort()
+              .join(",") || "";
+          const cartLineId = `${item.id}-${item.note || ""}-${modsString}`;
 
-            <div className="cart-info">
-              <h4>{item.name}</h4>
-              <p>{item.price.toFixed(2)} €</p>
-              {item.note && item.note.trim() !== "" && (
-                <span className="cart-note-indicator">Personalizado</span>
-              )}
+          return (
+            <div key={cartLineId} className="cart-item">
+              <img src={BASE_IMAGE_URL + item.image} alt={item.name} />
+
+              <div className="cart-info">
+                <h4>{item.name}</h4>
+
+                {/* 2. MOSTRAMOS LOS MODIFICADORES SELECCIONADOS */}
+                {item.modifiers && item.modifiers.length > 0 && (
+                  <ul className="cart-item-modifiers">
+                    {item.modifiers.map((mod) => (
+                      <li key={mod.id}>+ {mod.nombre}</li>
+                    ))}
+                  </ul>
+                )}
+
+                <p>{item.price.toFixed(2)} €</p>
+
+                {item.note && item.note.trim() !== "" && (
+                  <span className="cart-note-indicator">
+                    Personalizado: {item.note}
+                  </span>
+                )}
+              </div>
+
+              <div className="cart-qty">
+                <button onClick={() => decreaseQuantity(cartLineId)}>−</button>
+                <span>{item.quantity}</span>
+                <button onClick={() => increaseQuantity(cartLineId)}>+</button>
+              </div>
             </div>
-
-            <div className="cart-qty">
-              <button onClick={() => decreaseQuantity(item.id)}>−</button>
-
-              <span>{item.quantity}</span>
-
-              <button onClick={() => increaseQuantity(item.id)}>+</button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {cart.length > 0 && (

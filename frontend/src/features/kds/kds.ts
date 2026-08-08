@@ -1,3 +1,8 @@
+export type ModificadorKds = {
+  id: number;
+  nombre: string;
+};
+
 export type PedidoItemKds = {
   id: number;
   nombre: string;
@@ -7,7 +12,8 @@ export type PedidoItemKds = {
   mesa: number;
   listoParaServir: boolean;
   createdAt: string;
-}
+  modificadores?: ModificadorKds[];
+};
 
 export type ColumnaKds = {
   id: number;

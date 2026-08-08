@@ -19,11 +19,8 @@ export default function KdsBoard({ zonaTrabajo }: KdsBoardProps) {
   }
 
   if (error) {
-    return (
-      <div className="kds-scope kds-status kds-status-error">{error}</div>
-    );
+    return <div className="kds-scope kds-status kds-status-error">{error}</div>;
   }
-
 
   return (
     <div className="kds-scope kds-container">
@@ -35,7 +32,9 @@ export default function KdsBoard({ zonaTrabajo }: KdsBoardProps) {
           <div key={columna.id} className="kds-column">
             <h3 className="kds-column-header">
               <span>{columna.nombre}</span>
-              <span className="kds-column-count">{columna.productos.length}</span>
+              <span className="kds-column-count">
+                {columna.productos.length}
+              </span>
             </h3>
 
             <div className="kds-product-list">
@@ -52,15 +51,28 @@ export default function KdsBoard({ zonaTrabajo }: KdsBoardProps) {
                         <span className="kds-qty">{producto.cantidad}x</span>
                         {producto.nombre}
                       </span>
-                      <span className="kds-time">{producto.tiempoEsperaMin} min</span>
+                      <span className="kds-time">
+                        {producto.tiempoEsperaMin} min
+                      </span>
                     </div>
+
+                    {producto.modificadores &&
+                      producto.modificadores.length > 0 && (
+                        <ul className="kds-modifiers-list">
+                          {producto.modificadores.map((mod) => (
+                            <li key={mod.id}>+ {mod.nombre}</li>
+                          ))}
+                        </ul>
+                      )}
 
                     {producto.nota && (
                       <div className="kds-notes">↳ {producto.nota}</div>
                     )}
 
                     <div className="kds-ticket-footer">
-                      <span className="kds-table-name">Mesa {producto.mesa}</span>
+                      <span className="kds-table-name">
+                        Mesa {producto.mesa}
+                      </span>
                       <button
                         type="button"
                         className="kds-btn-ready"

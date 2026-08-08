@@ -3,6 +3,15 @@ import { useSession } from "../session/useSession";
 import { CartContext } from "./CartContext";
 import type { CartItem } from "./cart";
 
+export const getCartLineId = (item: CartItem) => {
+  const modsString =
+    item.modifiers
+      ?.map((m) => m.id)
+      .sort()
+      .join(",") || "";
+  return `${item.id}-${item.note || ""}-${modsString}`;
+};
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const { sessionCode } = useSession();
   const [items, setItems] = useState<CartItem[]>(() => {
@@ -31,12 +40,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addItem = (item: CartItem) => {
     setItems((prev) => {
-      const existing = prev.find(
-        (i) => i.id === item.id && i.note === item.note,
-      );
+      const newLineId = getCartLineId(item);
+
+      const existing = prev.find((i) => getCartLineId(i) === newLineId);
+
       if (existing) {
         return prev.map((i) =>
-          i.id === item.id && i.note === item.note
+          getCartLineId(i) === newLineId
             ? { ...i, quantity: i.quantity + item.quantity }
             : i,
         );
@@ -46,14 +56,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  const removeItem = (id: number) => {
-    setItems((prev) => prev.filter((i) => i.id !== id));
+  const removeItem = (cartLineId: string) => {
+    setItems((prev) => prev.filter((i) => getCartLineId(i) !== cartLineId));
   };
 
-  const decreaseItem = (id: number) => {
+  const decreaseItem = (cartLineId: string) => {
     setItems((prev) =>
       prev
-        .map((i) => (i.id === id ? { ...i, quantity: i.quantity - 1 } : i))
+        .map((i) =>
+          getCartLineId(i) === cartLineId
+            ? { ...i, quantity: i.quantity - 1 }
+            : i,
+        )
         .filter((i) => i.quantity > 0),
     );
   };

@@ -31,9 +31,16 @@ export type OrderItemDTO = {
   cantidad: number;
   precioUnitario: number;
   nota: string;
+  modificadores: number[];
 };
 
 export type OrderDTO = {
   items: OrderItemDTO[];
+  total: number;
 };
 
+export type ModificadorDTO = {
+  id: number;
+  nombre: string;
+  precioExtra: number;
+};

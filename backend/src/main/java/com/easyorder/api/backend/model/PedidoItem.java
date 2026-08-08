@@ -1,7 +1,10 @@
 package com.easyorder.api.backend.model;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,10 +13,21 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "PedidoItem")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class PedidoItem {
 
     @Id
@@ -31,23 +45,27 @@ public class PedidoItem {
     private Integer cantidad;
 
     @Column(name = "precio_unitario", nullable = false, precision = 10, scale = 2)
+    @Builder.Default
     private BigDecimal precioUnitario = BigDecimal.ZERO;
 
     @Column(length = 200)
     private String nota;
 
     @Column(name = "listo_para_servir")
+    @Builder.Default
     private boolean listoParaServir = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_zona_trabajo")
     private ZonaTrabajo zonaTrabajo;
 
-    @Column(nullable = true)
+    @Column(name = "servido", nullable = true)
+    @Builder.Default
     private boolean servido = false;
 
-    public PedidoItem() {
-    }
+    @OneToMany(mappedBy = "pedidoItem", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<PedidoItem_Modificador> modificadores = new ArrayList<>();
 
     public PedidoItem(Producto producto, Pedido pedido, Integer cantidad, BigDecimal precioUnitario, String nota,
             boolean listoParaServir, ZonaTrabajo zonaTrabajo, boolean servido) {

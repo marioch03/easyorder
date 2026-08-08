@@ -66,6 +66,10 @@ public class Producto {
     private ProductoTipo tipo;
 
     @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Producto_GrupoModificador> gruposModificadores = new ArrayList<>();
+
+    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     @Builder.Default
     private List<PedidoItem> pedidoItems = new ArrayList<>();

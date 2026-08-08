@@ -6,6 +6,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.easyorder.api.backend.dto.ModificadorKdsDTO;
 import com.easyorder.api.backend.dto.PedidoItemKds;
 import com.easyorder.api.backend.dto.SseTopic;
 import com.easyorder.api.backend.event.SseTopicEvent;
@@ -31,21 +32,33 @@ public class PedidoItemService {
   public List<PedidoItemKds> obtenerComandasParaKds(String nombreZonaTrabajo) {
 
     if (!zonaTrabajoRepository.existsByNombreIgnoreCase(nombreZonaTrabajo.toUpperCase())) {
-      throw new NoEncontradoException("ZonaTRabajo no encontrada: " + nombreZonaTrabajo);
+      throw new NoEncontradoException("Zona de Trabajo no encontrada: " + nombreZonaTrabajo);
     }
 
     List<PedidoItem> items = pedidoItemRepository.findPendientesByZona(nombreZonaTrabajo.toUpperCase());
 
     return items.stream()
-        .map(item -> new PedidoItemKds(
-            item.getId(),
-            item.getProducto().getNombre(),
-            item.getProducto().getTipo().getId(),
-            item.getCantidad(),
-            item.getNota(),
-            item.getPedido().getSesion().getMesa().getNumero(),
-            item.isListoParaServir(),
-            item.getPedido().getCreatedAt()))
+        .map(item -> {
+
+          List<ModificadorKdsDTO> modificadoresDTO = (item.getModificadores() == null)
+              ? List.of()
+              : item.getModificadores().stream()
+                  .map(mod -> new ModificadorKdsDTO(
+                      mod.getId(),
+                      mod.getModificador().getNombre()))
+                  .toList();
+
+          return new PedidoItemKds(
+              item.getId(),
+              item.getProducto().getNombre(),
+              item.getProducto().getTipo().getId(),
+              item.getCantidad(),
+              item.getNota(),
+              item.getPedido().getSesion().getMesa().getNumero(),
+              item.isListoParaServir(),
+              item.getPedido().getCreatedAt(),
+              modificadoresDTO);
+        })
         .toList();
   }
 
