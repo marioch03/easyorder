@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -59,77 +60,143 @@ public class PedidoService {
 
 	@Transactional
 	public PedidoDTO crearPedido(CrearPedidoDTO dto, Sesion sesion) {
-		PedidoEstado estadoPendiente = pedidoEstadoRepository.findByNombre(PedidoEstadoEnum.PENDIENTE.getValue())
-				.orElseThrow(() -> new NoEncontradoException("Estado no encontrado"));
+		// 1. Carga de datos necesarios
+		PedidoEstado estadoPendiente = obtenerEstadoPendiente();
+		Map<Long, Modificador> modificadorMap = cargarModificadoresMap(dto.items());
+		Map<Long, Producto> productoMap = cargarProductosMap(dto.items());
 
-		Set<Long> modificadorIds = dto.items().stream()
+		// 2. Construcción de ítems y cálculo del total
+		Pedido nuevoPedido = instanciarPedidoBase(sesion, estadoPendiente);
+		List<PedidoItem> items = new ArrayList<>();
+		BigDecimal totalCalculado = BigDecimal.ZERO;
+
+		for (CrearPedidoItemDTO itemDTO : dto.items()) {
+			PedidoItem item = crearPedidoItem(itemDTO, nuevoPedido, productoMap, modificadorMap);
+			items.add(item);
+			totalCalculado = totalCalculado.add(calcularSubtotalItem(item));
+		}
+
+		// 3. Validación de seguridad
+		validarTotal(dto.total(), totalCalculado);
+
+		// 4. Persistencia en Base de Datos
+		nuevoPedido.setTotal(totalCalculado);
+		Pedido pedidoGuardado = pedidoRepository.save(nuevoPedido);
+		pedidoItemRepository.saveAll(items);
+
+		// 5. Notificación y respuesta
+		notificarCambiosSSE();
+		return toPedidoDTO(pedidoGuardado);
+	}
+
+	private PedidoEstado obtenerEstadoPendiente() {
+		return pedidoEstadoRepository.findByNombre(PedidoEstadoEnum.PENDIENTE.getValue())
+				.orElseThrow(() -> new NoEncontradoException("Estado PENDIENTE no encontrado"));
+	}
+
+	private Map<Long, Modificador> cargarModificadoresMap(List<CrearPedidoItemDTO> items) {
+		Set<Long> ids = items.stream()
 				.filter(item -> item.modificadores() != null)
 				.flatMap(item -> item.modificadores().stream())
 				.collect(Collectors.toSet());
 
-		Map<Long, Modificador> modificadorMap = modificadorIds.isEmpty() ? Map.of()
-				: modificadorRepository.findAllById(modificadorIds).stream()
+		return ids.isEmpty() ? Map.of()
+				: modificadorRepository.findAllById(ids).stream()
 						.collect(Collectors.toMap(Modificador::getId, Function.identity()));
+	}
 
-		Set<Long> productoIds = dto.items().stream()
+	private Map<Long, Producto> cargarProductosMap(List<CrearPedidoItemDTO> items) {
+		Set<Long> ids = items.stream()
 				.map(CrearPedidoItemDTO::idProducto)
 				.collect(Collectors.toSet());
 
-		Map<Long, Producto> productoMap = productoRepository.findAllById(productoIds).stream()
+		return productoRepository.findAllById(ids).stream()
 				.collect(Collectors.toMap(Producto::getId, Function.identity()));
+	}
 
-		Pedido nuevoPedido = new Pedido(sesion, estadoPendiente, dto.total());
-		final Pedido pedidoGuardado = pedidoRepository.save(nuevoPedido);
+	private Pedido instanciarPedidoBase(Sesion sesion, PedidoEstado estado) {
+		Pedido pedido = new Pedido();
+		pedido.setSesion(sesion);
+		pedido.setEstado(estado);
+		return pedido;
+	}
 
-		List<PedidoItem> items = new ArrayList<>();
+	private PedidoItem crearPedidoItem(
+			CrearPedidoItemDTO itemDTO,
+			Pedido pedido,
+			Map<Long, Producto> productoMap,
+			Map<Long, Modificador> modificadorMap) {
+		Producto producto = Optional.ofNullable(productoMap.get(itemDTO.idProducto()))
+				.orElseThrow(() -> new NoEncontradoException("Producto no encontrado. Id: " + itemDTO.idProducto()));
 
-		for (CrearPedidoItemDTO itemDTO : dto.items()) {
-			Producto producto = productoMap.get(itemDTO.idProducto());
-			if (producto == null) {
-				throw new NoEncontradoException("Producto no encontrado. Id: " + itemDTO.idProducto());
-			}
+		PedidoItem item = new PedidoItem();
+		item.setPedido(pedido);
+		item.setProducto(producto);
+		item.setCantidad(itemDTO.cantidad());
+		item.setPrecioUnitario(producto.getPrecio());
+		item.setNota(itemDTO.nota());
+		item.setListoParaServir(false);
+		item.setZonaTrabajo(producto.getTipo().getZonaTrabajo());
 
-			PedidoItem pedidoItem = new PedidoItem();
-			pedidoItem.setPedido(pedidoGuardado);
-			pedidoItem.setProducto(producto);
-			pedidoItem.setCantidad(itemDTO.cantidad());
-			pedidoItem.setPrecioUnitario(producto.getPrecio());
-			pedidoItem.setNota(itemDTO.nota());
-			pedidoItem.setListoParaServir(false);
-			pedidoItem.setZonaTrabajo(producto.getTipo().getZonaTrabajo());
-
-			if (itemDTO.modificadores() != null && !itemDTO.modificadores().isEmpty()) {
-				List<PedidoItem_Modificador> itemModificadores = new ArrayList<>();
-
-				for (Long modId : itemDTO.modificadores()) {
-					Modificador modificador = modificadorMap.get(modId);
-					if (modificador == null) {
-						throw new NoEncontradoException("Modificador no encontrado. Id: " + modId);
-					}
-
-					itemModificadores.add(PedidoItem_Modificador.builder()
-							.pedidoItem(pedidoItem)
-							.modificador(modificador)
-							.cantidad(1)
-							.precioAplicado(modificador.getPrecioExtra())
-							.build());
-				}
-				pedidoItem.setModificadores(itemModificadores);
-			}
-			items.add(pedidoItem);
+		if (itemDTO.modificadores() != null && !itemDTO.modificadores().isEmpty()) {
+			item.setModificadores(crearModificadores(itemDTO.modificadores(), item, modificadorMap));
 		}
 
-		pedidoItemRepository.saveAll(items);
+		return item;
+	}
 
+	private List<PedidoItem_Modificador> crearModificadores(
+			List<Long> modIds,
+			PedidoItem item,
+			Map<Long, Modificador> modificadorMap) {
+		List<PedidoItem_Modificador> lista = new ArrayList<>();
+		for (Long modId : modIds) {
+			Modificador modificador = Optional.ofNullable(modificadorMap.get(modId))
+					.orElseThrow(() -> new NoEncontradoException("Modificador no encontrado. Id: " + modId));
+
+			lista.add(PedidoItem_Modificador.builder()
+					.pedidoItem(item)
+					.modificador(modificador)
+					.cantidad(1)
+					.precioAplicado(modificador.getPrecioExtra())
+					.build());
+		}
+		return lista;
+	}
+
+	private BigDecimal calcularSubtotalItem(PedidoItem item) {
+		BigDecimal extrasUnitarios = (item.getModificadores() == null)
+				? BigDecimal.ZERO
+				: item.getModificadores().stream()
+						.map(PedidoItem_Modificador::getPrecioAplicado)
+						.reduce(BigDecimal.ZERO, BigDecimal::add);
+
+		BigDecimal precioUnitarioTotal = item.getPrecioUnitario().add(extrasUnitarios);
+		return precioUnitarioTotal.multiply(BigDecimal.valueOf(item.getCantidad()));
+	}
+
+	private void validarTotal(BigDecimal totalEnviado, BigDecimal totalCalculado) {
+		if (totalEnviado == null || totalCalculado.compareTo(totalEnviado) != 0) {
+			throw new IllegalArgumentException(
+					String.format("El total enviado (%.2f) no coincide con el total real calculado (%.2f)",
+							totalEnviado, totalCalculado));
+		}
+		System.out.println("totalEnviado: " + totalEnviado);
+		System.out.println("totalCalculado: " + totalCalculado);
+	}
+
+	private void notificarCambiosSSE() {
 		eventPublisher.publishEvent(SseTopicEvent.of(SseTopic.PEDIDOS));
 		eventPublisher.publishEvent(SseTopicEvent.of(SseTopic.KDS));
+	}
 
+	private PedidoDTO toPedidoDTO(Pedido pedido) {
 		return new PedidoDTO(
-				pedidoGuardado.getId(),
-				pedidoGuardado.getSesion().getId(),
-				pedidoGuardado.getSesion().getMesa().getNumero(),
-				pedidoGuardado.getCreatedAt(),
-				pedidoGuardado.getEstado().getNombre());
+				pedido.getId(),
+				pedido.getSesion().getId(),
+				pedido.getSesion().getMesa().getNumero(),
+				pedido.getCreatedAt(),
+				pedido.getEstado().getNombre());
 	}
 
 	@Transactional

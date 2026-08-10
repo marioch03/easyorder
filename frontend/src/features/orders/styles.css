@@ -76,6 +76,18 @@
   box-shadow: var(--shadow-sm);
 }
 
+.order-legend-dot.pendiente {
+  background-color: var(--color-occupied);
+}
+
+.order-legend-dot.parcial {
+  background-color: var(--color-preparing);
+}
+
+.order-legend-dot.listo {
+  background-color: var(--color-success);
+}
+
 /* =========================================================
    2. TARJETA DE PEDIDO (.pedido-card)
    ========================================================= */

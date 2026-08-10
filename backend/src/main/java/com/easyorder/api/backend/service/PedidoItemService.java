@@ -80,7 +80,9 @@ public class PedidoItemService {
         .orElseThrow(() -> new NoEncontradoException(
             "PedidoItem no encontrado para el ID: " + id));
     pedidoItem.setServido(true);
+    pedidoItem.setListoParaServir(true);
     pedidoItemRepository.save(pedidoItem);
+    pedidoService.recalcularEstadoPedido(pedidoItem.getPedido().getId());
     eventPublisher.publishEvent(SseTopicEvent.of(SseTopic.PEDIDOS));
     eventPublisher.publishEvent(SseTopicEvent.of(SseTopic.KDS));
   }
