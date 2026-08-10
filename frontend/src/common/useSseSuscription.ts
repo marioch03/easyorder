@@ -68,6 +68,7 @@ export function useSseSubscription({ topic, onRefresh }: SseOptions) {
         console.warn(
           `⚠️ Conexión SSE cerrada por el servidor [${topic}]. Reintentando...`,
         );
+        throw new Error("Conexión SSE cerrada inesperadamente por el servidor");
       },
 
       onerror(err) {

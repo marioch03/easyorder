@@ -6,11 +6,14 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 
 @ControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
         @ExceptionHandler(Exception.class)
@@ -18,6 +21,11 @@ public class GlobalExceptionHandler {
                 ex.printStackTrace();
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                 .body(" Error: " + ex.getMessage());
+        }
+
+        @ExceptionHandler(AsyncRequestNotUsableException.class)
+        public void handleAsyncRequestNotUsable(AsyncRequestNotUsableException ex) {
+                log.debug("Cliente SSE desconectado: {}", ex.getMessage());
         }
 
         @ExceptionHandler(MethodArgumentNotValidException.class)
