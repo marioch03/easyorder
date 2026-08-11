@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useSession } from "../../session/useSession";
+import BillRequestedScreen from "../components/BillRequestedScreen";
 import { useBillData } from "../hooks/useBillData";
 import { solicitarCuentaApi } from "../services/billService";
 import "../styles.css";
@@ -17,18 +18,26 @@ export default function BillPage() {
     if (!sessionCode) return;
     setBotonLoading(true);
     try {
-      await solicitarCuentaApi(sessionCode);
+      await solicitarCuentaApi();
       setConfirmOpen(false);
       actualizarEstadoMesa("ESPERANDO_CUENTA");
     } catch (err) {
       console.error(err);
-
       alert("No se pudo solicitar la cuenta");
     } finally {
       setBotonLoading(false);
     }
   };
+
   if (loading) return <p className="bill-loading">Cargando cuenta…</p>;
+
+  if (cuentaSolicitada) {
+    return (
+      <div className="bill-page">
+        <BillRequestedScreen total={Number(cuenta?.total ?? 0)} />
+      </div>
+    );
+  }
 
   return (
     <div className="bill-page">
@@ -36,18 +45,48 @@ export default function BillPage() {
       <div className="bill-divider"></div>
 
       <div className="bill-list">
-        {cuenta?.items.map((item, index) => (
-          <div key={index} className="bill-item">
-            <div className="bill-left">
-              <span className="bill-qty">{item.cantidad}x</span>
-              <span>{item.nombreProducto}</span>
-            </div>
+        {cuenta?.items.map((item, index) => {
+          const modsTotal =
+            item.modificadores?.reduce(
+              (sum, mod) => sum + mod.precioAplicado,
+              0,
+            ) ?? 0;
+          const lineTotal = item.cantidad * (item.precioUnitario + modsTotal);
 
-            <span className="bill-price">
-              {(item.cantidad * item.precioUnitario).toFixed(2)} €
-            </span>
-          </div>
-        ))}
+          return (
+            <div key={index} className="bill-item">
+              <div className="bill-item-main">
+                <div className="bill-left">
+                  <span className="bill-qty">{item.cantidad}x</span>
+                  <span className="bill-product-name">
+                    {item.nombreProducto}
+                  </span>
+                </div>
+
+                <span className="bill-price">{lineTotal.toFixed(2)} €</span>
+              </div>
+
+              {item.modificadores && item.modificadores.length > 0 && (
+                <ul className="bill-item-modifiers">
+                  {item.modificadores.map((mod) => (
+                    <li key={mod.id}>
+                      <span>+ {mod.nombre}</span>
+                      {mod.precioAplicado > 0 && (
+                        <span className="bill-modifier-price">
+                          +{mod.precioAplicado.toFixed(2)} €
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {item.nota && item.nota.trim() !== "" && (
+                <span className="bill-item-note">Nota: {item.nota}</span>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       <div className="bill-footer">
@@ -59,11 +98,10 @@ export default function BillPage() {
         </div>
 
         <button
-          className={`request-bill-btn${cuentaSolicitada ? " requested" : ""}`}
-          disabled={cuentaSolicitada}
-          onClick={() => !cuentaSolicitada && setConfirmOpen(true)}
+          className="request-bill-btn"
+          onClick={() => setConfirmOpen(true)}
         >
-          {cuentaSolicitada ? "Cuenta solicitada" : "Solicitar cuenta"}
+          Solicitar cuenta
         </button>
       </div>
 

@@ -1,5 +1,5 @@
 import { clientApi } from "../../api/apiClient";
-import type { Pedido } from "../types/bill";
+import type { Cuenta, Pedido } from "../types/bill";
 
 export async function getMesa() {
   try {
@@ -19,11 +19,9 @@ export async function getPedidos(): Promise<Pedido[]> {
   }
 }
 
-export async function solicitarCuentaApi(sessionCode: string) {
+export async function solicitarCuentaApi() {
   try {
-    const response = await clientApi.put("/mesas/cuenta", {
-      sessionCode,
-    });
+    const response = await clientApi.get("/pedidos/cuenta");
 
     return response.data;
   } catch (error) {
@@ -31,7 +29,7 @@ export async function solicitarCuentaApi(sessionCode: string) {
   }
 }
 
-export async function getCuenta() {
+export async function getCuenta(): Promise<Cuenta> {
   try {
     const response = await clientApi.get("/pedidos/cuenta");
     return response.data;

@@ -22,8 +22,15 @@ public interface PedidoItemRepository extends JpaRepository<PedidoItem, Long> {
                 AND item.zonaTrabajo.nombre = :zonaTrabajoNombre
                 ORDER BY p.createdAt ASC
             """)
+
     List<PedidoItem> findPendientesByZona(@Param("zonaTrabajoNombre") String zonaTrabajoNombre);
 
     List<PedidoItem> findByPedidoIdIn(Collection<Long> pedidoIds);
+
+    @Query("SELECT DISTINCT pi FROM PedidoItem pi " +
+            "LEFT JOIN FETCH pi.modificadores " +
+            "JOIN FETCH pi.producto " +
+            "WHERE pi.pedido.id IN :pedidoIds")
+    List<PedidoItem> findByPedidoIdInWithModificadores(@Param("pedidoIds") List<Long> pedidoIds);
 
 }

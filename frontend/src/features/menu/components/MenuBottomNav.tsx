@@ -1,3 +1,4 @@
+import { useCart } from "../../cart/useCart";
 import { customerIcons } from "../customerIcons";
 
 type MenuBottomNavProps = {
@@ -15,6 +16,9 @@ export default function MenuBottomNav({
   activeSection,
   setActiveSection,
 }: MenuBottomNavProps) {
+  const { items } = useCart();
+  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+
   return (
     <nav className="bottom-nav">
       {BUTTONS.map((btn) => (
@@ -26,6 +30,11 @@ export default function MenuBottomNav({
         >
           <span className="nav-icon-badge">
             <img src={btn.icon} alt="" aria-hidden="true" />
+            {btn.key === "carrito" && totalItems > 0 && (
+              <span className="cart-count-badge">
+                {totalItems > 99 ? "99+" : totalItems}
+              </span>
+            )}
           </span>
           <span>{btn.label}</span>
         </button>

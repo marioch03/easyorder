@@ -12,7 +12,7 @@ function CustomerPage() {
   const renderContent = () => {
     switch (activeSection) {
       case "carrito":
-        return <CartPage />;
+        return <CartPage onGoToMenu={() => setActiveSection("menu")} />;
       case "cuenta":
         return <BillPage />;
       default:

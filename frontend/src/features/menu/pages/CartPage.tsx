@@ -1,16 +1,21 @@
 import { useState } from "react";
 import ConfirmModal from "../../../common/ConfirmModal";
 import { useSession } from "../../session/useSession";
+import CartEmptyState from "../components/CartEmptyState";
+import CartSuccessScreen from "../components/CartSuccessScreen";
 import { useCartData } from "../hooks/useCartData";
 import "../styles.css";
 
-export default function CartPage() {
+interface CartPageProps {
+  onGoToMenu: () => void;
+}
+
+export default function CartPage({ onGoToMenu }: CartPageProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [botonLoading, setBotonLoading] = useState(false);
+  const [pedidoRealizado, setPedidoRealizado] = useState(false);
 
   const { sessionCode } = useSession();
-
-  const BASE_IMAGE_URL = "/images/";
 
   const {
     cart,
@@ -28,63 +33,89 @@ export default function CartPage() {
 
     try {
       await realizarPedido();
+      setConfirmOpen(false);
+      setPedidoRealizado(true);
     } catch (err) {
       console.error(err);
     } finally {
       setBotonLoading(false);
-      setConfirmOpen(false);
     }
   };
+
+  const handleVolverAlMenu = () => {
+    setPedidoRealizado(false);
+    onGoToMenu();
+  };
+
+  if (pedidoRealizado) {
+    return (
+      <div className="cart-page">
+        <CartSuccessScreen onGoToMenu={handleVolverAlMenu} />
+      </div>
+    );
+  }
 
   return (
     <div className="cart-page">
       <h1 className="cart-title">Carrito</h1>
 
       <div className="cart-items-wrapper">
-        {cart.length === 0 && <p>Tu carrito está vacío</p>}
+        {cart.length === 0 ? (
+          <CartEmptyState onGoToMenu={onGoToMenu} />
+        ) : (
+          cart.map((item) => {
+            const modsString =
+              item.modifiers
+                ?.map((m) => m.id)
+                .sort()
+                .join(",") || "";
+            const cartLineId = `${item.id}-${item.note || ""}-${modsString}`;
 
-        {cart.map((item) => {
-          // 1. GENERAMOS EL ID ÚNICO DE LA LÍNEA PARA REACT Y PARA SUMAR/RESTAR
-          const modsString =
-            item.modifiers
-              ?.map((m) => m.id)
-              .sort()
-              .join(",") || "";
-          const cartLineId = `${item.id}-${item.note || ""}-${modsString}`;
+            const hasModifiers = item.modifiers && item.modifiers.length > 0;
+            const hasNote = item.note && item.note.trim() !== "";
 
-          return (
-            <div key={cartLineId} className="cart-item">
-              <img src={BASE_IMAGE_URL + item.image} alt={item.name} />
+            return (
+              <div key={cartLineId} className="cart-item">
+                <div className="cart-row-main">
+                  <div className="cart-info-left">
+                    <h4 className="cart-product-name">{item.name}</h4>
+                    <span className="cart-product-price">
+                      {item.price.toFixed(2)} €
+                    </span>
+                  </div>
 
-              <div className="cart-info">
-                <h4>{item.name}</h4>
+                  <div className="cart-qty-pill">
+                    <button onClick={() => decreaseQuantity(cartLineId)}>
+                      −
+                    </button>
+                    <span>{item.quantity}</span>
+                    <button onClick={() => increaseQuantity(cartLineId)}>
+                      +
+                    </button>
+                  </div>
+                </div>
 
-                {/* 2. MOSTRAMOS LOS MODIFICADORES SELECCIONADOS */}
-                {item.modifiers && item.modifiers.length > 0 && (
-                  <ul className="cart-item-modifiers">
-                    {item.modifiers.map((mod) => (
-                      <li key={mod.id}>+ {mod.nombre}</li>
-                    ))}
-                  </ul>
-                )}
+                {(hasModifiers || hasNote) && (
+                  <div className="cart-row-details">
+                    {hasModifiers && (
+                      <ul className="cart-item-modifiers">
+                        {item.modifiers!.map((mod) => (
+                          <li key={mod.id}>+ {mod.nombre}</li>
+                        ))}
+                      </ul>
+                    )}
 
-                <p>{item.price.toFixed(2)} €</p>
-
-                {item.note && item.note.trim() !== "" && (
-                  <span className="cart-note-indicator">
-                    Personalizado: {item.note}
-                  </span>
+                    {hasNote && (
+                      <div className="cart-item-note">
+                        <strong>Nota:</strong> {item.note}
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
-
-              <div className="cart-qty">
-                <button onClick={() => decreaseQuantity(cartLineId)}>−</button>
-                <span>{item.quantity}</span>
-                <button onClick={() => increaseQuantity(cartLineId)}>+</button>
-              </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
 
       {cart.length > 0 && (

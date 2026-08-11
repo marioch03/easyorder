@@ -370,12 +370,20 @@ public class PedidoService {
 
 		List<PedidoItem> items = pedidoIds.isEmpty()
 				? List.of()
-				: pedidoItemRepository.findByPedidoIdIn(pedidoIds);
+				: pedidoItemRepository.findByPedidoIdInWithModificadores(pedidoIds);
 
 		List<PedidoItemDTO> itemsAgrupados = agruparPorProductoYNota(items);
 
 		BigDecimal total = itemsAgrupados.stream()
-				.map(i -> i.precioUnitario().multiply(BigDecimal.valueOf(i.cantidad())))
+				.map(i -> {
+					BigDecimal costoModificadores = i.modificadores().stream()
+							.map(m -> m.precioAplicado())
+							.reduce(BigDecimal.ZERO, BigDecimal::add);
+
+					BigDecimal precioConModificadores = i.precioUnitario().add(costoModificadores);
+
+					return precioConModificadores.multiply(BigDecimal.valueOf(i.cantidad()));
+				})
 				.reduce(BigDecimal.ZERO, BigDecimal::add);
 
 		return new CuentaDTO(itemsAgrupados, total);
