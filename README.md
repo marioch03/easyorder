@@ -1,3 +1,4 @@
+
 ---
 
 # EasyOrder — Sistema de Gestión de Pedidos para Restaurantes
