@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import Modal from "react-modal";
+import { toast } from "sonner";
 import OrderCard from "./OrderCard";
 import { EstadoPedido, type PedidoDTO } from "./orders";
 import { marcarPedidoServido, marcarServidoItem } from "./orderService";
@@ -82,6 +83,7 @@ export default function OrderPage() {
       if (pedidoSeleccionado?.idPedido === idPedido) {
         cerrarModal();
       }
+      toast.success(`Pedido #${idPedido} servido correctamente`);
     } catch (err) {
       console.error("Error al marcar pedido como servido:", err);
       setActionError(

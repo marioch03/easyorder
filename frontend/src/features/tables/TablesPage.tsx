@@ -2,6 +2,7 @@ import { useState } from "react";
 import Modal from "react-modal";
 import QRCode from "react-qr-code";
 import { useParams } from "react-router-dom";
+import { toast } from "sonner";
 import type { Cuenta } from "../menu/types/bill";
 import { icons } from "./icons";
 import ImageButton from "./ImageButton";
@@ -50,6 +51,7 @@ export default function TablesPage() {
     try {
       await crearSesionMesa(mesa.id);
       cerrarModal();
+      toast.success(`QR generado para la mesa ${mesa.numero}`);
     } catch (err) {
       console.error(err);
       setActionError("No se pudo generar el QR. Inténtalo de nuevo.");
@@ -73,6 +75,7 @@ export default function TablesPage() {
     try {
       await cerrarSesionMesa(mesa.sesionActiva.qrCodeUrl);
       cerrarModal();
+      toast.success(`Sesión cerrada en la mesa ${mesa.numero}`);
     } catch (err) {
       console.error(err);
       setActionError("No se pudo cerrar la sesión. Inténtalo de nuevo.");

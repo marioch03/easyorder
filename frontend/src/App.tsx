@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { Toaster } from "sonner";
 import ProtectedRoute from "./features/auth/ProtectedRoute";
 import { CartProvider } from "./features/cart/CartProvider";
 import ComandasPage from "./features/comandas/ComandasPage";
@@ -84,6 +85,12 @@ function App() {
           <Route path="*" element={<Navigate to="/error" replace />} />
         </Routes>
       </Suspense>
+
+      <Toaster
+        position="top-center"
+        richColors={false}
+        toastOptions={{ className: "eo-toast" }}
+      />
     </BrowserRouter>
   );
 }

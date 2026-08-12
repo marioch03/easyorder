@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import ConfirmModal from "../../../common/ConfirmModal";
 import { useSession } from "../../session/useSession";
 import CartEmptyState from "../components/CartEmptyState";
@@ -33,12 +34,15 @@ export default function CartPage({ onGoToMenu }: CartPageProps) {
 
     try {
       await realizarPedido();
-      setConfirmOpen(false);
       setPedidoRealizado(true);
     } catch (err) {
       console.error(err);
+      toast.error("No se pudo enviar el pedido", {
+        description: "Revisa tu conexión e inténtalo de nuevo.",
+      });
     } finally {
       setBotonLoading(false);
+      setConfirmOpen(false);
     }
   };
 

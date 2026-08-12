@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import type { OrderItemDTO } from "../../common/types";
 import type { LineaComanda } from "./comandas";
 import { crearPedidoAdmin } from "./comandasService";
@@ -145,11 +146,14 @@ export default function ComandasPage() {
         cantidad: l.cantidad,
         precioUnitario: l.precio,
         nota: l.nota.trim(),
+        modificadores: [],
       }));
 
-      await crearPedidoAdmin({ items }, mesaId);
+      await crearPedidoAdmin({ items, total }, mesaId);
 
       vaciarComanda();
+      setMostrarTicketMovil(false);
+      toast.success("Pedido enviado correctamente");
     } catch (err) {
       console.error("Error al enviar la comanda:", err);
       setEnviarError("No se pudo enviar la comanda. Inténtalo de nuevo.");

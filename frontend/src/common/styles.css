@@ -296,3 +296,26 @@
   background: var(--color-preparing);
   color: #5c3a05;
 }
+
+.eo-toast[data-sonner-toast] {
+  background: white;
+  border: 1px solid rgba(100, 130, 173, 0.15);
+  border-radius: var(--radius-md, 14px);
+  box-shadow: var(--shadow-md);
+  font-family: var(--font-body);
+}
+
+.eo-toast[data-sonner-toast] [data-title] {
+  font-weight: 600;
+  color: var(--color-primary-deep);
+  font-size: 0.95rem;
+}
+
+.eo-toast[data-sonner-toast] [data-description] {
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.eo-toast[data-sonner-toast][data-type="success"] [data-icon] {
+  color: var(--color-success);
+}

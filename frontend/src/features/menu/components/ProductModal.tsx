@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { getAlergenoIcon } from "../../../common/allergens";
 import type { ModificadorDTO } from "../../../common/types";
 import type { CartItem } from "../../cart/cart";
@@ -94,6 +95,9 @@ export default function ProductModal({ product, onClose }: Props) {
     };
 
     addItem(item);
+    toast.success(`${product.nombre} añadido al carrito`, {
+      description: `${quantity} ud. · ${(unitPrice * quantity).toFixed(2)} €`,
+    });
     onClose();
   };
 
