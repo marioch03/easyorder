@@ -593,3 +593,213 @@
     margin-bottom: env(safe-area-inset-bottom);
   }
 }
+
+/* =========================================================
+   TICKET - MODIFICADORES INLINE
+   ========================================================= */
+
+.comanda-linea-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.comanda-linea-mods {
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  color: var(--color-primary-dark);
+  opacity: 0.65;
+  line-height: 1.2;
+}
+
+/* =========================================================
+   MODAL DE CONFIGURACIÓN (MODIFICADORES Y NOTAS)
+   ========================================================= */
+
+.config-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.config-modal-content {
+  background: var(--color-background-secondary);
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.config-modal-header {
+  background: linear-gradient(120deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: var(--color-background-secondary);
+  padding: 16px 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.config-modal-header h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: white;
+}
+
+.config-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 28px;
+  line-height: 1;
+  color: white;
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.config-modal-close:hover {
+  opacity: 1;
+}
+
+.config-modal-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.modifier-group-header {
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.modifier-group-header h4 {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.modifier-group-rules {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-primary-dark);
+  opacity: 0.6;
+  background: rgba(100, 130, 173, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.modifier-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.modifier-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  background: #fff;
+  border: 1px solid rgba(100, 130, 173, 0.2);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.modifier-btn:hover {
+  border-color: var(--color-primary);
+}
+
+.modifier-btn.selected {
+  background: rgba(43, 87, 154, 0.05);
+  border-color: var(--color-primary);
+  box-shadow: inset 0 0 0 1px var(--color-primary);
+}
+
+.modifier-name {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.modifier-price {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.config-note-input {
+  width: 100%;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(100, 130, 173, 0.2);
+  font-family: var(--font-body);
+  font-size: 13px;
+  resize: none;
+  box-sizing: border-box;
+}
+
+.config-note-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.config-modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid rgba(100, 130, 173, 0.15);
+  background: var(--color-background-secondary);
+}
+
+.config-modal-submit {
+  width: 100%;
+  padding: 16px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.config-modal-submit:disabled {
+  background: var(--color-background-primary);
+  color: var(--color-primary-dark);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.config-modal-submit:not(:disabled):hover {
+  filter: brightness(1.1);
+}

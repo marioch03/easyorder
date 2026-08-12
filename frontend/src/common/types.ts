@@ -44,3 +44,11 @@ export type ModificadorDTO = {
   nombre: string;
   precioExtra: number;
 };
+
+export type GrupoModificadorDTO = {
+  id: number;
+  nombre: string;
+  seleccionMinima: number;
+  seleccionMaxima: number;
+  modificadores: ModificadorDTO[];
+};

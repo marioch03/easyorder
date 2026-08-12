@@ -96,14 +96,28 @@ public class ProductoService {
 				modificadores);
 	}
 
+	@Transactional(readOnly = true)
 	public List<ProductoComandaDTO> getProductosSimplificados() {
-		return productoRepository.findAll().stream()
+		List<Producto> productos = productoRepository.findAll();
+
+		List<Long> productoIds = productos.stream().map(Producto::getId).toList();
+
+		Map<Long, List<GrupoModificadorDTO>> gruposPorProducto = producto_GrupoModificadorRepository
+				.findByProducto_IdIn(productoIds).stream()
+				.collect(Collectors.groupingBy(
+						pgm -> pgm.getProducto().getId(),
+						Collectors.mapping(
+								pgm -> mapearAGrupoDTO(pgm.getGrupo()),
+								Collectors.toList())));
+
+		return productos.stream()
 				.map(producto -> new ProductoComandaDTO(
 						producto.getId(),
 						producto.getNombre(),
 						producto.getPrecio(),
 						producto.getTipo().getId(),
-						producto.isDisponible()))
+						producto.isDisponible(),
+						gruposPorProducto.getOrDefault(producto.getId(), List.of())))
 				.collect(Collectors.toList());
 	}
 

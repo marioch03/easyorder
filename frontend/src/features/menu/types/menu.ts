@@ -1,4 +1,4 @@
-import type { ModificadorDTO } from "../../../common/types";
+import type { GrupoModificadorDTO } from "../../../common/types";
 
 export type ProductDTO = {
   id: number;
@@ -22,12 +22,4 @@ export type Alergeno = {
   nombre: string;
   descripcion?: string;
   tipo: "CONTIENE" | "PUEDE_CONTENER_TRAZAS";
-};
-
-export type GrupoModificadorDTO = {
-  id: number;
-  nombre: string;
-  seleccionMinima: number;
-  seleccionMaxima: number;
-  modificadores: ModificadorDTO[];
 };

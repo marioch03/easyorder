@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
-import type { OrderItemDTO } from "../../common/types";
-import type { LineaComanda } from "./comandas";
-import { crearPedidoAdmin } from "./comandasService";
+import type { ModificadorDTO } from "../../common/types";
+import type { ProductoComandaDTO } from "./comandas";
+import ConfigProductoModal from "./ConfigProductoModal"; // Ajusta la ruta
 import "./styles.css";
 import { useComandasData } from "./useComandasData";
 
@@ -13,16 +12,36 @@ const ESTADO_MESA_CLASE: Record<string, string> = {
 };
 
 export default function ComandasPage() {
-  const { mesas, zonas, tiposProducto, productos, loading, error } =
-    useComandasData();
+  // Ahora el hook nos trae tanto los datos como la lógica del carrito
+  const {
+    mesas,
+    zonas,
+    tiposProducto,
+    productos,
+    loading,
+    error,
+    lineas,
+    mesaId,
+    setMesaId,
+    notaAbierta,
+    enviando,
+    enviarError,
+    total,
+    totalUnidades,
+    agregarLineaComanda,
+    cambiarCantidad,
+    actualizarNota,
+    abrirNota,
+    quitarLinea,
+    vaciarComanda,
+    realizarPedido,
+  } = useComandasData();
 
+  // Estados locales solo para la interfaz (UI)
   const [tipoActivo, setTipoActivo] = useState<number | null>(null);
-  const [mesaId, setMesaId] = useState<number | null>(null);
-  const [lineas, setLineas] = useState<LineaComanda[]>([]);
-  const [notaAbierta, setNotaAbierta] = useState<string | null>(null);
-  const [enviando, setEnviando] = useState(false);
-  const [enviarError, setEnviarError] = useState<string | null>(null);
-  const [mostrarTicketMovil, setMostrarTicketMovil] = useState(false); // <--- NUEVO
+  const [productoConfigurando, setProductoConfigurando] =
+    useState<ProductoComandaDTO | null>(null);
+  const [mostrarTicketMovil, setMostrarTicketMovil] = useState(false);
 
   const productosPorTipo = useMemo(
     () =>
@@ -35,10 +54,8 @@ export default function ComandasPage() {
 
   useEffect(() => {
     if (tipoActivo !== null) return;
-    const primeraConProductos = productosPorTipo.find(
-      (t) => t.productos.length > 0,
-    );
-    if (primeraConProductos) setTipoActivo(primeraConProductos.id);
+    const primera = productosPorTipo.find((t) => t.productos.length > 0);
+    if (primera) setTipoActivo(primera.id);
   }, [productosPorTipo, tipoActivo]);
 
   const mesasPorZona = useMemo(
@@ -53,122 +70,25 @@ export default function ComandasPage() {
   );
 
   const mesaSeleccionada = mesas.find((m) => m.id === mesaId) ?? null;
-
   const productosVisibles =
     productosPorTipo.find((t) => t.id === tipoActivo)?.productos ?? [];
 
-  const total = useMemo(
-    () => lineas.reduce((acc, l) => acc + l.precio * l.cantidad, 0),
-    [lineas],
-  );
-
-  const totalUnidades = useMemo(
-    () => lineas.reduce((acc, l) => acc + l.cantidad, 0),
-    [lineas],
-  );
-
-  const agregarProducto = (producto: ProductoComandaLike) => {
-    setLineas((prev) => {
-      const existente = prev.find(
-        (l) => l.productoId === producto.id && l.nota === "",
-      );
-      if (existente) {
-        return prev.map((l) =>
-          l.key === existente.key ? { ...l, cantidad: l.cantidad + 1 } : l,
-        );
-      }
-      return [
-        ...prev,
-        {
-          key: `${producto.id}-${Date.now()}`,
-          productoId: producto.id,
-          nombre: producto.nombre,
-          precio: producto.precio,
-          cantidad: 1,
-          nota: "",
-        },
-      ];
-    });
+  // Al pulsar un producto, SIEMPRE se abre el modal (tenga modificadores o no) para poder añadir la nota
+  const iniciarAgregarProducto = (producto: ProductoComandaDTO) => {
+    setProductoConfigurando(producto);
   };
 
-  const cambiarCantidad = (key: string, delta: number) => {
-    setLineas((prev) =>
-      prev
-        .map((l) =>
-          l.key === key ? { ...l, cantidad: l.cantidad + delta } : l,
-        )
-        .filter((l) => l.cantidad > 0),
-    );
+  const handleConfirmarConfig = (
+    producto: ProductoComandaDTO,
+    mods: ModificadorDTO[],
+    nota: string,
+  ) => {
+    agregarLineaComanda(producto, mods, nota);
+    setProductoConfigurando(null);
   };
 
-  const actualizarNota = (key: string, nota: string) => {
-    setLineas((prev) => prev.map((l) => (l.key === key ? { ...l, nota } : l)));
-  };
-
-  const abrirNota = (linea: LineaComanda) => {
-    if (linea.cantidad > 1) {
-      const nuevaKey = `${linea.productoId}-${Date.now()}`;
-
-      setLineas((prev) => {
-        const restoActualizado = prev.map((l) =>
-          l.key === linea.key ? { ...l, cantidad: l.cantidad - 1 } : l,
-        );
-        return [...restoActualizado, { ...linea, key: nuevaKey, cantidad: 1 }];
-      });
-
-      setNotaAbierta(nuevaKey);
-      return;
-    }
-
-    setNotaAbierta(notaAbierta === linea.key ? null : linea.key);
-  };
-
-  const quitarLinea = (key: string) => {
-    setLineas((prev) => prev.filter((l) => l.key !== key));
-    if (notaAbierta === key) setNotaAbierta(null);
-  };
-
-  const vaciarComanda = () => {
-    setLineas([]);
-    setMesaId(null);
-    setEnviarError(null);
-  };
-
-  const realizarPedido = async () => {
-    if (!mesaId || lineas.length === 0 || enviando) return;
-
-    setEnviando(true);
-    setEnviarError(null);
-
-    try {
-      const items: OrderItemDTO[] = lineas.map((l) => ({
-        idProducto: l.productoId,
-        cantidad: l.cantidad,
-        precioUnitario: l.precio,
-        nota: l.nota.trim(),
-        modificadores: [],
-      }));
-
-      await crearPedidoAdmin({ items, total }, mesaId);
-
-      vaciarComanda();
-      setMostrarTicketMovil(false);
-      toast.success("Pedido enviado correctamente");
-    } catch (err) {
-      console.error("Error al enviar la comanda:", err);
-      setEnviarError("No se pudo enviar la comanda. Inténtalo de nuevo.");
-    } finally {
-      setEnviando(false);
-    }
-  };
-
-  if (loading) {
-    return <div className="loading">Cargando comandas…</div>;
-  }
-
-  if (error) {
-    return <div className="loading error">{error}</div>;
-  }
+  if (loading) return <div className="loading">Cargando comandas…</div>;
+  if (error) return <div className="loading error">{error}</div>;
 
   return (
     <div className="comandas-layout">
@@ -180,7 +100,6 @@ export default function ComandasPage() {
             .map((tipo) => (
               <button
                 key={tipo.id}
-                type="button"
                 className={`comandas-tab${tipoActivo === tipo.id ? " active" : ""}`}
                 onClick={() => setTipoActivo(tipo.id)}
               >
@@ -190,34 +109,25 @@ export default function ComandasPage() {
         </div>
 
         <div className="comandas-grid">
-          {productosVisibles.length === 0 ? (
-            <div className="comandas-empty">
-              Esta categoría no tiene productos disponibles.
-            </div>
-          ) : (
-            productosVisibles.map((producto) => (
-              <button
-                key={producto.id}
-                type="button"
-                className={`comanda-product${producto.disponible ? "" : " disabled"}`}
-                onClick={() => producto.disponible && agregarProducto(producto)}
-                disabled={!producto.disponible}
-              >
-                <span className="comanda-product-name">{producto.nombre}</span>
-                <span className="comanda-product-price">
-                  {producto.precio.toFixed(2)} €
-                </span>
-                {!producto.disponible && (
-                  <span className="comanda-product-unavailable">
-                    No disponible
-                  </span>
-                )}
-              </button>
-            ))
-          )}
+          {productosVisibles.map((producto) => (
+            <button
+              key={producto.id}
+              className={`comanda-product${producto.disponible ? "" : " disabled"}`}
+              onClick={() =>
+                producto.disponible && iniciarAgregarProducto(producto)
+              }
+              disabled={!producto.disponible}
+            >
+              <span className="comanda-product-name">{producto.nombre}</span>
+              <span className="comanda-product-price">
+                {producto.precio.toFixed(2)} €
+              </span>
+            </button>
+          ))}
         </div>
       </div>
 
+      {/* ---------- Ticket Móvil Bar ---------- */}
       <div className="mobile-floating-bar">
         <div className="mobile-floating-info">
           <span className="mobile-floating-qty">{totalUnidades} artículos</span>
@@ -231,47 +141,26 @@ export default function ComandasPage() {
         </button>
       </div>
 
-      {/* ---------- Ticket de la comanda ---------- */}
+      {/* ---------- Ticket ---------- */}
       <aside className={`comanda-ticket ${mostrarTicketMovil ? "open" : ""}`}>
         <div className="comanda-ticket-header">
           <div className="comanda-ticket-header-title">
-            {/* NUEVO: Botón de volver para móvil */}
             <button
-              type="button"
               className="mobile-close-ticket"
               onClick={() => setMostrarTicketMovil(false)}
             >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M15 18l-6-6 6-6" />
-              </svg>
+              ×
             </button>
             <h2>Comanda</h2>
           </div>
-
           {lineas.length > 0 && (
-            <button
-              type="button"
-              className="comanda-clear"
-              onClick={vaciarComanda}
-            >
+            <button className="comanda-clear" onClick={vaciarComanda}>
               Vaciar
             </button>
           )}
         </div>
 
         <div className="mesa-picker">
-          {mesasPorZona.length === 0 && (
-            <span className="mesa-picker-empty">No hay mesas disponibles.</span>
-          )}
           {mesasPorZona.map(({ zona, mesas: mesasZona }) => (
             <div key={zona.id} className="mesa-picker-zone">
               <span className="mesa-picker-zone-label">{zona.nombre}</span>
@@ -279,7 +168,6 @@ export default function ComandasPage() {
                 {mesasZona.map((mesa) => (
                   <button
                     key={mesa.id}
-                    type="button"
                     className={`mesa-chip ${ESTADO_MESA_CLASE[mesa.estado] ?? ""}${mesaId === mesa.id ? " selected" : ""}`}
                     onClick={() => setMesaId(mesa.id)}
                   >
@@ -292,50 +180,50 @@ export default function ComandasPage() {
         </div>
 
         <div className="comanda-lineas">
-          {lineas.length === 0 ? (
-            <div className="comanda-lineas-empty">
-              Toca un producto del catálogo para añadirlo a la comanda.
-            </div>
-          ) : (
-            lineas.map((linea) => (
+          {lineas.map((linea) => {
+            const precioMods = linea.modificadores.reduce(
+              (s, m) => s + m.precioExtra,
+              0,
+            );
+            const precioTotalUnidad = linea.precio + precioMods;
+
+            return (
               <div key={linea.key} className="comanda-linea">
                 <div className="comanda-linea-top">
-                  <span className="comanda-linea-nombre">{linea.nombre}</span>
+                  <div className="comanda-linea-info">
+                    <span className="comanda-linea-nombre">{linea.nombre}</span>
+                    {linea.modificadores.length > 0 && (
+                      <span className="comanda-linea-mods">
+                        {linea.modificadores
+                          .map((m) => `+ ${m.nombre}`)
+                          .join(", ")}
+                      </span>
+                    )}
+                  </div>
                   <span className="comanda-linea-precio">
-                    {(linea.precio * linea.cantidad).toFixed(2)} €
+                    {(precioTotalUnidad * linea.cantidad).toFixed(2)} €
                   </span>
                 </div>
 
                 <div className="comanda-linea-bottom">
                   <div className="comanda-linea-qty">
-                    <button
-                      type="button"
-                      onClick={() => cambiarCantidad(linea.key, -1)}
-                    >
+                    <button onClick={() => cambiarCantidad(linea.key, -1)}>
                       −
                     </button>
                     <span>{linea.cantidad}</span>
-                    <button
-                      type="button"
-                      onClick={() => cambiarCantidad(linea.key, 1)}
-                    >
+                    <button onClick={() => cambiarCantidad(linea.key, 1)}>
                       +
                     </button>
                   </div>
-
                   <button
-                    type="button"
                     className="comanda-linea-nota-toggle"
                     onClick={() => abrirNota(linea)}
                   >
                     {linea.nota ? "Nota ✓" : "+ Nota"}
                   </button>
-
                   <button
-                    type="button"
                     className="comanda-linea-quitar"
                     onClick={() => quitarLinea(linea.key)}
-                    aria-label={`Quitar ${linea.nombre}`}
                   >
                     ×
                   </button>
@@ -345,45 +233,37 @@ export default function ComandasPage() {
                   <input
                     type="text"
                     className="comanda-linea-nota-input"
-                    placeholder="Ej. sin cebolla, para llevar…"
                     value={linea.nota}
                     onChange={(e) => actualizarNota(linea.key, e.target.value)}
                     autoFocus
                   />
                 )}
               </div>
-            ))
-          )}
+            );
+          })}
         </div>
 
         <div className="comanda-footer">
           {enviarError && <p className="action-error">{enviarError}</p>}
-
-          <div className="comanda-total-row">
-            <span className="comanda-total-label">
-              Total {totalUnidades > 0 && `· ${totalUnidades} uds.`}
-            </span>
-            <span className="comanda-total-value">{total.toFixed(2)} €</span>
-          </div>
-
           <button
-            type="button"
             className="btn-primary comanda-submit"
             disabled={!mesaId || lineas.length === 0 || enviando}
             onClick={realizarPedido}
           >
-            {enviando ? (
-              <span className="loader" />
-            ) : mesaSeleccionada ? (
-              `Realizar pedido · Mesa ${mesaSeleccionada.numero}`
-            ) : (
-              "Selecciona una mesa"
-            )}
+            {mesaSeleccionada
+              ? `Realizar pedido · Mesa ${mesaSeleccionada.numero}`
+              : "Selecciona una mesa"}
           </button>
         </div>
       </aside>
+
+      {productoConfigurando && (
+        <ConfigProductoModal
+          producto={productoConfigurando}
+          onClose={() => setProductoConfigurando(null)}
+          onConfirm={handleConfirmarConfig}
+        />
+      )}
     </div>
   );
 }
-
-type ProductoComandaLike = { id: number; nombre: string; precio: number };
