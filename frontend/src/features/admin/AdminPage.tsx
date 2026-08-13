@@ -29,6 +29,7 @@ import {
   deshabilitarUsuario,
   editarProducto,
   eliminarMesa,
+  getProductos,
   registrarUsuario,
 } from "./adminService";
 import StatCard from "./StatCard";
@@ -49,6 +50,7 @@ function AdminPage() {
     mesas,
     setMesas,
     productos,
+    setProductos,
     tiposProducto,
     usuarioRoles,
     usuarios,
@@ -176,6 +178,8 @@ function AdminPage() {
             onConfirm={async (payload) => {
               try {
                 const productoActualizado = await editarProducto(payload);
+                const productosActualizados = await getProductos();
+                setProductos(productosActualizados);
                 logActivity(
                   `Producto "${productoActualizado.nombre}" modificado`,
                 );

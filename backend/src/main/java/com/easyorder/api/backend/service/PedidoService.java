@@ -222,6 +222,7 @@ public class PedidoService {
 		return crearPedido(dto, sesion);
 	}
 
+	@Transactional
 	public PedidoDTO crearPedidoAdmin(CrearPedidoDTO dto, Long idMesa) {
 		Sesion sesion = sesionRepository.findByMesaIdAndEstadoNombre(idMesa, "ACTIVA")
 				.orElseThrow(() -> new NoEncontradoException("Sesión no encontrada para la mesa: " + idMesa));

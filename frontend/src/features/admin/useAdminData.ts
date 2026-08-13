@@ -62,6 +62,7 @@ export function useAdminData() {
     mesas,
     setMesas,
     productos,
+    setProductos,
     tiposProducto,
     usuarioRoles,
     usuarios,

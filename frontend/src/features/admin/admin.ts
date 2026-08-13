@@ -124,7 +124,7 @@ export type EditProductPayload = {
   descripcion: string;
   precio: number;
   tipoId: number | null;
-  activo: boolean;
+  disponible: boolean;
 };
 
 export type EditProductFormProps = FormProps<EditProductPayload> & {

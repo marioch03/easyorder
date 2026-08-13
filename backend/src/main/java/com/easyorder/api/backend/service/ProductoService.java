@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +34,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ProductoService {
 
+	private static final String TENANT_KEY = "T(com.easyorder.api.backend.tenant.TenantContext).get()";
+
 	private final ProductoRepository productoRepository;
 
 	private final ProductoTipoRepository productoTipoRepository;
@@ -44,6 +47,7 @@ public class ProductoService {
 	private final Producto_GrupoModificadorRepository producto_GrupoModificadorRepository;
 
 	@Transactional(readOnly = true)
+	@Cacheable(value = "productos", key = TENANT_KEY)
 	public List<ProductoDTO> findAll() {
 		List<Producto> productos = productoRepository.findAll();
 
@@ -96,6 +100,7 @@ public class ProductoService {
 	}
 
 	@Transactional(readOnly = true)
+	@Cacheable(value = "productosSimplificados", key = TENANT_KEY)
 	public List<ProductoComandaDTO> getProductosSimplificados() {
 		List<Producto> productos = productoRepository.findAll();
 
@@ -125,10 +130,12 @@ public class ProductoService {
 				.orElseThrow(() -> new NoEncontradoException("Producto no encontrado. ID: " + id));
 	}
 
+	@CacheEvict(value = { "productos", "productosSimplificados" }, key = TENANT_KEY)
 	public Producto save(Producto producto) {
 		return productoRepository.save(producto);
 	}
 
+	@CacheEvict(value = { "productos", "productosSimplificados" }, key = TENANT_KEY)
 	public void deleteById(Long id) {
 		productoRepository.deleteById(id);
 	}
@@ -137,14 +144,16 @@ public class ProductoService {
 		return productoRepository.findByNombreContainingIgnoreCase(nombre);
 	}
 
+	@Transactional(readOnly = true)
+	@Cacheable(value = "productosTipos", key = TENANT_KEY)
 	public List<ProductoTipoDTO> getTipos() {
 		return productoTipoRepository.findAll().stream()
 				.map(tipo -> new ProductoTipoDTO(tipo.getId(), tipo.getNombre()))
 				.collect(Collectors.toList());
 	}
 
-	@CacheEvict(value = "productos", allEntries = true)
-	public Producto editarProducto(Long id, EditarProductoDTO dto) {
+	@CacheEvict(value = { "productos", "productosSimplificados" }, key = TENANT_KEY)
+	public EditarProductoDTO editarProducto(Long id, EditarProductoDTO dto) {
 
 		Producto producto = productoRepository.findById(id)
 				.orElseThrow(() -> new NoEncontradoException(
@@ -152,18 +161,26 @@ public class ProductoService {
 
 		ProductoTipo tipo = productoTipoRepository.findById(dto.tipoId())
 				.orElseThrow(() -> new NoEncontradoException(
-						"ProductoTipo no encontrado. ID: " + id));
+						"ProductoTipo no encontrado. ID: " + dto.tipoId()));
 
-		producto.setId(dto.id());
 		producto.setNombre(dto.nombre());
 		producto.setDescripcion(dto.descripcion());
 		producto.setPrecio(BigDecimal.valueOf(dto.precio()));
-		producto.setDisponible(dto.activo());
+		producto.setDisponible(dto.disponible());
 		producto.setTipo(tipo);
 
-		return productoRepository.save(producto);
+		Producto productoGuardado = productoRepository.save(producto);
+		return new EditarProductoDTO(
+				productoGuardado.getId(),
+				productoGuardado.getNombre(),
+				productoGuardado.getDescripcion(),
+				productoGuardado.getPrecio().doubleValue(),
+				productoGuardado.getTipo().getId(),
+				productoGuardado.isDisponible());
 	}
 
+	@Transactional(readOnly = true)
+	@Cacheable(value = "productoTiposKds", key = TENANT_KEY + " + '::' + #nombreZonaTrabajo")
 	public List<ProductoTipoDTO> getTiposKds(String nombreZonaTrabajo) {
 		ZonaTrabajo zonaTrabajo = zonaTrabajoRepository.findByNombre(nombreZonaTrabajo)
 				.orElseThrow(() -> new NoEncontradoException(nombreZonaTrabajo));

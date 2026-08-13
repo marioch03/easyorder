@@ -32,6 +32,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SesionService {
 
+    private static final String TENANT_KEY = "T(com.easyorder.api.backend.tenant.TenantContext).get()";
+
     private final SesionRepository sesionRepository;
     private final SesionEstadoRepository sesionEstadoRepository;
     private final MesaRepository mesaRepository;
@@ -132,7 +134,7 @@ public class SesionService {
         return getSesionPorCodigo(qrCodeUrl).getMesa();
     }
 
-    @Cacheable(value = "sesionClienteCache", key = "#sessionCode")
+    @Cacheable(value = "sesionClienteCache", key = TENANT_KEY + " + '::' + #sessionCode")
     @Transactional(readOnly = true)
     public SesionClienteDTO obtenerDatosSesionCliente(String sessionCode) {
         Sesion sesion = getSesionPorCodigo(sessionCode);

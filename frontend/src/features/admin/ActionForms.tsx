@@ -333,7 +333,7 @@ export function EditProductForm({
   const [descripcion, setDescripcion] = useState("");
   const [precio, setPrecio] = useState(0);
   const [tipoId, setTipoId] = useState<number | null>(null);
-  const [activo, setActivo] = useState(true);
+  const [disponible, setDisponible] = useState(true);
 
   const resultados = productos.filter((p) =>
     p.nombre.toLowerCase().includes(query.toLowerCase()),
@@ -348,7 +348,7 @@ export function EditProductForm({
     setDescripcion(producto.descripcion ?? "");
     setPrecio(producto.precio);
     setTipoId(producto.tipoId);
-    setActivo(producto.disponible);
+    setDisponible(producto.disponible);
   };
 
   return (
@@ -365,7 +365,7 @@ export function EditProductForm({
           descripcion,
           precio: Number(precio),
           tipoId,
-          activo,
+          disponible,
         });
       }}
     >
@@ -456,8 +456,8 @@ export function EditProductForm({
               <label>Estado</label>
 
               <select
-                value={activo ? "true" : "false"}
-                onChange={(e) => setActivo(e.target.value === "true")}
+                value={disponible ? "true" : "false"}
+                onChange={(e) => setDisponible(e.target.value === "true")}
               >
                 <option value="true">Activo</option>
                 <option value="false">Inactivo</option>

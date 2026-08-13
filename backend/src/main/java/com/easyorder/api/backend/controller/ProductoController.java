@@ -47,7 +47,7 @@ public class ProductoController {
     }
 
     @PutMapping("/admin/productos/{id}")
-    public ResponseEntity<Producto> editarProducto(
+    public ResponseEntity<EditarProductoDTO> editarProducto(
             @PathVariable Long id,
             @RequestBody EditarProductoDTO dto) {
 
