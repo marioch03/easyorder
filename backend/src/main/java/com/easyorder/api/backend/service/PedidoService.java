@@ -334,22 +334,17 @@ public class PedidoService {
 		eventPublisher.publishEvent(SseTopicEvent.of(SseTopic.PEDIDOS));
 	}
 
-	public CuentaDTO obtenerCuenta(Long idMesa) {
-		Mesa mesa = mesaRepository.findById(idMesa)
-				.orElseThrow(() -> new NoEncontradoException("Mesa no encontrada. Id: " + idMesa));
-
-		Sesion sesion = obtenerSesionActivaEntidad(mesa);
-		if (sesion == null) {
-			return new CuentaDTO(List.of(), BigDecimal.ZERO);
-		}
-
-		return construirCuenta(sesion.getId());
-	}
-
+	@Transactional(readOnly = true)
 	public CuentaDTO obtenerCuentaCliente(String sessionCode) {
 		Sesion sesion = sesionRepository.findByQrCodeUrl(sessionCode)
 				.orElseThrow(() -> new NoEncontradoException("Sesión no encontrada para el QR code: " + sessionCode));
-		return construirCuenta(sesion.getId());
+		return construirCuenta(sesion);
+	}
+
+	public CuentaDTO obtenerCuentaAdmin(Long idMesa) {
+		Sesion sesion = sesionRepository.findByMesaIdAndEstadoNombre(idMesa, "ACTIVA")
+				.orElseThrow(() -> new NoEncontradoException("Sesión no encontrada para la mesa: " + idMesa));
+		return construirCuenta(sesion);
 	}
 
 	@Transactional(readOnly = true)
@@ -379,7 +374,8 @@ public class PedidoService {
 	}
 
 	@Transactional(readOnly = true)
-	private CuentaDTO construirCuenta(Long idSesion) {
+	private CuentaDTO construirCuenta(Sesion sesion) {
+		Long idSesion = sesion.getId();
 		List<Pedido> pedidos = pedidoRepository.findBySesionId(idSesion);
 		List<Long> pedidoIds = pedidos.stream()
 				.map(Pedido::getId)

@@ -1,15 +1,6 @@
 import { clientApi } from "../../api/apiClient";
 import type { Cuenta, Pedido } from "../types/bill";
 
-export async function getMesa() {
-  try {
-    const response = await clientApi.get("/sesiones/mesa");
-    return response.data;
-  } catch (error) {
-    throw new Error("Error obteniendo mesa");
-  }
-}
-
 export async function getPedidos(): Promise<Pedido[]> {
   try {
     const response = await clientApi.get<Pedido[]>("/pedidos");

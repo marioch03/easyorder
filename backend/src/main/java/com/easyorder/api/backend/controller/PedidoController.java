@@ -40,7 +40,7 @@ public class PedidoController {
 
     @GetMapping("/admin/pedidos/{idMesa}/cuenta")
     public ResponseEntity<CuentaDTO> getCuentaAdmin(@PathVariable Long idMesa) {
-        return ResponseEntity.ok(pedidoService.obtenerCuenta(idMesa));
+        return ResponseEntity.ok(pedidoService.obtenerCuentaAdmin(idMesa));
     }
 
     @PostMapping("/admin/pedidos/mesa/{idMesa}")
