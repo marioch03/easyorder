@@ -24,6 +24,7 @@ import com.easyorder.api.backend.dto.PedidoItem_ModificadorDTO;
 import com.easyorder.api.backend.dto.SseTopic;
 import com.easyorder.api.backend.event.SseTopicEvent;
 import com.easyorder.api.backend.exception.NoEncontradoException;
+import com.easyorder.api.backend.exception.ProductoNoDisponibleException;
 import com.easyorder.api.backend.model.Mesa;
 import com.easyorder.api.backend.model.Modificador;
 import com.easyorder.api.backend.model.Pedido;
@@ -64,6 +65,8 @@ public class PedidoService {
 		PedidoEstado estadoPendiente = obtenerEstadoPendiente();
 		Map<Long, Modificador> modificadorMap = cargarModificadoresMap(dto.items());
 		Map<Long, Producto> productoMap = cargarProductosMap(dto.items());
+
+		validarDisponibilidad(productoMap, dto.items());
 
 		// 2. Construcción de ítems y cálculo del total
 		Pedido nuevoPedido = instanciarPedidoBase(sesion, estadoPendiente);
@@ -112,6 +115,19 @@ public class PedidoService {
 
 		return productoRepository.findAllById(ids).stream()
 				.collect(Collectors.toMap(Producto::getId, Function.identity()));
+	}
+
+	private void validarDisponibilidad(Map<Long, Producto> productoMap, List<CrearPedidoItemDTO> items) {
+		List<String> noDisponibles = items.stream()
+				.map(item -> productoMap.get(item.idProducto()))
+				.filter(producto -> producto != null && !producto.isDisponible())
+				.map(Producto::getNombre)
+				.toList();
+
+		if (!noDisponibles.isEmpty()) {
+			throw new ProductoNoDisponibleException(
+					"Los siguientes productos ya no están disponibles: " + String.join(", ", noDisponibles));
+		}
 	}
 
 	private Pedido instanciarPedidoBase(Sesion sesion, PedidoEstado estado) {

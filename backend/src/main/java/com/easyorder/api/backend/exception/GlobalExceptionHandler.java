@@ -80,4 +80,11 @@ public class GlobalExceptionHandler {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                                 .body(ex.getMessage());
         }
+
+        @ExceptionHandler(ProductoNoDisponibleException.class)
+        public ResponseEntity<String> handleProductoNoDisponible(
+                        ProductoNoDisponibleException ex) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                .body(ex.getMessage());
+        }
 }

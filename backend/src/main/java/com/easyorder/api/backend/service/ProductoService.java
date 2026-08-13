@@ -49,7 +49,6 @@ public class ProductoService {
 
 		List<Long> productoIds = productos.stream().map(Producto::getId).toList();
 
-		// 1. Mapeo de alérgenos (ya lo tenías)
 		Map<Long, List<AlergenoDTO>> alergenosPorProducto = productoAlergenoRepository
 				.findByProducto_IdIn(productoIds).stream()
 				.collect(Collectors.groupingBy(
