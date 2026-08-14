@@ -341,6 +341,7 @@ public class PedidoService {
 		return construirCuenta(sesion);
 	}
 
+	@Transactional(readOnly = true)
 	public CuentaDTO obtenerCuentaAdmin(Long idMesa) {
 		Sesion sesion = sesionRepository.findByMesaIdAndEstadoNombre(idMesa, "ACTIVA")
 				.orElseThrow(() -> new NoEncontradoException("Sesión no encontrada para la mesa: " + idMesa));

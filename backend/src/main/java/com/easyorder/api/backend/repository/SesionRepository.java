@@ -13,31 +13,35 @@ import com.easyorder.api.backend.model.Sesion;
 import com.easyorder.api.backend.model.SesionEstado;
 
 public interface SesionRepository extends JpaRepository<Sesion, Long> {
-    Optional<Sesion> findByMesaAndEstado(Mesa mesa, SesionEstado estado);
+	Optional<Sesion> findByMesaAndEstado(Mesa mesa, SesionEstado estado);
 
-    Optional<Sesion> findByMesaIdAndEstadoNombre(Long mesaId, String nombreEstado);
+	Optional<Sesion> findByMesaIdAndEstadoNombre(Long mesaId, String nombreEstado);
 
-    List<Sesion> findByMesaInAndEstadoNombre(List<Mesa> mesas, String nombreEstado);
+	List<Sesion> findByMesaInAndEstadoNombre(List<Mesa> mesas, String nombreEstado);
 
-    boolean existsByQrCodeUrlAndEstadoNombre(String qrCodeUrl, String estadoNombre);
+	boolean existsByQrCodeUrlAndEstadoNombre(String qrCodeUrl, String estadoNombre);
 
-    Optional<Sesion> findByQrCodeUrl(String qrCodeUrl);
+	Optional<Sesion> findByQrCodeUrl(String qrCodeUrl);
 
-    @Query(value = "SELECT COUNT(*) > 0 FROM Sesion s " +
-            "JOIN SesionEstado e ON s.id_estado = e.id " +
-            "WHERE s.qr_code_url = :qrCodeUrl AND e.nombre = :estadoNombre", nativeQuery = true)
-    int existsByQrCodeUrlAndEstadoNombreUnfiltered(
-            @Param("qrCodeUrl") String qrCodeUrl,
-            @Param("estadoNombre") String estadoNombre);
+	@Query("""
+			SELECT COUNT(s) > 0
+			FROM Sesion s
+			WHERE s.qrCodeUrl = :qrCodeUrl AND s.estado.nombre = :estadoNombre
+			""")
+	int existsByQrCodeUrlAndEstadoNombreUnfiltered(
+			@Param("qrCodeUrl") String qrCodeUrl,
+			@Param("estadoNombre") String estadoNombre);
 
-    @Query(value = "SELECT * FROM Sesion s WHERE s.qr_code_url = :qrCodeUrl", nativeQuery = true)
-    Optional<Sesion> findByQrCodeUrlUnfiltered(@Param("qrCodeUrl") String qrCodeUrl);
+	@Query("SELECT s FROM Sesion s WHERE s.qrCodeUrl = :qrCodeUrl")
+	Optional<Sesion> findByQrCodeUrlUnfiltered(@Param("qrCodeUrl") String qrCodeUrl);
 
-    @Query(value = """
-            SELECT s.id AS id, s.id_tenant AS tenantId, e.nombre AS estadoNombre
-            FROM Sesion s
-            JOIN SesionEstado e ON s.id_estado = e.id
-            WHERE s.qr_code_url = :qrCodeUrl
-            """, nativeQuery = true)
-    Optional<SesionAuthProjection> findAuthProjectionByQrCodeUrl(@Param("qrCodeUrl") String qrCodeUrl);
+	@Query(value = """
+			SELECT s.id AS id,
+			       s.id_tenant AS tenantId,
+			       e.nombre AS estadoNombre
+			FROM sesion s
+			JOIN sesion_estado e ON s.id_estado = e.id
+			WHERE s.qr_code_url = :qrCodeUrl
+			""", nativeQuery = true)
+	Optional<SesionAuthProjection> findAuthProjectionByQrCodeUrl(@Param("qrCodeUrl") String qrCodeUrl);
 }

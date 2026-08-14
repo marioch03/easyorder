@@ -12,7 +12,7 @@ export async function getPedidos(): Promise<Pedido[]> {
 
 export async function solicitarCuentaApi() {
   try {
-    const response = await clientApi.get("/pedidos/cuenta");
+    const response = await clientApi.put("/mesas/cuenta");
 
     return response.data;
   } catch (error) {

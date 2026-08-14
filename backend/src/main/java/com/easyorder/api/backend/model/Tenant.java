@@ -13,8 +13,8 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "Tenant", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_tenant_slug", columnNames = {"slug"})
+@Table(name = "tenant", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_tenant_slug", columnNames = { "slug" })
 })
 public class Tenant {
 
@@ -28,7 +28,7 @@ public class Tenant {
     @Column(nullable = false, length = 60, unique = true)
     private String slug;
 
-    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
+    @Column(nullable = false)
     private Boolean activo = true;
 
     @CreationTimestamp

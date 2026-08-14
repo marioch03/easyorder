@@ -149,13 +149,14 @@ public class SesionService {
 
     @Transactional(readOnly = true)
     public SesionAuthProjection getSesionActivaParaAutenticacion(String qrCodeUrl) {
+        System.out.println("HA ENTRADOOOO");
         SesionAuthProjection sesion = sesionRepository.findAuthProjectionByQrCodeUrl(qrCodeUrl)
                 .orElseThrow(() -> new NoEncontradoException("Sesión no encontrada para el QR code: " + qrCodeUrl));
 
         if (!"ACTIVA".equals(sesion.getEstadoNombre())) {
             throw new NoEncontradoException("La sesión no está activa");
         }
-
+        System.out.println(">>>>>>>>>>><SESSION: " + sesion.getEstadoNombre() + "<<<<<<<<<<");
         return sesion;
     }
 }

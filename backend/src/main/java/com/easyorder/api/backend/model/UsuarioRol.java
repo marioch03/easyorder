@@ -16,7 +16,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "UsuarioRol", uniqueConstraints = {
+@Table(name = "usuario_rol", uniqueConstraints = {
         @UniqueConstraint(columnNames = "nombre")
 })
 public class UsuarioRol {

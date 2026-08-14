@@ -16,7 +16,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "PedidoEstado", uniqueConstraints = {
+@Table(name = "pedido_estado", uniqueConstraints = {
         @UniqueConstraint(columnNames = "nombre")
 })
 public class PedidoEstado {
@@ -77,7 +77,7 @@ public class PedidoEstado {
 
     @Override
     public String toString() {
-        return "PedidoEstado{" +
+        return "pedido_estado{" +
                 "id=" + id +
                 ", nombre='" + nombre + '\'' +
                 ", descripcion='" + descripcion + '\'' +

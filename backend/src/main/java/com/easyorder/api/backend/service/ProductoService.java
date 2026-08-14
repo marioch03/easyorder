@@ -50,7 +50,7 @@ public class ProductoService {
 	@Cacheable(value = "productos", key = TENANT_KEY)
 	public List<ProductoDTO> findAll() {
 		List<Producto> productos = productoRepository.findAll();
-
+		System.out.println("----------LLEGO HASTA AQUIIIII");
 		List<Long> productoIds = productos.stream().map(Producto::getId).toList();
 
 		Map<Long, List<AlergenoDTO>> alergenosPorProducto = productoAlergenoRepository

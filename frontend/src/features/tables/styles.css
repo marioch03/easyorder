@@ -194,13 +194,29 @@
  
 .pedido-item {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   padding: 8px 12px;
   background: rgba(100, 130, 173, 0.05);
   border-radius: var(--radius-sm);
+  border-bottom: 1px solid #eee;
   font-size: 13px;
   color: var(--color-text);
+}
+
+.pedido-item-main {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-weight: 500;
+}
+
+.pedido-item-modifiers {
+  margin: 4px 0 0 16px;
+  padding: 0;
+  font-size: 0.85em;
+  color: #666;
+  list-style: none;
 }
  
 /* --- Botones de acción --- */

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.TenantId;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -26,7 +27,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Entity
-@Table(name = "Sesion")
+@Table(name = "sesion")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -55,7 +56,8 @@ public class Sesion {
     @JoinColumn(name = "id_estado", nullable = false)
     private SesionEstado estado;
 
-    @Column(name = "hora_inicio", columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
+    @CreationTimestamp
+    @Column(name = "hora_inicio")
     private LocalDateTime horaInicio;
 
     @Column(name = "hora_fin")

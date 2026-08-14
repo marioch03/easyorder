@@ -42,18 +42,17 @@ services:
       - ./frontend:/app
       - /app/node_modules
   db:
-    image: mariadb:10.11-jammy
+    image: postgres:16-alpine
     container_name: easyorder-db
     environment:
-      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD} 
-      MARIADB_DATABASE: ${DB_NAME}
-      MARIADB_USER: ${DB_USER}
-      MARIADB_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       TZ: Europe/Madrid
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
-      - db_data:/var/lib/mysql
+      - db_data:/var/lib/postgresql/data
   cache:
     image: valkey/valkey:8.0-alpine
     container_name: easyorder-cache

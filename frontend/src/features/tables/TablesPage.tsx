@@ -252,20 +252,45 @@ export default function TablesPage() {
             </div>
 
             <div className="pedido-items">
-              {cuenta.items.map((item) => (
-                <div className="pedido-item" key={item.idProducto}>
-                  <span>
-                    {item.cantidad} x {item.nombreProducto}
-                  </span>
+              {cuenta.items.map((item, index) => {
+                const modsTotal =
+                  item.modificadores?.reduce(
+                    (sum, mod) => sum + mod.precioAplicado,
+                    0,
+                  ) ?? 0;
 
-                  <span>
-                    {(item.cantidad * item.precioUnitario).toFixed(2)} €
-                  </span>
-                </div>
-              ))}
+                const lineTotal =
+                  item.cantidad * (item.precioUnitario + modsTotal);
+
+                return (
+                  <div
+                    className="pedido-item"
+                    key={`${item.idProducto}-${index}`}
+                  >
+                    <div className="pedido-item-main">
+                      <span>
+                        {item.cantidad} x {item.nombreProducto}
+                      </span>
+                      <span>{lineTotal.toFixed(2)} €</span>
+                    </div>
+
+                    {item.modificadores && item.modificadores.length > 0 && (
+                      <ul className="pedido-item-modifiers">
+                        {item.modificadores.map((mod) => (
+                          <li key={mod.id}>
+                            + {mod.nombre}{" "}
+                            {mod.precioAplicado > 0 &&
+                              `(+${mod.precioAplicado.toFixed(2)} €)`}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
-            <div className="modal-bottom-orders">
+            <div className="modal-bottom-tables">
               <h3>Total: {cuenta.total.toFixed(2)} €</h3>
             </div>
           </div>

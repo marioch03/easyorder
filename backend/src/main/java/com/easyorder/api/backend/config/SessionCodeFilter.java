@@ -34,14 +34,17 @@ public class SessionCodeFilter extends OncePerRequestFilter {
             FilterChain filterChain) throws ServletException, IOException {
 
         final String sessionCode = request.getHeader(SESSION_HEADER);
+        System.out.println(">>>>>>>>>>>><SESSION CODE: " + sessionCode + "<<<<<<<<<<");
 
         if (sessionCode == null || sessionCode.isBlank()) {
             filterChain.doFilter(request, response);
             return;
         }
+        System.out.println(">>>>>>>>>><ENTRA AL FILTRO>>>>>>>>>><SESSION CODE: " + sessionCode + "<<<<<<<<<<");
 
         final SesionAuthProjection sesion;
         try {
+            System.out.println("ENTRA AL GETSESIONACTIVA");
             sesion = sesionService.getSesionActivaParaAutenticacion(sessionCode);
         } catch (NoEncontradoException e) {
             response.sendError(HttpStatus.UNAUTHORIZED.value(), "Invalid session code");

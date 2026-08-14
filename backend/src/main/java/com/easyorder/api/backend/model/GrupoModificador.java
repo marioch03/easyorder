@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "GrupoModificador")
+@Table(name = "grupo_modificador")
 @Getter
 @Setter
 @NoArgsConstructor
