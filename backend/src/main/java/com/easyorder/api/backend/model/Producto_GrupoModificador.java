@@ -21,7 +21,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Producto_GrupoModificador {
+public class Producto_GrupoModificador extends AuditableEntity {
 
   @EmbeddedId
   private Producto_GrupoModificadorId id;

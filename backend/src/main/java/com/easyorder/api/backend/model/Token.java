@@ -1,5 +1,7 @@
 package com.easyorder.api.backend.model;
 
+import org.hibernate.annotations.TenantId;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -12,16 +14,18 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "token")
-public class Token {
+public class Token extends AuditableEntity {
     public enum TokenType {
         BEARER
     }
@@ -30,6 +34,10 @@ public class Token {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @TenantId
+    @Column(name = "id_tenant", nullable = false)
+    private Long tenantId;
+
     @Column(unique = true)
     private String token;
 
@@ -37,6 +45,7 @@ public class Token {
     @Builder.Default
     @Enumerated(EnumType.STRING)
     private TokenType tokenType = TokenType.BEARER;
+
     private boolean revoked;
     private boolean expired;
 

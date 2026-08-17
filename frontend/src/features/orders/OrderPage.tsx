@@ -22,13 +22,17 @@ const porAntiguedad = (a: PedidoDTO, b: PedidoDTO) =>
   new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
 
 export default function OrderPage() {
-  const [pedidoSeleccionado, setPedidoSeleccionado] =
-    useState<PedidoDTO | null>(null);
+  const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [servidoLoadingId, setServidoLoadingId] = useState<number | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
   const { pedidos, loading, error } = useOrdersData();
+
+  const pedidoSeleccionado = useMemo(() => {
+    if (selectedOrderId === null) return null;
+    return pedidos.find((p) => p.idPedido === selectedOrderId) || null;
+  }, [pedidos, selectedOrderId]);
 
   const pedidosPendientes = useMemo(() => {
     return pedidos.filter(
@@ -53,22 +57,23 @@ export default function OrderPage() {
   );
 
   const abrirModal = (pedido: PedidoDTO) => {
-    setPedidoSeleccionado(pedido);
+    setSelectedOrderId(pedido.idPedido);
     setActionError(null);
     setModalIsOpen(true);
   };
 
   const cerrarModal = () => {
-    setPedidoSeleccionado(null);
+    setSelectedOrderId(null);
     setModalIsOpen(false);
   };
 
   const handleMarcarServido = async (idItem: number) => {
     try {
       await marcarServidoItem(idItem);
-      cerrarModal();
+      toast.success(`Producto servido correctamente`);
     } catch (err) {
       console.error("Error al marcar el ítem como servido:", err);
+      toast.error(`Error al marcar el producto como servido`);
     }
   };
 

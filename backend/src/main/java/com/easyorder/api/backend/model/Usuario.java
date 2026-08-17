@@ -1,10 +1,8 @@
 package com.easyorder.api.backend.model;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.TenantId;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -35,7 +33,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Usuario {
+public class Usuario extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -54,10 +52,6 @@ public class Usuario {
     @ManyToOne
     @JoinColumn(name = "rol", nullable = false)
     private UsuarioRol rol;
-
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
 
     @Builder.Default
     @Column(nullable = false)

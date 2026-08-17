@@ -19,7 +19,7 @@ import jakarta.persistence.UniqueConstraint;
 @Table(name = "usuario_rol", uniqueConstraints = {
         @UniqueConstraint(columnNames = "nombre")
 })
-public class UsuarioRol {
+public class UsuarioRol extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -2,6 +2,8 @@ package com.easyorder.api.backend.model;
 
 import java.math.BigDecimal;
 
+import org.hibernate.annotations.TenantId;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -24,11 +26,15 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PedidoItem_Modificador {
+public class PedidoItem_Modificador extends AuditableEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+
+  @TenantId
+  @Column(name = "id_tenant", nullable = false)
+  private Long tenantId;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "id_pedido_item", nullable = false)

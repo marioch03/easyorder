@@ -1,13 +1,10 @@
 package com.easyorder.api.backend.model;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.TenantId;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -34,7 +31,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Pedido {
+public class Pedido extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,14 +48,6 @@ public class Pedido {
     @ManyToOne
     @JoinColumn(name = "id_estado", nullable = false)
     private PedidoEstado estado;
-
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 
     @Column(name = "total", nullable = false, precision = 10, scale = 2)
     @Builder.Default

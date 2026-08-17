@@ -1,6 +1,6 @@
 package com.easyorder.api.backend.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import jakarta.validation.Valid;
@@ -17,7 +17,7 @@ public record PedidoDTO(
 
 		String nombreEstado,
 
-		LocalDateTime createdAt,
+		Instant createdAt,
 
 		@NotEmpty(message = "El pedido debe contener al menos un artículo") @Valid List<PedidoItemDTO> items) {
 	public PedidoDTO {
@@ -26,7 +26,7 @@ public record PedidoDTO(
 		}
 	}
 
-	public PedidoDTO(Long idPedido, Long idSesion, int numeroMesa, LocalDateTime createdAt, String nombreEstado) {
+	public PedidoDTO(Long idPedido, Long idSesion, int numeroMesa, Instant createdAt, String nombreEstado) {
 		this(idPedido, idSesion, numeroMesa, nombreEstado, createdAt, List.of());
 	}
 

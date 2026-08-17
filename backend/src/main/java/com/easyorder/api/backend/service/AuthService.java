@@ -1,6 +1,5 @@
 package com.easyorder.api.backend.service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.security.authentication.AuthenticationManager;
@@ -43,7 +42,6 @@ public class AuthService {
         Usuario usuario = Usuario.builder()
                 .nombre(request.nombre())
                 .clave(passwordEncoder.encode(request.clave()))
-                .createdAt(LocalDateTime.now())
                 .rol(getRolByNombre(request.rol()))
                 .activo(true)
                 .tenantId(tenantId)

@@ -34,7 +34,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @Builder
 @ToString
-public class Sesion {
+public class Sesion extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
