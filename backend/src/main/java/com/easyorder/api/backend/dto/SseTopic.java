@@ -1,5 +1,7 @@
 package com.easyorder.api.backend.dto;
 
+import java.util.Arrays;
+
 public enum SseTopic {
   MESAS("mesas"),
   PEDIDOS("pedidos"),
@@ -15,7 +17,19 @@ public enum SseTopic {
     return value;
   }
 
-  public static String canal(SseTopic topic, Long tenantId) {
-    return tenantId + "-" + topic.getValue();
+  public static SseTopic fromValue(String value) {
+
+    return Arrays.stream(values())
+
+        .filter(topic -> topic.value.equalsIgnoreCase(value))
+
+        .findFirst()
+
+        .orElseThrow(() ->
+
+        new IllegalArgumentException(
+
+            "Topic SSE no válido: " + value));
+
   }
 }

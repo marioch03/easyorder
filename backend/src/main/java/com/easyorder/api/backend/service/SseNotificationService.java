@@ -1,5 +1,6 @@
 package com.easyorder.api.backend.service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,68 +16,144 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SseNotificationService {
 
-  private final Map<String, List<SseEmitter>> emitters = new ConcurrentHashMap<>();
+  private static final long EMITTER_TIMEOUT = 3_600_000L;
 
-  public SseEmitter suscribir(String topic) {
-    System.out.println(">>>>>>>>>><Suscriptor conectado al topic: " + topic);
-    SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
-    emitters.computeIfAbsent(topic, k -> new CopyOnWriteArrayList<>()).add(emitter);
+  private static final String EVENT_REFRESH = "refresh";
+  private static final String DATA_REFRESH = "refresh";
 
-    emitter.onCompletion(() -> removeEmitter(topic, emitter));
-    emitter.onTimeout(() -> removeEmitter(topic, emitter));
-    emitter.onError((e) -> removeEmitter(topic, emitter));
+  private final Map<String, List<SseEmitter>> topicEmitters = new ConcurrentHashMap<>();
+
+  private String buildKey(Long tenantId, String topic) {
+    return tenantId + ":" + topic;
+  }
+
+  public SseEmitter suscribir(Long tenantId, String topic) {
+
+    String channelKey = buildKey(tenantId, topic);
+
+    log.info(
+        "Cliente conectado al canal SSE local: [{}]",
+        channelKey);
+
+    SseEmitter emitter = new SseEmitter(EMITTER_TIMEOUT);
+
+    topicEmitters
+        .computeIfAbsent(
+            channelKey,
+            key -> new CopyOnWriteArrayList<>())
+        .add(emitter);
+
+    emitter.onCompletion(
+        () -> removeEmitter(channelKey, emitter));
+
+    emitter.onTimeout(
+        () -> removeEmitter(channelKey, emitter));
+
+    emitter.onError(
+        error -> removeEmitter(channelKey, emitter));
 
     try {
-      emitter.send(SseEmitter.event().data("connected"));
-    } catch (Exception e) {
-      log.error("💥 ERROR al enviar refresh. Cortando conexión...", e);
-      removeEmitter(topic, emitter);
+
+      emitter.send(
+          SseEmitter.event()
+              .name("connected")
+              .data("Conexión establecida con éxito"));
+
+    } catch (IOException | IllegalStateException e) {
+
+      log.debug(
+          "Error durante handshake SSE. Canal [{}]",
+          channelKey,
+          e);
+
+      removeEmitter(channelKey, emitter);
     }
 
     return emitter;
   }
 
-  public void notificar(String topic) {
-    System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>NOTIFICANDO EN EL TOPIC: " + topic);
-    List<SseEmitter> canalEmitters = emitters.get(topic);
-    log.info("notificar('{}') -> {} suscriptores", topic, canalEmitters == null ? 0 : canalEmitters.size());
+  public void notificarLocales(
+      Long tenantId,
+      String topic) {
 
-    if (canalEmitters != null) {
-      for (SseEmitter emitter : canalEmitters) {
-        synchronized (emitter) {
-          try {
-            emitter.send(SseEmitter.event().data("refresh"));
-          } catch (Exception e) {
-            log.error("💥 ERROR al enviar refresh. Cortando conexión...", e);
-            removeEmitter(topic, emitter);
-          }
-        }
+    String channelKey = buildKey(tenantId, topic);
+
+    List<SseEmitter> emitters = topicEmitters.get(channelKey);
+
+    if (emitters == null || emitters.isEmpty()) {
+
+      log.debug(
+          "Sin clientes SSE locales para [{}]",
+          channelKey);
+
+      return;
+    }
+
+    log.debug(
+        "Enviando refresh SSE. canal={}, clientes={}",
+        channelKey,
+        emitters.size());
+
+    for (SseEmitter emitter : emitters) {
+
+      try {
+
+        emitter.send(
+            SseEmitter.event()
+                .name(EVENT_REFRESH)
+                .data(DATA_REFRESH));
+
+      } catch (IOException | IllegalStateException e) {
+
+        log.debug(
+            "Cliente SSE desconectado. Canal [{}]",
+            channelKey);
+
+        removeEmitter(
+            channelKey,
+            emitter);
       }
     }
   }
 
-  @Scheduled(fixedRate = 15000)
+  @Scheduled(fixedRate = 15_000)
   public void sendHeartbeat() {
-    for (Map.Entry<String, List<SseEmitter>> entry : emitters.entrySet()) {
-      List<SseEmitter> canalEmitters = entry.getValue();
-      if (canalEmitters != null && !canalEmitters.isEmpty()) {
-        for (SseEmitter emitter : canalEmitters) {
-          synchronized (emitter) {
+
+    topicEmitters.forEach(
+        (channelKey, emitters) -> {
+
+          for (SseEmitter emitter : emitters) {
+
             try {
-              emitter.send(SseEmitter.event().comment("ping"));
-            } catch (Exception e) {
-              removeEmitter(entry.getKey(), emitter);
+
+              emitter.send(
+                  SseEmitter.event()
+                      .comment("ping"));
+
+            } catch (
+                IOException | IllegalStateException e) {
+
+              removeEmitter(
+                  channelKey,
+                  emitter);
             }
           }
-        }
-      }
-    }
+        });
   }
 
-  private void removeEmitter(String topic, SseEmitter emitter) {
-    List<SseEmitter> canalEmitters = emitters.get(topic);
-    if (canalEmitters != null) {
-      canalEmitters.remove(emitter);
-    }
+  private void removeEmitter(
+      String channelKey,
+      SseEmitter emitter) {
+
+    topicEmitters.computeIfPresent(
+        channelKey,
+        (key, emitters) -> {
+
+          emitters.remove(emitter);
+
+          return emitters.isEmpty()
+              ? null
+              : emitters;
+        });
   }
 }

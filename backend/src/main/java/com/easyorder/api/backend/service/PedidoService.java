@@ -302,7 +302,7 @@ public class PedidoService {
 		pedido.setEstado(estadoServido);
 
 		pedidoRepository.save(pedido);
-		eventPublisher.publishEvent(SseTopicEvent.of(SseTopic.PEDIDOS));
+		notificarCambiosSSE();
 	}
 
 	@Transactional

@@ -1,12 +1,12 @@
 package com.easyorder.api.backend.listener;
 
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-import com.easyorder.api.backend.dto.SseTopic;
 import com.easyorder.api.backend.event.SseTopicEvent;
-import com.easyorder.api.backend.service.SseNotificationService;
+import com.easyorder.api.backend.service.RedisPublisherService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -14,11 +14,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SseEventListener {
 
-    private final SseNotificationService sseNotificationService;
+    private final RedisPublisherService redisPublisherService;
 
+    @Async("taskExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onSseTopicEvent(SseTopicEvent event) {
-        String canal = SseTopic.canal(event.topic(), event.tenantId());
-        sseNotificationService.notificar(canal);
+        redisPublisherService.publish(event);
     }
 }
