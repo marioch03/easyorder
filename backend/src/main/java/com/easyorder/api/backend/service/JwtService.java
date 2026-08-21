@@ -1,85 +1,115 @@
 package com.easyorder.api.backend.service;
 
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.Date;
+import java.util.UUID;
+
 import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.easyorder.api.backend.model.Usuario;
+import com.easyorder.api.backend.repository.RefreshTokenRepository;
 
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class JwtService {
 
-    @Value("${jwt.secret}")
-    private String jwtSecret;
-    @Value("${jwt.expiration}")
-    private long jwtExpiration;
-    @Value("${jwt.refresh-token.expiration}")
-    private long refreshExpiration;
+    private final String issuer;
+    private final SecretKey key;
+    private final long jwtExpiration;
+    private final RefreshTokenRepository refreshTokenRepository;
 
-    public String generateToken(Usuario usuario) {
+    public JwtService(@Value("${jwt.issuer}") String issuer, @Value("${jwt.secret}") String secret,
+            @Value("${jwt.expiration}") long jwtExpiration,
+            RefreshTokenRepository refreshTokenRepository) {
+        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        this.issuer = issuer;
+        this.key = Keys.hmacShaKeyFor(keyBytes);
+        this.jwtExpiration = jwtExpiration;
+        this.refreshTokenRepository = refreshTokenRepository;
+    }
+
+    public String generateAccessToken(Usuario usuario) {
         return buildToken(usuario, jwtExpiration);
     }
 
-    public String generateRefreshToken(Usuario usuario) {
-        return buildToken(usuario, refreshExpiration);
-    }
-
     private String buildToken(Usuario usuario, long expiration) {
+        Instant now = Instant.now();
+        Instant expirationInstant = now.plusMillis(expiration);
+        String jti = UUID.randomUUID().toString();
         return Jwts.builder()
-                .setSubject(usuario.getNombre())
+                .id(jti)
+                .subject(usuario.getNombre())
+                .issuer(issuer)
                 .claim("roles", usuario.getRol().getNombre())
                 .claim("tenantId", usuario.getTenantId())
-                .setIssuedAt(new java.util.Date(System.currentTimeMillis()))
-                .setExpiration(new java.util.Date(System.currentTimeMillis() + expiration))
-                .signWith(getSigningKey())
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(expirationInstant))
+                .signWith(key, Jwts.SIG.HS256)
                 .compact();
     }
 
-    private SecretKey getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
-        return Keys.hmacShaKeyFor(keyBytes);
-    }
-
-    public String extractNombre(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+    public String getSubject(String token) {
+        return Jwts.parser().verifyWith(key).build()
+                .parseSignedClaims(token).getPayload().getSubject();
     }
 
     public Long extractTenantId(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-        return claims.get("tenantId", Long.class);
+        try {
+            return Jwts.parser().verifyWith(key).build()
+                    .parseSignedClaims(token).getPayload().get("tenantId", Long.class);
+        } catch (Exception e) {
+            log.error("Error al extraer el tenantId del token: {}", e.getMessage());
+            return null;
+        }
     }
 
-    public boolean isTokenValid(String token, Usuario usuario) {
-        final String nombre = extractNombre(token);
-        return (nombre.equals(usuario.getNombre())) && !isTokenExpired(token);
+    public boolean isValid(String token) {
+        try {
+            Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
+            return true;
+        } catch (Exception e) {
+            log.debug("JWT validation failed: {}", e.getMessage());
+            return false;
+        }
     }
 
-    public boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new java.util.Date());
+    public String getTokenId(String token) {
+        try {
+            return Jwts.parser().verifyWith(key).build()
+                    .parseSignedClaims(token).getPayload().getId();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
-    public java.util.Date extractExpiration(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getExpiration();
+    public boolean isTokenRevoked(String token) {
+        String tokenId = getTokenId(token);
+        boolean revoked = tokenId != null && refreshTokenRepository.isTokenRevoked(tokenId);
+        log.debug("RefreshToken revocation check - ID: {}, Revoked: {}", tokenId, revoked);
+        return revoked;
+    }
+
+    public boolean isValidAndNotRevoked(String token) {
+        return isValid(token) && !isTokenRevoked(token);
+    }
+
+    public Timestamp getExpiration(String token) {
+        try {
+            Date expiration = Jwts.parser().verifyWith(key).build()
+                    .parseSignedClaims(token).getPayload().getExpiration();
+            return new Timestamp(expiration.getTime());
+        } catch (Exception e) {
+            return null;
+        }
     }
 
 }

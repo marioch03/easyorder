@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { getRolesFromToken } from "./jwtService";
+import useAuth from "../../hooks/useAuth"; // Ajusta la ruta de importación a tu hook
 
 type ProtectedRouteProps = {
-  children?: ReactNode; // 1. Hacemos que children sea OPCIONAL (?) y usamos ReactNode
+  children?: ReactNode;
   allowedRoles?: string[];
 };
 
@@ -11,18 +11,20 @@ export default function ProtectedRoute({
   children,
   allowedRoles,
 }: ProtectedRouteProps) {
-  const accessToken = localStorage.getItem("accessToken");
-  const refreshToken = localStorage.getItem("refreshToken");
+  const { user, isAuthenticated, isInitializing } = useAuth();
 
-  if (!accessToken && !refreshToken) {
-    return <Navigate to="/auth/login" replace />;
+  if (isInitializing) {
+    return <div>Cargando sesión...</div>;
   }
 
-  if (allowedRoles && accessToken) {
-    const roles = getRolesFromToken(accessToken);
+  if (!isAuthenticated || !user) {
+    const tenantSlug = localStorage.getItem("tenant_slug") || "";
+    const loginPath = `/${tenantSlug}/auth/login`;
+    return <Navigate to={loginPath} replace />;
+  }
 
-    const hasRole = allowedRoles.some((role) => roles.includes(role));
-
+  if (allowedRoles) {
+    const hasRole = allowedRoles.includes(user.rol);
     if (!hasRole) {
       return <Navigate to="/error" replace />;
     }

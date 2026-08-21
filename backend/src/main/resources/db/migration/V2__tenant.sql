@@ -27,8 +27,8 @@ ALTER TABLE pedido FORCE ROW LEVEL SECURITY;
 ALTER TABLE pedido_item ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pedido_item FORCE ROW LEVEL SECURITY;
 
-ALTER TABLE token ENABLE ROW LEVEL SECURITY;
-ALTER TABLE token FORCE ROW LEVEL SECURITY;
+ALTER TABLE refresh_token ENABLE ROW LEVEL SECURITY;
+ALTER TABLE refresh_token FORCE ROW LEVEL SECURITY;
 
 ALTER TABLE grupo_modificador ENABLE ROW LEVEL SECURITY;
 ALTER TABLE grupo_modificador FORCE ROW LEVEL SECURITY;
@@ -73,7 +73,7 @@ CREATE POLICY isolation_policy_pedido ON pedido
 CREATE POLICY isolation_policy_pedido_item ON pedido_item 
     FOR ALL USING (id_tenant = current_tenant_id());
 
-CREATE POLICY isolation_policy_token ON token 
+CREATE POLICY isolation_policy_refresh_token ON refresh_token 
     FOR ALL USING (id_tenant = current_tenant_id());
 
 CREATE POLICY isolation_policy_grupo_modificador ON grupo_modificador 

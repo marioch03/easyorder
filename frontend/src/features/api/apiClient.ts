@@ -1,11 +1,18 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
+import {
+  clearAccessToken,
+  getAccessToken,
+  setAccessToken,
+} from "../../utils/token";
 
+// urls
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const BASE_URL_CLIENTE = `${BASE_URL}/cliente`;
 const BASE_URL_ADMIN = `${BASE_URL}/admin`;
 const BASE_URL_AUTH = `${BASE_URL}/auth`;
 const BASE_URL_PUBLIC = `${BASE_URL}/public`;
 
+// obtener tenant
 const getTenantSlug = (): string | null => {
   const storedSlug = localStorage.getItem("tenant_slug");
   if (storedSlug) return storedSlug;
@@ -20,6 +27,9 @@ const getTenantSlug = (): string | null => {
   return null;
 };
 
+// -------------------------------------------------------------
+// CONTROL DE CONCURRENCIA PARA EL REFRESH (COLA GLOBAL)
+// -------------------------------------------------------------
 let isRefreshing = false;
 let failedQueue: Array<{
   resolve: (value: string) => void;
@@ -29,155 +39,105 @@ let failedQueue: Array<{
 const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue.forEach((prom) => {
     if (error) prom.reject(error);
-    else prom.resolve(token!);
+    else if (token) prom.resolve(token);
   });
   failedQueue = [];
 };
 
+/**
+ * Función global que solicita el refresco respetando la cola.
+ * Puede ser llamada por interceptores o directamente desde App.tsx
+ */
+export const requestNewToken = async (): Promise<string> => {
+  if (isRefreshing) {
+    return new Promise((resolve, reject) => {
+      failedQueue.push({ resolve, reject });
+    });
+  }
+
+  isRefreshing = true;
+
+  try {
+    const res = await publicAuthApi.post<{
+      access_token?: string;
+      accessToken?: string;
+    }>("/refresh");
+
+    const newAccessToken = res.data.accessToken || res.data.access_token || "";
+
+    if (!newAccessToken) throw new Error("No token returned");
+
+    setAccessToken(newAccessToken);
+    processQueue(null, newAccessToken);
+    return newAccessToken;
+  } catch (error) {
+    processQueue(error, null);
+    clearAccessToken();
+    window.dispatchEvent(new Event("auth:logout"));
+    throw error;
+  } finally {
+    isRefreshing = false;
+  }
+};
+
+// -------------------------------------------------------------
+// INSTANCIAS DE AXIOS
+// -------------------------------------------------------------
 export const publicAuthApi = axios.create({
   baseURL: BASE_URL_AUTH,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-export const privateAuthApi = axios.create({
-  baseURL: BASE_URL_AUTH,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-privateAuthApi.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error: AxiosError) => Promise.reject(error),
-);
-
-export const initApi = axios.create({
-  baseURL: BASE_URL_CLIENTE,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  headers: { "Content-Type": "application/json" },
+  withCredentials: true,
 });
 
 export const publicApi = axios.create({
   baseURL: BASE_URL_PUBLIC,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  headers: { "Content-Type": "application/json" },
+});
+
+export const initApi = axios.create({
+  baseURL: BASE_URL_CLIENTE,
+  headers: { "Content-Type": "application/json" },
+});
+
+export const privateAuthApi = axios.create({
+  baseURL: BASE_URL_AUTH,
+  headers: { "Content-Type": "application/json" },
+  withCredentials: true,
+});
+
+export const privateApi = axios.create({
+  baseURL: BASE_URL_ADMIN,
+  headers: { "Content-Type": "application/json" },
 });
 
 export const clientApi = axios.create({
   baseURL: BASE_URL_CLIENTE,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  headers: { "Content-Type": "application/json" },
 });
+
+// -------------------------------------------------------------
+// INTERCEPTORES REQUEST (Inyección de Tokens y Headers)
+// -------------------------------------------------------------
+const injectBearerToken = (config: InternalAxiosRequestConfig) => {
+  const token = getAccessToken();
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+};
+
+privateAuthApi.interceptors.request.use(injectBearerToken, (error) =>
+  Promise.reject(error),
+);
+privateApi.interceptors.request.use(injectBearerToken, (error) =>
+  Promise.reject(error),
+);
 
 clientApi.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const sessionCode = localStorage.getItem("sessionCode");
-
-    if (sessionCode) {
-      config.headers["X-Session-Code"] = sessionCode;
-    }
+    if (sessionCode) config.headers["X-Session-Code"] = sessionCode;
     return config;
   },
-  (error: AxiosError) => Promise.reject(error),
-);
-
-clientApi.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (
-      error.response &&
-      (error.response.status === 401 ||
-        error.response.status === 403 ||
-        error.response.status === 404)
-    ) {
-      localStorage.removeItem("sessionCode");
-      window.location.href = "/invalid";
-    }
-    return Promise.reject(error);
-  },
-);
-
-export const privateApi = axios.create({
-  baseURL: BASE_URL_ADMIN,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-privateApi.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error: AxiosError) => Promise.reject(error),
-);
-
-privateApi.interceptors.response.use(
-  (response) => response,
-  async (error: AxiosError) => {
-    const originalRequest = error.config;
-    if (!originalRequest) return Promise.reject(error);
-
-    const customRequest = originalRequest as InternalAxiosRequestConfig & {
-      _retry?: boolean;
-    };
-
-    if (
-      (error.response?.status === 401 || error.response?.status === 403) &&
-      !customRequest._retry
-    ) {
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        }).then((token) => {
-          customRequest.headers.Authorization = `Bearer ${token}`;
-          return privateApi(customRequest);
-        });
-      }
-
-      customRequest._retry = true;
-      isRefreshing = true;
-
-      try {
-        const refreshToken = localStorage.getItem("refreshToken");
-        if (!refreshToken) throw new Error("No hay refresh token");
-
-        const res = await publicAuthApi.post(`/refresh`, {
-          refreshToken,
-        });
-        const { access_token: accessToken } = res.data;
-
-        localStorage.setItem("accessToken", accessToken);
-        customRequest.headers.Authorization = `Bearer ${accessToken}`;
-        processQueue(null, accessToken);
-        return privateApi(customRequest);
-      } catch (refreshError) {
-        processQueue(refreshError, null);
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        window.location.href = "/auth/login";
-        return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
-      }
-    }
-
-    return Promise.reject(error);
-  },
+  (error) => Promise.reject(error),
 );
 
 const apisToInjectTenant = [
@@ -187,15 +147,57 @@ const apisToInjectTenant = [
   clientApi,
   privateApi,
 ];
-
 apisToInjectTenant.forEach((apiInstance) => {
   apiInstance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     const slug = getTenantSlug();
-
-    if (slug) {
-      config.headers["X-Tenant-Slug"] = slug;
-    }
-
+    if (slug) config.headers["X-Tenant-Slug"] = slug;
     return config;
   });
 });
+
+// -------------------------------------------------------------
+// INTERCEPTORES RESPONSE (Manejo de 401 y Refresco)
+// -------------------------------------------------------------
+clientApi.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && [401, 403, 404].includes(error.response.status)) {
+      localStorage.removeItem("sessionCode");
+      window.location.href = "/invalid";
+    }
+    return Promise.reject(error);
+  },
+);
+
+const setupAuthResponseInterceptor = (apiInstance: any) => {
+  apiInstance.interceptors.response.use(
+    (response: any) => response,
+    async (error: AxiosError) => {
+      const originalRequest = error.config as InternalAxiosRequestConfig & {
+        _retry?: boolean;
+      };
+
+      if (!originalRequest || originalRequest.url?.includes("/refresh")) {
+        return Promise.reject(error);
+      }
+
+      if (error.response?.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
+
+        try {
+          const newAccessToken = await requestNewToken();
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+
+          return apiInstance(originalRequest);
+        } catch (refreshError) {
+          return Promise.reject(refreshError);
+        }
+      }
+
+      return Promise.reject(error);
+    },
+  );
+};
+
+setupAuthResponseInterceptor(privateApi);
+setupAuthResponseInterceptor(privateAuthApi);

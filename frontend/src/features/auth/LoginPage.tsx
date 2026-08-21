@@ -1,45 +1,18 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { login } from "./authService";
-import { getRolesFromToken } from "./jwtService";
 import "./styles.css";
+import { useLogin } from "./useLogin";
 
 export default function LoginPage() {
   const [nombre, setNombre] = useState("");
   const [clave, setClave] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const navigate = useNavigate();
+  const { mutate: doLogin, isPending, isError } = useLogin();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setIsLoading(true);
-
     const tenantSlug = localStorage.getItem("tenant_slug") || "";
 
-    try {
-      await login({ nombre, clave, tenantSlug });
-
-      const accessToken = localStorage.getItem("accessToken");
-      const roles = accessToken ? getRolesFromToken(accessToken) : [];
-
-      if (roles.includes("ADMIN")) {
-        navigate(`/${tenantSlug}/select-interface`, { replace: true });
-      } else if (roles.includes("KDS")) {
-        navigate(`/${tenantSlug}/kds`, { replace: true });
-      } else if (roles.includes("PERSONAL")) {
-        navigate(`/${tenantSlug}/staff`, { replace: true });
-      } else {
-        navigate("/forbidden", { replace: true });
-      }
-    } catch (err) {
-      console.error(err);
-      setError("Usuario o contraseña incorrectos.");
-    } finally {
-      setIsLoading(false);
-    }
+    doLogin({ nombre, clave, tenantSlug });
   };
 
   return (
@@ -114,14 +87,18 @@ export default function LoginPage() {
                 />
               </div>
 
-              {error && <div className="login-error">{error}</div>}
+              {isError && (
+                <div className="login-error">
+                  Usuario o contraseña incorrectos.
+                </div>
+              )}
 
               <button
                 type="submit"
                 className="login-button"
-                disabled={isLoading}
+                disabled={isPending}
               >
-                {isLoading ? "Entrando…" : "Entrar"}
+                {isPending ? "Entrando…" : "Entrar"}
               </button>
             </form>
           </div>

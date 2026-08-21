@@ -9,10 +9,11 @@ function ManagementPage() {
   const { slug } = useParams<{ slug: string }>();
 
   const currentSlug = slug || localStorage.getItem("tenant_slug") || "";
-
   const SECCIONES_VALIDAS = ["mesas", "comandas", "pedidos"];
 
-  const segmento = location.pathname.split("/").pop() ?? "";
+  const segmentos = location.pathname.split("/").filter(Boolean);
+  const segmento = segmentos[segmentos.length - 1] ?? "";
+
   const activeSection = SECCIONES_VALIDAS.includes(segmento)
     ? segmento
     : "mesas";

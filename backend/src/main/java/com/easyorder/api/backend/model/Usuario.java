@@ -60,7 +60,7 @@ public class Usuario extends AuditableEntity {
     @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
     @JsonIgnore
     @Builder.Default
-    private List<Token> tokens = new ArrayList<>();
+    private List<RefreshToken> tokens = new ArrayList<>();
 
     // --- Constructores personalizados ---
 

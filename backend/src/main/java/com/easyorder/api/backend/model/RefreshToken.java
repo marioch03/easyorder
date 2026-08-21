@@ -1,11 +1,11 @@
 package com.easyorder.api.backend.model;
 
+import java.time.Instant;
+
 import org.hibernate.annotations.TenantId;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -24,11 +24,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "token")
-public class Token extends AuditableEntity {
-    public enum TokenType {
-        BEARER
-    }
+@Table(name = "refresh_token")
+public class RefreshToken extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,15 +38,13 @@ public class Token extends AuditableEntity {
     @Column(unique = true)
     private String token;
 
-    @Column(name = "token_type")
-    @Builder.Default
-    @Enumerated(EnumType.STRING)
-    private TokenType tokenType = TokenType.BEARER;
+    @Column(name = "expires_at", nullable = false)
+    private Instant expiresAt;
 
+    @Column(nullable = false)
     private boolean revoked;
-    private boolean expired;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JoinColumn(name = "usuario_id", referencedColumnName = "id")
     private Usuario usuario;
 }

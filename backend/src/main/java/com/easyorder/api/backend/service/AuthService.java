@@ -1,6 +1,8 @@
 package com.easyorder.api.backend.service;
 
-import java.util.List;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.UUID;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -12,33 +14,36 @@ import com.easyorder.api.backend.dto.RegisterRequest;
 import com.easyorder.api.backend.dto.TokenResponse;
 import com.easyorder.api.backend.exception.NoEncontradoException;
 import com.easyorder.api.backend.exception.TokenInvalidoException;
+import com.easyorder.api.backend.model.RefreshToken;
 import com.easyorder.api.backend.model.Tenant;
-import com.easyorder.api.backend.model.Token;
 import com.easyorder.api.backend.model.Usuario;
 import com.easyorder.api.backend.model.UsuarioRol;
+import com.easyorder.api.backend.repository.RefreshTokenRepository;
 import com.easyorder.api.backend.repository.TenantRepository;
-import com.easyorder.api.backend.repository.TokenRepository;
 import com.easyorder.api.backend.repository.UsuarioRepository;
 import com.easyorder.api.backend.repository.UsuarioRolRepository;
 import com.easyorder.api.backend.tenant.TenantContext;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
     private final UsuarioRepository usuarioRepository;
     private final UsuarioRolRepository usuarioRolRepository;
-    private final TokenRepository tokenRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final TenantRepository tenantRepository;
     private final JwtService jwtService;
 
     public TokenResponse register(RegisterRequest request) {
         Long tenantId = tenantRepository.findIdBySlug(request.tenantSlug())
-                .orElseThrow(() -> new NoEncontradoException("Bar no encontrado o inactivo" + request.tenantSlug()));
+                .orElseThrow(() -> new NoEncontradoException("Bar no encontrado o inactivo: " + request.tenantSlug()));
+
         Usuario usuario = Usuario.builder()
                 .nombre(request.nombre())
                 .clave(passwordEncoder.encode(request.clave()))
@@ -46,99 +51,90 @@ public class AuthService {
                 .activo(true)
                 .tenantId(tenantId)
                 .build();
+
         Usuario usuarioGuardado = usuarioRepository.save(usuario);
-        String jwtToken = jwtService.generateToken(usuarioGuardado);
-        String refreshToken = jwtService.generateRefreshToken(usuarioGuardado);
-        saveUserToken(usuarioGuardado, jwtToken);
+
+        String jwtToken = jwtService.generateAccessToken(usuarioGuardado);
+        String refreshToken = createAndSaveRefreshToken(usuarioGuardado);
+
         return new TokenResponse(jwtToken, refreshToken);
     }
 
     public TokenResponse login(LoginRequest request) {
         Tenant tenant = tenantRepository.findBySlugAndActivoTrue(request.tenantSlug())
-                .orElseThrow(() -> new NoEncontradoException("Bar no encontrado o inactivo" + request.tenantSlug()));
+                .orElseThrow(() -> new NoEncontradoException("Bar no encontrado o inactivo: " + request.tenantSlug()));
+
         TenantContext.set(tenant.getId());
-        System.out.println("TenantContext: " + TenantContext.get());
+
         try {
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            request.nombre(),
-                            request.clave()));
+                    new UsernamePasswordAuthenticationToken(request.nombre(), request.clave()));
 
             Usuario usuario = usuarioRepository.findByNombre(request.nombre()).orElseThrow();
-            String jwtToken = jwtService.generateToken(usuario);
-            String refreshToken = jwtService.generateRefreshToken(usuario);
-            revokeAllUserTokens(usuario);
-            saveUserToken(usuario, jwtToken);
+
+            String jwtToken = jwtService.generateAccessToken(usuario);
+
+            refreshTokenRepository.revocarTodosLosTokensDelUsuario(usuario.getId());
+
+            String refreshToken = createAndSaveRefreshToken(usuario);
+
             return new TokenResponse(jwtToken, refreshToken);
         } finally {
             TenantContext.clear();
         }
     }
 
-    public TokenResponse refreshToken(String refreshToken) {
-        if (refreshToken == null || refreshToken.isEmpty()) {
-            throw new TokenInvalidoException("Token de refresco no proporcionado");
+    public TokenResponse refreshToken(String refreshTokenString) {
+        if (refreshTokenString == null || refreshTokenString.isEmpty()) {
+            throw new TokenInvalidoException("Refresh token no proporcionado");
         }
 
-        String nombre = jwtService.extractNombre(refreshToken);
-        if (nombre == null) {
-            throw new TokenInvalidoException("Token invalido");
+        RefreshToken refreshToken = refreshTokenRepository.findByToken(refreshTokenString)
+                .orElseThrow(() -> new TokenInvalidoException("Refresh token no encontrado"));
+
+        if (refreshToken.isRevoked()) {
+            throw new TokenInvalidoException("El token ha sido revocado. Inicia sesión nuevamente.");
         }
 
-        Long tenantId = jwtService.extractTenantId(refreshToken);
-        if (tenantId != null) {
-            TenantContext.set(tenantId);
+        if (refreshToken.getExpiresAt().isBefore(Instant.now())) {
+            refreshTokenRepository.revocarToken(refreshTokenString); // Lo revocamos para limpiar
+            throw new TokenInvalidoException("El token ha expirado. Inicia sesión nuevamente.");
         }
+
+        Usuario usuario = refreshToken.getUsuario();
+        TenantContext.set(usuario.getTenantId());
 
         try {
-            Usuario usuario = usuarioRepository.findByNombre(nombre)
-                    .orElseThrow(() -> new TokenInvalidoException(
-                            "Usuario no encontrado en la base de datos para este tenant"));
+            String newJwtToken = jwtService.generateAccessToken(usuario);
 
-            if (!jwtService.isTokenValid(refreshToken, usuario)) {
-                throw new TokenInvalidoException("Token invalido");
-            }
-
-            String jwtToken = jwtService.generateToken(usuario);
-            revokeAllUserTokens(usuario);
-            try {
-                saveUserToken(usuario, jwtToken);
-            } catch (org.springframework.dao.DataIntegrityViolationException e) {
-                // Ignoramos silenciosamente la colisión de la petición concurrente del frontend
-                System.out.println("Token duplicado ignorado de forma segura.");
-            }
-
-            return new TokenResponse(jwtToken, refreshToken);
-
+            return new TokenResponse(newJwtToken, refreshTokenString);
         } finally {
             TenantContext.clear();
         }
     }
 
-    public UsuarioRol getRolByNombre(String nombre) {
+    public void logout(String refreshTokenString) {
+        if (refreshTokenString != null && !refreshTokenString.isEmpty()) {
+            refreshTokenRepository.revocarToken(refreshTokenString);
+        }
+    }
+
+    private UsuarioRol getRolByNombre(String nombre) {
         return usuarioRolRepository.findByNombre(nombre).orElseThrow();
     }
 
-    private void saveUserToken(Usuario usuario, String jwtToken) {
-        Token token = Token.builder()
+    private String createAndSaveRefreshToken(Usuario usuario) {
+        String token = UUID.randomUUID().toString();
+
+        RefreshToken refreshToken = RefreshToken.builder()
                 .usuario(usuario)
-                .token(jwtToken)
-                .tokenType(Token.TokenType.BEARER)
-                .expired(false)
+                .tenantId(usuario.getTenantId())
+                .token(token)
+                .expiresAt(Instant.now().plus(7, ChronoUnit.DAYS))
                 .revoked(false)
                 .build();
-        tokenRepository.save(token);
-    }
 
-    private void revokeAllUserTokens(Usuario usuario) {
-        final List<Token> validUserTokens = tokenRepository
-                .findAllByUsuarioIdAndExpiredFalseAndRevokedFalse(usuario.getId());
-        if (!validUserTokens.isEmpty()) {
-            for (Token token : validUserTokens) {
-                token.setRevoked(true);
-                token.setExpired(true);
-            }
-            tokenRepository.saveAll(validUserTokens);
-        }
+        refreshTokenRepository.save(refreshToken);
+        return token;
     }
 }

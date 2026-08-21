@@ -1,5 +1,6 @@
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { useEffect, useRef } from "react";
+import { getAccessToken } from "../utils/token";
 import type { SseTopic } from "./types";
 
 interface SseOptions {
@@ -9,7 +10,7 @@ interface SseOptions {
 
 const SSE_REFRESH_EVENT = "refresh";
 
-const INITIAL_RETRY_DELAY = 2_000;
+const INITIAL_RETRY_DELAY = 1_000;
 const MAX_RETRY_DELAY = 30_000;
 const REFRESH_DEBOUNCE_MS = 250;
 
@@ -68,8 +69,7 @@ export function useSseSubscription({ topic, onRefresh }: SseOptions) {
     };
 
     const connectOnce = async (): Promise<void> => {
-      const token = localStorage.getItem("accessToken");
-
+      const token = getAccessToken();
       if (!token) {
         console.error(`[SSE] No existe accessToken. topic=${topic}`);
         // Lanzar para que el bucle externo aplique backoff y reintente

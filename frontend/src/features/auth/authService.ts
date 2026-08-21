@@ -1,4 +1,8 @@
-import { privateAuthApi, publicAuthApi } from "../api/apiClient";
+import {
+  privateAuthApi,
+  publicAuthApi,
+  requestNewToken,
+} from "../api/apiClient";
 
 export interface LoginRequest {
   nombre: string;
@@ -8,7 +12,6 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   access_token: string;
-  refresh_token: string;
 }
 
 export async function login(credentials: LoginRequest): Promise<LoginResponse> {
@@ -17,15 +20,15 @@ export async function login(credentials: LoginRequest): Promise<LoginResponse> {
       "/login",
       credentials,
     );
-    const data = response.data;
-
-    localStorage.setItem("accessToken", data.access_token);
-    localStorage.setItem("refreshToken", data.refresh_token);
-
-    return data;
+    return response.data;
   } catch (error) {
     throw new Error("Credenciales incorrectas");
   }
+}
+
+export async function refreshToken(): Promise<LoginResponse> {
+  const token = await requestNewToken();
+  return { access_token: token };
 }
 
 export const logout = async (): Promise<void> => {
@@ -33,9 +36,5 @@ export const logout = async (): Promise<void> => {
     await privateAuthApi.post("/logout");
   } catch (error) {
     console.error("Error al revocar la sesión en el servidor:", error);
-  } finally {
-    // Limpieza local
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
   }
 };
