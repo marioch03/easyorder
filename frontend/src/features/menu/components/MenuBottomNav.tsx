@@ -1,4 +1,4 @@
-import { useCart } from "../../cart/useCart";
+import { useCartStore } from "../../cart/cartStore";
 import { customerIcons } from "../customerIcons";
 
 type MenuBottomNavProps = {
@@ -16,8 +16,9 @@ export default function MenuBottomNav({
   activeSection,
   setActiveSection,
 }: MenuBottomNavProps) {
-  const { items } = useCart();
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+  const totalItems = useCartStore((state) =>
+    state.items.reduce((sum, item) => sum + item.quantity, 0),
+  );
 
   return (
     <nav className="bottom-nav">

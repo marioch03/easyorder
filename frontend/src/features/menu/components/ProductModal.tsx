@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { getAlergenoIcon } from "../../../common/allergens";
 import type { ModificadorDTO } from "../../../common/types";
-import type { CartItem } from "../../cart/cart";
-import { useCart } from "../../cart/useCart";
+import type { CartItem } from "../../cart/cartStore";
+import { useCartStore } from "../../cart/cartStore";
 import "../styles.css";
 import type { ProductDTO } from "../types/menu";
 
@@ -20,7 +20,7 @@ export default function ProductModal({ product, onClose }: Props) {
   const [selectedModifiers, setSelectedModifiers] = useState<
     Record<number, ModificadorDTO[]>
   >({});
-  const { addItem } = useCart();
+  const addItem = useCartStore((state) => state.addItem);
 
   useEffect(() => {
     setQuantity(1);

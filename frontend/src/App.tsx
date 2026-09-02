@@ -5,7 +5,6 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
 import { refreshToken } from "./features/auth/authService";
 import ProtectedRoute from "./features/auth/ProtectedRoute";
-import { CartProvider } from "./features/cart/CartProvider";
 import ComandasPage from "./features/comandas/ComandasPage";
 import { SessionProvider } from "./features/session/SessionProvider";
 import TenantLayout from "./features/tenant/TenantLayout";
@@ -93,9 +92,7 @@ function App() {
                 path="cliente"
                 element={
                   <SessionProvider>
-                    <CartProvider>
-                      <CustomerPage />
-                    </CartProvider>
+                    <CustomerPage />
                   </SessionProvider>
                 }
               />
