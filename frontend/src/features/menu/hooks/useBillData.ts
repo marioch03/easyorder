@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
-import { useSession } from "../../session/useSession";
+import { useSessionStore } from "../../session/sessionStore";
 import { getCuenta } from "../services/billService";
 import type { Cuenta } from "../types/bill";
 
 export function useBillData(sessionCode: string | null) {
   const [cuenta, setCuenta] = useState<Cuenta | null>(null);
   const [loading, setLoading] = useState(true);
-  const sessionData = useSession();
-  const estadoMesa = sessionData.sessionData?.estadoMesa ?? null;
+  const estadoMesa = useSessionStore((state) => state.sessionData?.estadoMesa) ?? null;
 
   useEffect(() => {
     if (!sessionCode) return;

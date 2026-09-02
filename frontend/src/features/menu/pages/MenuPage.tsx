@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useSession } from "../../session/useSession";
+import { useSessionStore } from "../../session/sessionStore";
 import AllergenLegendModal from "../components/AllergenLegendModal"; // 1. Importamos la leyenda
 import ProductCard from "../components/ProductCard";
 import ProductModal from "../components/ProductModal";
@@ -16,7 +16,7 @@ export default function MenuPage() {
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
   const categoryRefs = useRef<Record<number, HTMLElement | null>>({});
   const [searchQuery, setSearchQuery] = useState("");
-  const { sessionCode } = useSession();
+  const sessionCode = useSessionStore((state) => state.sessionCode);
   const { products, categories, loading, error } = useMenuData(sessionCode);
 
   const productosDisponibles = useMemo(() => {

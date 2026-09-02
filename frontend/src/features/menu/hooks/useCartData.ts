@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import type { OrderDTO, OrderItemDTO } from "../../../common/types";
 import { getCartLineId, useCartStore } from "../../cart/cartStore";
 import { useCartSessionSync } from "../../cart/useCartSessionSync";
-import { useSession } from "../../session/useSession";
+import { useSessionStore } from "../../session/sessionStore";
 import { crearPedido } from "../services/cartService";
 
 export function useCartData(sessionCode: string | null) {
@@ -15,8 +15,7 @@ export function useCartData(sessionCode: string | null) {
   const clearCart = useCartStore((state) => state.clearCart);
   const cart = items;
 
-  const sessionData = useSession();
-  const estadoMesa = sessionData.sessionData?.estadoMesa;
+  const estadoMesa = useSessionStore((state) => state.sessionData?.estadoMesa);
   const mesaBloqueada = estadoMesa === "ESPERANDO_CUENTA";
 
   const total = useMemo(

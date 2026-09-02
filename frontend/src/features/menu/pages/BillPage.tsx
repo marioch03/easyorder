@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useSession } from "../../session/useSession";
+import { useSessionStore } from "../../session/sessionStore";
 import BillRequestedScreen from "../components/BillRequestedScreen";
 import { useBillData } from "../hooks/useBillData";
 import { solicitarCuentaApi } from "../services/billService";
@@ -7,7 +7,8 @@ import "../styles.css";
 
 export default function BillPage() {
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const { sessionCode, actualizarEstadoMesa } = useSession();
+  const sessionCode = useSessionStore((state) => state.sessionCode);
+  const actualizarEstadoMesa = useSessionStore((state) => state.actualizarEstadoMesa);
   const [botonLoading, setBotonLoading] = useState(false);
 
   const { cuenta, loading, estadoMesa } = useBillData(sessionCode);

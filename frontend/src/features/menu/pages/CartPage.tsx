@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import ConfirmModal from "../../../common/ConfirmModal";
-import { useSession } from "../../session/useSession";
+import { useSessionStore } from "../../session/sessionStore";
 import CartEmptyState from "../components/CartEmptyState";
 import CartSuccessScreen from "../components/CartSuccessScreen";
 import { useCartData } from "../hooks/useCartData";
@@ -16,7 +16,7 @@ export default function CartPage({ onGoToMenu }: CartPageProps) {
   const [botonLoading, setBotonLoading] = useState(false);
   const [pedidoRealizado, setPedidoRealizado] = useState(false);
 
-  const { sessionCode } = useSession();
+  const sessionCode = useSessionStore((state) => state.sessionCode);
 
   const {
     cart,

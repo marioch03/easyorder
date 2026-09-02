@@ -6,7 +6,6 @@ import { Toaster } from "sonner";
 import { refreshToken } from "./features/auth/authService";
 import ProtectedRoute from "./features/auth/ProtectedRoute";
 import ComandasPage from "./features/comandas/ComandasPage";
-import { SessionProvider } from "./features/session/SessionProvider";
 import TenantLayout from "./features/tenant/TenantLayout";
 import queryClient from "./lib/queryClient";
 import useAuthStore from "./store/authStore";
@@ -91,9 +90,7 @@ function App() {
               <Route
                 path="cliente"
                 element={
-                  <SessionProvider>
-                    <CustomerPage />
-                  </SessionProvider>
+                  <CustomerPage />
                 }
               />
 
