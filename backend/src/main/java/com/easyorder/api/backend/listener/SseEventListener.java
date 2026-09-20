@@ -17,7 +17,7 @@ public class SseEventListener {
     private final RedisPublisherService redisPublisherService;
 
     @Async("taskExecutor")
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
     public void onSseTopicEvent(SseTopicEvent event) {
         redisPublisherService.publish(event);
     }

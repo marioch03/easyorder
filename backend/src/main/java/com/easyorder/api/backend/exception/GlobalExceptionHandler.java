@@ -50,6 +50,12 @@ public class GlobalExceptionHandler {
 				.body(new ErrorResponse("Parámetro inválido: " + ex.getName()));
 	}
 
+	@ExceptionHandler(IllegalArgumentException.class)
+	public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+				.body(new ErrorResponse(ex.getMessage()));
+	}
+
 	@ExceptionHandler(EntityNotFoundException.class)
 	public ResponseEntity<ErrorResponse> handleEntityNotFound(EntityNotFoundException ex) {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND)
