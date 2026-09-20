@@ -16,9 +16,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class TenantFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
@@ -31,7 +33,7 @@ public class TenantFilter extends OncePerRequestFilter {
             final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
             final String tenantSlug = request.getHeader("X-Tenant-Slug");
 
-            boolean tenantSet = false;
+            boolean tenantSet = TenantContext.getOrNull() != null;
 
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 final String jwt = authHeader.substring(7);
@@ -42,6 +44,7 @@ public class TenantFilter extends OncePerRequestFilter {
                         tenantSet = true;
                     }
                 } catch (Exception e) {
+                    log.debug("No se pudo extraer tenantId del token JWT: {}", e.getMessage());
                 }
             }
 

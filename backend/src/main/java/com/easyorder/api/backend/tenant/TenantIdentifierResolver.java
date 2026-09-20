@@ -13,8 +13,6 @@ public class TenantIdentifierResolver implements CurrentTenantIdentifierResolver
   @Override
   public Long resolveCurrentTenantIdentifier() {
     Long tenantId = TenantContext.getOrNull();
-    // System.out.println("----> HIBERNATE PREGUNTA EL TENANT. Valor actual en
-    // ThreadLocal: " + tenantId);
     return tenantId != null ? tenantId : -1L;
   }
 
