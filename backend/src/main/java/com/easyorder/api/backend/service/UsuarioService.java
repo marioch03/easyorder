@@ -10,7 +10,7 @@ import com.easyorder.api.backend.model.Usuario;
 import com.easyorder.api.backend.repository.UsuarioRepository;
 import com.easyorder.api.backend.repository.UsuarioRolRepository;
 
-import jakarta.persistence.EntityNotFoundException;
+import com.easyorder.api.backend.exception.NoEncontradoException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -21,7 +21,7 @@ public class UsuarioService {
 
     public void deshabilitarUsuario(long id) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado. ID: " + id));
+                .orElseThrow(() -> new NoEncontradoException("Usuario no encontrado. ID: " + id));
 
         usuario.setActivo(false);
         usuarioRepository.save(usuario);

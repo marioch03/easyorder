@@ -70,7 +70,8 @@ public class AuthService {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.nombre(), request.clave()));
 
-            Usuario usuario = usuarioRepository.findByNombre(request.nombre()).orElseThrow();
+            Usuario usuario = usuarioRepository.findByNombre(request.nombre())
+                    .orElseThrow(() -> new NoEncontradoException("Usuario no encontrado: " + request.nombre()));
 
             String jwtToken = jwtService.generateAccessToken(usuario);
 
@@ -120,7 +121,8 @@ public class AuthService {
     }
 
     private UsuarioRol getRolByNombre(String nombre) {
-        return usuarioRolRepository.findByNombre(nombre).orElseThrow();
+        return usuarioRolRepository.findByNombre(nombre)
+                .orElseThrow(() -> new NoEncontradoException("Rol no encontrado: " + nombre));
     }
 
     private String createAndSaveRefreshToken(Usuario usuario) {

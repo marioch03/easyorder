@@ -2,7 +2,6 @@ package com.easyorder.api.backend.controller;
 
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +13,6 @@ import com.easyorder.api.backend.dto.UsuarioDTO;
 import com.easyorder.api.backend.dto.UsuarioRolDTO;
 import com.easyorder.api.backend.service.UsuarioService;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -28,13 +26,9 @@ public class UsuarioController {
     }
 
     @PatchMapping("/admin/usuarios/{id}")
-    public ResponseEntity<String> deshabilitarUsuario(@PathVariable Long id) {
-        try {
-            usuarioService.deshabilitarUsuario(id);
-            return ResponseEntity.ok("Usuario deshabilitado correctamente");
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+    public ResponseEntity<Void> deshabilitarUsuario(@PathVariable Long id) {
+        usuarioService.deshabilitarUsuario(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/admin/usuarios/roles")
