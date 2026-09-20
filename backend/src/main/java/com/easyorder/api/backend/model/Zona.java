@@ -47,7 +47,7 @@ public class Zona extends AuditableEntity {
     @Column(length = 255)
     private String descripcion;
 
-    @OneToMany(mappedBy = "zona", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "zona")
     @JsonIgnore
     @Builder.Default
     private Set<Mesa> mesas = new HashSet<>();
