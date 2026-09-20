@@ -18,7 +18,6 @@ import com.easyorder.api.backend.dto.CrearMesaDTO;
 import com.easyorder.api.backend.dto.MesaDTO;
 import com.easyorder.api.backend.service.MesaService;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -47,12 +46,8 @@ public class MesaController {
 
     @DeleteMapping("/admin/mesas/{numero}")
     public ResponseEntity<String> eliminarMesa(@PathVariable int numero) {
-        try {
-            mesaService.eliminarMesa(numero);
-            return ResponseEntity.ok("Mesa eliminada correctamente");
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+        mesaService.eliminarMesa(numero);
+        return ResponseEntity.ok("Mesa eliminada correctamente");
     }
 
     @PutMapping("/cliente/mesas/cuenta")

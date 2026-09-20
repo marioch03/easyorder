@@ -47,12 +47,7 @@ public class MesaService {
                 .collect(Collectors.toMap(s -> s.getMesa().getId(), Function.identity()));
 
         return mesas.stream()
-                .map(mesa -> new MesaDTO(
-                        mesa.getId(),
-                        mesa.getNumero(),
-                        mesa.getEstado().getNombre(),
-                        mesa.getZona().getNombre(),
-                        toSesionDTO(sesionActivaPorMesa.get(mesa.getId()))))
+                .map(mesa -> toMesaDTO(mesa, sesionActivaPorMesa.get(mesa.getId())))
                 .toList();
     }
 
@@ -78,12 +73,7 @@ public class MesaService {
 
         Mesa mesaCreada = save(mesa);
         eventPublisher.publishEvent(SseTopicEvent.of(SseTopic.MESAS));
-        return new MesaDTO(
-                mesaCreada.getId(),
-                mesaCreada.getNumero(),
-                mesaCreada.getEstado().getNombre(),
-                mesaCreada.getZona().getNombre(),
-                null);
+        return toMesaDTO(mesaCreada, null);
     }
 
     @Transactional
@@ -95,12 +85,7 @@ public class MesaService {
 
         Mesa mesaActualizada = save(mesa);
         eventPublisher.publishEvent(SseTopicEvent.of(SseTopic.MESAS));
-        return new MesaDTO(
-                mesaActualizada.getId(),
-                mesaActualizada.getNumero(),
-                mesaActualizada.getEstado().getNombre(),
-                mesaActualizada.getZona().getNombre(),
-                null);
+        return toMesaDTO(mesaActualizada, null);
     }
 
     @Transactional
@@ -119,12 +104,7 @@ public class MesaService {
 
         eventPublisher.publishEvent(SseTopicEvent.of(SseTopic.MESAS));
 
-        return new MesaDTO(
-                mesaActualizada.getId(),
-                mesaActualizada.getNumero(),
-                mesaActualizada.getEstado().getNombre(),
-                mesaActualizada.getZona().getNombre(),
-                new SesionDTO(sesion.getId(), sesion.getQrCodeUrl()));
+        return toMesaDTO(mesaActualizada, sesion);
     }
 
     @Transactional
@@ -148,6 +128,17 @@ public class MesaService {
     public MesaEstado getEstadoMesa(String nombre) {
         return mesaEstadoRepository.findByNombre(nombre.toUpperCase())
                 .orElseThrow(() -> new NoEncontradoException("Estado no encontrado. Nombre: " + nombre));
+    }
+
+    private MesaDTO toMesaDTO(Mesa mesa, Sesion sesion) {
+        String nombreZona = mesa.getZona() != null ? mesa.getZona().getNombre() : null;
+        String nombreEstado = mesa.getEstado() != null ? mesa.getEstado().getNombre() : null;
+        return new MesaDTO(
+                mesa.getId(),
+                mesa.getNumero(),
+                nombreEstado,
+                nombreZona,
+                toSesionDTO(sesion));
     }
 
     private SesionDTO toSesionDTO(Sesion sesion) {

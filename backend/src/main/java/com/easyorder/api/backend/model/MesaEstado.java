@@ -28,7 +28,7 @@ public class MesaEstado extends AuditableEntity {
     @Column(nullable = false, length = 50)
     private String nombre;
 
-    @OneToMany(mappedBy = "estado", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "estado")
     @JsonIgnore
     private Set<Mesa> mesas = new HashSet<>();
 
