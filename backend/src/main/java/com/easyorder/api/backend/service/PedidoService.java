@@ -197,8 +197,6 @@ public class PedidoService {
 					String.format("El total enviado (%.2f) no coincide con el total real calculado (%.2f)",
 							totalEnviado, totalCalculado));
 		}
-		System.out.println("totalEnviado: " + totalEnviado);
-		System.out.println("totalCalculado: " + totalCalculado);
 	}
 
 	private void notificarCambiosSSE() {
@@ -433,20 +431,16 @@ public class PedidoService {
 		return new ArrayList<>(agrupados.values());
 	}
 
-	private Sesion obtenerSesionActivaEntidad(Mesa mesa) {
-		SesionEstado estadoActiva = sesionEstadoRepository.findByNombre("ACTIVA")
-				.orElseThrow(() -> new NoEncontradoException("Estado no encontrado: ACTIVA"));
-		return sesionRepository.findByMesaAndEstado(mesa, estadoActiva).orElse(null);
-	}
-
 	private PedidoItemDTO toPedidoItemDTO(PedidoItem item) {
 
-		List<PedidoItem_ModificadorDTO> modificadoresDTO = item.getModificadores().stream()
-				.map(mod -> new PedidoItem_ModificadorDTO(
-						mod.getModificador().getId(),
-						mod.getModificador().getNombre(),
-						mod.getPrecioAplicado()))
-				.toList();
+		List<PedidoItem_ModificadorDTO> modificadoresDTO = (item.getModificadores() == null)
+				? List.of()
+				: item.getModificadores().stream()
+						.map(mod -> new PedidoItem_ModificadorDTO(
+								mod.getModificador().getId(),
+								mod.getModificador().getNombre(),
+								mod.getPrecioAplicado()))
+						.toList();
 
 		return new PedidoItemDTO(
 				item.getId(),

@@ -5,7 +5,6 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -31,7 +30,7 @@ public class PedidoEstado extends AuditableEntity {
     @Column(length = 200)
     private String descripcion;
 
-    @OneToMany(mappedBy = "estado", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "estado")
     @JsonIgnore
     private Set<Pedido> pedidos = new HashSet<>();
 
