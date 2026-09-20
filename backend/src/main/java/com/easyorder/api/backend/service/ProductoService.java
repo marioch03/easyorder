@@ -50,7 +50,6 @@ public class ProductoService {
 	@Cacheable(value = "productos", key = TENANT_KEY)
 	public List<ProductoDTO> findAll() {
 		List<Producto> productos = productoRepository.findAll();
-		System.out.println("----------LLEGO HASTA AQUIIIII");
 		List<Long> productoIds = productos.stream().map(Producto::getId).toList();
 
 		Map<Long, List<AlergenoDTO>> alergenosPorProducto = productoAlergenoRepository
@@ -137,6 +136,9 @@ public class ProductoService {
 
 	@CacheEvict(value = { "productos", "productosSimplificados" }, key = TENANT_KEY)
 	public void deleteById(Long id) {
+		if (!productoRepository.existsById(id)) {
+			throw new NoEncontradoException("Producto no encontrado. ID: " + id);
+		}
 		productoRepository.deleteById(id);
 	}
 

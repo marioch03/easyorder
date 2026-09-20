@@ -54,7 +54,7 @@ public class ProductoTipo extends AuditableEntity {
     @JoinColumn(name = "id_zona_trabajo")
     private ZonaTrabajo zonaTrabajo;
 
-    @OneToMany(mappedBy = "tipo", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "tipo")
     @JsonIgnore
     @Builder.Default
     private List<Producto> productos = new ArrayList<>();

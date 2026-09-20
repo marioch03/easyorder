@@ -57,12 +57,8 @@ public class ProductoController {
 
     @DeleteMapping("/admin/productos/{id}")
     public ResponseEntity<Void> eliminarProducto(@PathVariable Long id) {
-        if (productoService.getProducto(id) != null) {
-            productoService.deleteById(id);
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        productoService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/cliente/productos/tipos")
