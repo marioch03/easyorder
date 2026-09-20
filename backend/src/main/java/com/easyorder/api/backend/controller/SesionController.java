@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.easyorder.api.backend.dto.MesaDTO;
 import com.easyorder.api.backend.dto.SesionClienteDTO;
+import com.easyorder.api.backend.dto.SesionDTO;
 import com.easyorder.api.backend.model.Mesa;
 import com.easyorder.api.backend.model.Sesion;
 import com.easyorder.api.backend.service.SesionService;
@@ -22,20 +24,24 @@ public class SesionController {
     private final SesionService sesionService;
 
     @PostMapping("/admin/sesiones/open/{idMesa}")
-    public ResponseEntity<Sesion> crearSesion(@PathVariable Long idMesa) {
+    public ResponseEntity<SesionDTO> crearSesion(@PathVariable Long idMesa) {
         Sesion nuevaSesion = sesionService.crearSesion(idMesa);
-        return ResponseEntity.status(HttpStatus.CREATED).body(nuevaSesion);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new SesionDTO(nuevaSesion.getId(), nuevaSesion.getQrCodeUrl()));
     }
 
     @PostMapping("/admin/sesiones/close/{sessionCode}")
-    public ResponseEntity<Sesion> cerrarSesion(@PathVariable String sessionCode) {
+    public ResponseEntity<SesionDTO> cerrarSesion(@PathVariable String sessionCode) {
         Sesion sesion = sesionService.cerrarSesion(sessionCode);
-        return ResponseEntity.ok(sesion);
+        return ResponseEntity.ok(new SesionDTO(sesion.getId(), sesion.getQrCodeUrl()));
     }
 
     @GetMapping("/cliente/sesiones/mesa")
-    public Mesa getMesaPorCodigo(@RequestHeader("X-Session-Code") String sessionCode) {
-        return sesionService.getMesaPorCodigo(sessionCode);
+    public MesaDTO getMesaPorCodigo(@RequestHeader("X-Session-Code") String sessionCode) {
+        Mesa mesa = sesionService.getMesaPorCodigo(sessionCode);
+        String estado = mesa.getEstado() != null ? mesa.getEstado().getNombre() : null;
+        String zona = mesa.getZona() != null ? mesa.getZona().getNombre() : null;
+        return new MesaDTO(mesa.getId(), mesa.getNumero(), estado, zona, null);
     }
 
     @GetMapping("/cliente/sesiones/init")

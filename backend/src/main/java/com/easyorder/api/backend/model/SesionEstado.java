@@ -31,7 +31,7 @@ public class SesionEstado extends AuditableEntity {
     @Column(length = 200)
     private String descripcion;
 
-    @OneToMany(mappedBy = "estado", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "estado")
     @JsonIgnore
     private Set<Sesion> sesiones = new HashSet<>();
 
