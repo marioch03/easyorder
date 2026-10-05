@@ -1,5 +1,7 @@
 package com.easyorder.api.backend.model;
 
+import org.hibernate.annotations.TenantId;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -25,6 +27,10 @@ public class Producto_GrupoModificador extends AuditableEntity {
 
   @EmbeddedId
   private Producto_GrupoModificadorId id;
+
+  @TenantId
+  @Column(name = "id_tenant", nullable = false)
+  private Long tenantId;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @MapsId("idProducto")

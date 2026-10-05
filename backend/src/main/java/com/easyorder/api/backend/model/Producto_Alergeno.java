@@ -1,5 +1,7 @@
 package com.easyorder.api.backend.model;
 
+import org.hibernate.annotations.TenantId;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -24,6 +26,10 @@ public class Producto_Alergeno {
   @EmbeddedId
   private ProductoAlergenoId id = new ProductoAlergenoId();
 
+  @TenantId
+  @Column(name = "id_tenant", nullable = false)
+  private Long tenantId;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @MapsId("idProducto")
   @JoinColumn(name = "id_producto", nullable = false)
@@ -42,6 +48,9 @@ public class Producto_Alergeno {
     this.producto = producto;
     this.alergeno = alergeno;
     this.tipo = tipo;
-    this.id = new ProductoAlergenoId(producto.getId(), alergeno.getId());
+    this.tenantId = (producto != null) ? producto.getTenantId() : null;
+    this.id = new ProductoAlergenoId(
+        (producto != null) ? producto.getId() : null,
+        (alergeno != null) ? alergeno.getId() : null);
   }
 }
