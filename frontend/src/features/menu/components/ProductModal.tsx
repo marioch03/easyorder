@@ -68,16 +68,16 @@ export default function ProductModal({ product, onClose }: Props) {
     });
   }, [product, selectedModifiers]);
 
-  const { unitPrice, totalPrice } = useMemo(() => {
-    if (!product) return { unitPrice: 0, totalPrice: 0 };
+  const { unitPrice } = useMemo(() => {
+    if (!product) return { unitPrice: 0 };
 
     const extraPrice = Object.values(selectedModifiers)
       .flat()
       .reduce((sum, mod) => sum + mod.precioExtra, 0);
 
     const unit = product.precio + extraPrice;
-    return { unitPrice: unit, totalPrice: unit * quantity };
-  }, [product, selectedModifiers, quantity]);
+    return { unitPrice: unit };
+  }, [product, selectedModifiers]);
 
   const handleAdd = () => {
     if (!product || !isSelectionValid) return;

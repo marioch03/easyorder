@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSessionInit } from "../../session/useSessionInit";
 import MenuBanner from "../components/MenuBanner";
 import MenuBottomNav from "../components/MenuBottomNav";
 import "../styles.css";
@@ -7,6 +8,7 @@ import CartPage from "./CartPage";
 import MenuPage from "./MenuPage";
 
 function CustomerPage() {
+  useSessionInit();
   const [activeSection, setActiveSection] = useState("menu");
 
   const renderContent = () => {

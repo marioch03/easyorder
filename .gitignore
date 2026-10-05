@@ -83,3 +83,5 @@ HELP.md
 # Logs generales
 logs/
 *.log
+AUDITORIA_BACKEND.md
+antigravity.md

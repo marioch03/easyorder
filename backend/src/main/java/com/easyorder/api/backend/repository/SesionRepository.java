@@ -36,12 +36,10 @@ public interface SesionRepository extends JpaRepository<Sesion, Long> {
 	Optional<Sesion> findByQrCodeUrlUnfiltered(@Param("qrCodeUrl") String qrCodeUrl);
 
 	@Query(value = """
-			SELECT s.id AS id,
-			       s.id_tenant AS tenantId,
-			       e.nombre AS estadoNombre
-			FROM sesion s
-			JOIN sesion_estado e ON s.id_estado = e.id
-			WHERE s.qr_code_url = :qrCodeUrl
+			SELECT id AS id,
+			       tenant_id AS tenantId,
+			       estado_nombre AS estadoNombre
+			FROM get_active_session_by_qr(:qrCodeUrl)
 			""", nativeQuery = true)
 	Optional<SesionAuthProjection> findAuthProjectionByQrCodeUrl(@Param("qrCodeUrl") String qrCodeUrl);
 }
