@@ -53,6 +53,9 @@ public class Pedido extends AuditableEntity {
     @Builder.Default
     private BigDecimal total = BigDecimal.ZERO;
 
+    @Column(name = "idempotency_key", length = 64)
+    private String idempotencyKey;
+
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     @Builder.Default

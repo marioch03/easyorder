@@ -3,6 +3,7 @@ package com.easyorder.api.backend.tenant;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.List;
@@ -26,14 +27,21 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import com.easyorder.api.backend.dto.SesionAuthProjection;
 import com.easyorder.api.backend.model.Mesa;
 import com.easyorder.api.backend.model.MesaEstado;
+import com.easyorder.api.backend.model.Pedido;
+import com.easyorder.api.backend.model.PedidoEstado;
 import com.easyorder.api.backend.model.Producto;
 import com.easyorder.api.backend.model.Producto_Alergeno;
 import com.easyorder.api.backend.model.Producto_GrupoModificador;
+import com.easyorder.api.backend.model.Sesion;
+import com.easyorder.api.backend.model.SesionEstado;
 import com.easyorder.api.backend.repository.MesaEstadoRepository;
 import com.easyorder.api.backend.repository.MesaRepository;
+import com.easyorder.api.backend.repository.PedidoEstadoRepository;
+import com.easyorder.api.backend.repository.PedidoRepository;
 import com.easyorder.api.backend.repository.ProductoRepository;
 import com.easyorder.api.backend.repository.Producto_AlergenoRepository;
 import com.easyorder.api.backend.repository.Producto_GrupoModificadorRepository;
+import com.easyorder.api.backend.repository.SesionEstadoRepository;
 import com.easyorder.api.backend.repository.SesionRepository;
 
 @SpringBootTest
@@ -127,11 +135,32 @@ class RowLevelSecurityIntegrationTest {
     private SesionRepository sesionRepository;
 
     @Autowired
+    private SesionEstadoRepository sesionEstadoRepository;
+
+    @Autowired
+    private PedidoRepository pedidoRepository;
+
+    @Autowired
+    private PedidoEstadoRepository pedidoEstadoRepository;
+
+    @Autowired
     private org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
 
+    @org.junit.jupiter.api.BeforeEach
     @AfterEach
-    void tearDown() {
-        TenantContext.clear();
+    void limpiarDatosTemporales() {
+        try {
+            TenantContext.set(1L);
+            pedidoRepository.deleteAll();
+            sesionRepository.deleteAll();
+
+            TenantContext.set(2L);
+            pedidoRepository.deleteAll();
+            sesionRepository.deleteAll();
+            mesaRepository.deleteAll();
+        } finally {
+            TenantContext.clear();
+        }
     }
 
     @Test
@@ -276,16 +305,103 @@ class RowLevelSecurityIntegrationTest {
     @Test
     @DisplayName("Resolución QR anónima bajo RLS (MT-03): SECURITY DEFINER resuelve sesión sin TenantContext")
     void testResolucionSesionQrAnonima() {
-        // Un comensal anónimo no tiene TenantContext
+        // 1. Crear sesión en Tenant 1
+        TenantContext.set(1L);
+        Mesa mesaT1 = mesaRepository.findAll().getFirst();
+        SesionEstado estadoActivo = sesionEstadoRepository.findById(1L).orElseThrow();
+
+        Sesion sesionT1 = new Sesion();
+        sesionT1.setMesa(mesaT1);
+        sesionT1.setEstado(estadoActivo);
+        sesionT1.setQrCodeUrl("qr-anonimo-test-rls");
+        sesionT1.setTenantId(1L);
+        sesionRepository.saveAndFlush(sesionT1);
+
+        // 2. Un comensal anónimo no tiene TenantContext
         TenantContext.clear();
 
-        // Buscar por el código de sesión activo existente en el seed
+        // 3. La función get_active_session_by_qr retorna la proyección aunque TenantContext sea nulo
         Optional<SesionAuthProjection> resultado = sesionRepository
-                .findAuthProjectionByQrCodeUrl("16463a47-dbdc-4994-b1b5-3087e65d6e9f");
+                .findAuthProjectionByQrCodeUrl("qr-anonimo-test-rls");
 
-        // Nota: en V1 la sesion 1 tiene estado 'ACTIVA' en su inicio
-        // La función get_active_session_by_qr retorna la proyección aunque
-        // TenantContext sea nulo
-        assertThat(resultado).isNotNull();
+        assertThat(resultado).isPresent();
+        assertThat(resultado.get().getTenantId()).isEqualTo(1L);
+    }
+
+    @Test
+    @DisplayName("Idempotencia Multi-Tenant (ORD-01): Clave única por tenant permite claves idénticas entre distintos restaurantes")
+    void testIdempotenciaPedidosMultiTenant() {
+        String key = "client-uuid-compartido-123";
+
+        // 1. Preparar mesa y sesión en Tenant 1 con repositorios JPA
+        TenantContext.set(1L);
+        Mesa mesaT1 = mesaRepository.findAll().getFirst();
+        SesionEstado estadoActivo = sesionEstadoRepository.findById(1L).orElseThrow();
+        PedidoEstado pedidoEstadoPendiente = pedidoEstadoRepository.findById(1L).orElseThrow();
+
+        Sesion sesionT1 = new Sesion();
+        sesionT1.setMesa(mesaT1);
+        sesionT1.setEstado(estadoActivo);
+        sesionT1.setQrCodeUrl("sesion-idem-t1");
+        sesionT1.setTenantId(1L);
+        sesionT1 = sesionRepository.saveAndFlush(sesionT1);
+
+        // Insertar pedido en Tenant 1 con la clave
+        Pedido pedidoT1 = Pedido.builder()
+                .sesion(sesionT1)
+                .estado(pedidoEstadoPendiente)
+                .total(new BigDecimal("20.00"))
+                .idempotencyKey(key)
+                .tenantId(1L)
+                .build();
+        pedidoRepository.saveAndFlush(pedidoT1);
+
+        // 2. Preparar mesa y sesión en Tenant 2
+        TenantContext.set(2L);
+        MesaEstado estadoMesaLibre = mesaEstadoRepository.findAll().getFirst();
+        Mesa mesaT2 = new Mesa();
+        mesaT2.setNumero(901);
+        mesaT2.setEstado(estadoMesaLibre);
+        mesaT2.setTenantId(2L);
+        mesaT2 = mesaRepository.saveAndFlush(mesaT2);
+
+        Sesion sesionT2 = new Sesion();
+        sesionT2.setMesa(mesaT2);
+        sesionT2.setEstado(estadoActivo);
+        sesionT2.setQrCodeUrl("sesion-idem-t2");
+        sesionT2.setTenantId(2L);
+        sesionT2 = sesionRepository.saveAndFlush(sesionT2);
+
+        // Tenant 2 crea un pedido con LA MISMA clave de idempotencia sin conflicto
+        Pedido pedidoT2 = Pedido.builder()
+                .sesion(sesionT2)
+                .estado(pedidoEstadoPendiente)
+                .total(new BigDecimal("15.00"))
+                .idempotencyKey(key)
+                .tenantId(2L)
+                .build();
+        Pedido guardadoT2 = pedidoRepository.saveAndFlush(pedidoT2);
+        assertThat(guardadoT2.getId()).isNotNull();
+
+        // 3. Tenant 1 intenta volver a insertar con la misma clave: violenta la restricción UNIQUE de PostgreSQL
+        TenantContext.set(1L);
+        Pedido pedidoDuplicadoT1 = Pedido.builder()
+                .sesion(sesionT1)
+                .estado(pedidoEstadoPendiente)
+                .total(new BigDecimal("20.00"))
+                .idempotencyKey(key)
+                .tenantId(1L)
+                .build();
+
+        assertThatThrownBy(() -> {
+            pedidoRepository.saveAndFlush(pedidoDuplicadoT1);
+        }).isInstanceOf(Exception.class)
+          .satisfies(e -> {
+              Throwable cause = e;
+              while (cause.getCause() != null) {
+                  cause = cause.getCause();
+              }
+              assertThat(cause.getMessage()).containsIgnoringCase("idx_pedido_tenant_idempotency");
+          });
     }
 }

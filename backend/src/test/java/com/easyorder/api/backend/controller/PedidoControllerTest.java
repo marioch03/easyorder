@@ -136,7 +136,7 @@ class PedidoControllerTest {
                     null, 100L, "Burger", 1, new BigDecimal("10.00"), null, false, false, List.of());
             CrearPedidoDTO request = new CrearPedidoDTO(List.of(item), new BigDecimal("10.00"));
 
-            when(pedidoService.crearPedidoAdmin(any(CrearPedidoDTO.class), eq(1L))).thenReturn(pedidoDTO);
+            when(pedidoService.crearPedidoAdmin(any(CrearPedidoDTO.class), eq(1L), org.mockito.ArgumentMatchers.isNull())).thenReturn(pedidoDTO);
 
             mockMvc.perform(post("/admin/pedidos/mesa/1")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -146,13 +146,32 @@ class PedidoControllerTest {
         }
 
         @Test
+        @DisplayName("POST /admin/pedidos/mesa/{idMesa} - Propaga Idempotency-Key al servicio")
+        void crearPedidoAdmin_conIdempotencyKey_propagaAlServicio() throws Exception {
+            CrearPedidoItemDTO item = new CrearPedidoItemDTO(
+                    null, 100L, "Burger", 1, new BigDecimal("10.00"), null, false, false, List.of());
+            CrearPedidoDTO request = new CrearPedidoDTO(List.of(item), new BigDecimal("10.00"));
+
+            when(pedidoService.crearPedidoAdmin(any(CrearPedidoDTO.class), eq(1L), eq("admin-idem-456"))).thenReturn(pedidoDTO);
+
+            mockMvc.perform(post("/admin/pedidos/mesa/1")
+                            .header("Idempotency-Key", "admin-idem-456")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.idPedido").value(1L));
+
+            verify(pedidoService).crearPedidoAdmin(any(CrearPedidoDTO.class), eq(1L), eq("admin-idem-456"));
+        }
+
+        @Test
         @DisplayName("POST /cliente/pedidos - Crea pedido y retorna HTTP 201")
         void crearPedidoCliente_retorna201() throws Exception {
             CrearPedidoItemDTO item = new CrearPedidoItemDTO(
                     null, 100L, "Burger", 1, new BigDecimal("10.00"), null, false, false, List.of());
             CrearPedidoDTO request = new CrearPedidoDTO(List.of(item), new BigDecimal("10.00"));
 
-            when(pedidoService.crearPedidoCliente(any(CrearPedidoDTO.class), eq("session-qr-123"))).thenReturn(pedidoDTO);
+            when(pedidoService.crearPedidoCliente(any(CrearPedidoDTO.class), eq("session-qr-123"), org.mockito.ArgumentMatchers.isNull())).thenReturn(pedidoDTO);
 
             mockMvc.perform(post("/cliente/pedidos")
                             .header("X-Session-Code", "session-qr-123")
@@ -160,6 +179,26 @@ class PedidoControllerTest {
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.idPedido").value(1L));
+        }
+
+        @Test
+        @DisplayName("POST /cliente/pedidos - Propaga Idempotency-Key al servicio")
+        void crearPedidoCliente_conIdempotencyKey_propagaAlServicio() throws Exception {
+            CrearPedidoItemDTO item = new CrearPedidoItemDTO(
+                    null, 100L, "Burger", 1, new BigDecimal("10.00"), null, false, false, List.of());
+            CrearPedidoDTO request = new CrearPedidoDTO(List.of(item), new BigDecimal("10.00"));
+
+            when(pedidoService.crearPedidoCliente(any(CrearPedidoDTO.class), eq("session-qr-123"), eq("client-idem-789"))).thenReturn(pedidoDTO);
+
+            mockMvc.perform(post("/cliente/pedidos")
+                            .header("X-Session-Code", "session-qr-123")
+                            .header("Idempotency-Key", "client-idem-789")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.idPedido").value(1L));
+
+            verify(pedidoService).crearPedidoCliente(any(CrearPedidoDTO.class), eq("session-qr-123"), eq("client-idem-789"));
         }
     }
 

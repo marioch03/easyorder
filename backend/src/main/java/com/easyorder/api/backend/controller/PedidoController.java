@@ -46,8 +46,9 @@ public class PedidoController {
     @PostMapping("/admin/pedidos/mesa/{idMesa}")
     public ResponseEntity<PedidoDTO> crearPedidoAdmin(
             @Valid @RequestBody CrearPedidoDTO dto,
-            @PathVariable Long idMesa) {
-        PedidoDTO nuevoPedido = pedidoService.crearPedidoAdmin(dto, idMesa);
+            @PathVariable Long idMesa,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
+        PedidoDTO nuevoPedido = pedidoService.crearPedidoAdmin(dto, idMesa, idempotencyKey);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevoPedido);
     }
 
@@ -75,8 +76,9 @@ public class PedidoController {
     @PostMapping("/cliente/pedidos")
     public ResponseEntity<PedidoDTO> crearPedidoCliente(
             @Valid @RequestBody CrearPedidoDTO dto,
-            @RequestHeader("X-Session-Code") String sessionCode) {
-        PedidoDTO nuevoPedido = pedidoService.crearPedidoCliente(dto, sessionCode);
+            @RequestHeader("X-Session-Code") String sessionCode,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
+        PedidoDTO nuevoPedido = pedidoService.crearPedidoCliente(dto, sessionCode, idempotencyKey);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevoPedido);
     }
 }

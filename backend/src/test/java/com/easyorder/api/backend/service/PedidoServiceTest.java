@@ -200,6 +200,94 @@ class PedidoServiceTest {
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("no coincide con el total real calculado");
         }
+
+        @Test
+        @DisplayName("Idempotencia: Con clave nueva, persiste el pedido con la clave y notifica SSE")
+        void crearPedido_conIdempotencyKeyNueva_persisteYNotifica() {
+            CrearPedidoItemDTO itemDTO = new CrearPedidoItemDTO(
+                    null, 100L, "Hamburguesa", 1, new BigDecimal("10.00"), null, false, false, List.of());
+            CrearPedidoDTO pedidoDTO = new CrearPedidoDTO(List.of(itemDTO), new BigDecimal("10.00"));
+            String idempotencyKey = "uuid-test-12345";
+
+            when(pedidoRepository.findByIdempotencyKey(idempotencyKey)).thenReturn(Optional.empty());
+            when(pedidoEstadoRepository.findByNombre("PENDIENTE")).thenReturn(Optional.of(estadoPendiente));
+            when(productoRepository.findAllById(Set.of(100L))).thenReturn(List.of(producto));
+            when(pedidoRepository.save(any(Pedido.class))).thenAnswer(i -> {
+                Pedido p = i.getArgument(0);
+                p.setId(10L);
+                return p;
+            });
+
+            PedidoDTO resultado = pedidoService.crearPedido(pedidoDTO, sesion, idempotencyKey);
+
+            assertThat(resultado).isNotNull();
+            assertThat(resultado.idPedido()).isEqualTo(10L);
+
+            org.mockito.ArgumentCaptor<Pedido> captor = org.mockito.ArgumentCaptor.forClass(Pedido.class);
+            verify(pedidoRepository).save(captor.capture());
+            assertThat(captor.getValue().getIdempotencyKey()).isEqualTo(idempotencyKey);
+            verify(eventPublisher, org.mockito.Mockito.times(2)).publishEvent(any(SseTopicEvent.class));
+        }
+
+        @Test
+        @DisplayName("Idempotencia: Con clave existente, retorna pedido existente SIN guardar de nuevo y SIN notificar SSE")
+        void crearPedido_conIdempotencyKeyExistente_retornaExistenteSinNotificar() {
+            CrearPedidoDTO pedidoDTO = new CrearPedidoDTO(List.of(), new BigDecimal("10.00"));
+            String idempotencyKey = "uuid-test-repetida";
+
+            Pedido pedidoExistente = Pedido.builder()
+                    .id(99L)
+                    .sesion(sesion)
+                    .estado(estadoPendiente)
+                    .total(new BigDecimal("10.00"))
+                    .idempotencyKey(idempotencyKey)
+                    .build();
+
+            when(pedidoRepository.findByIdempotencyKey(idempotencyKey)).thenReturn(Optional.of(pedidoExistente));
+
+            PedidoDTO resultado = pedidoService.crearPedido(pedidoDTO, sesion, idempotencyKey);
+
+            assertThat(resultado).isNotNull();
+            assertThat(resultado.idPedido()).isEqualTo(99L);
+            assertThat(resultado.numeroMesa()).isEqualTo(5);
+
+            // Verifica que NO se llamó a la base de datos para guardar ni se enviaron notificaciones a cocina
+            verify(pedidoRepository, org.mockito.Mockito.never()).save(any());
+            verify(pedidoItemRepository, org.mockito.Mockito.never()).saveAll(any());
+            verify(eventPublisher, org.mockito.Mockito.never()).publishEvent(any());
+        }
+
+        @Test
+        @DisplayName("Idempotencia: Ante colisión de concurrencia milimétrica, resuelve y retorna el pedido ganador")
+        void crearPedido_conColisionConcurrente_recuperaPedidoExistente() {
+            CrearPedidoItemDTO itemDTO = new CrearPedidoItemDTO(
+                    null, 100L, "Hamburguesa", 1, new BigDecimal("10.00"), null, false, false, List.of());
+            CrearPedidoDTO pedidoDTO = new CrearPedidoDTO(List.of(itemDTO), new BigDecimal("10.00"));
+            String idempotencyKey = "uuid-concurrente";
+
+            Pedido pedidoGanador = Pedido.builder()
+                    .id(105L)
+                    .sesion(sesion)
+                    .estado(estadoPendiente)
+                    .total(new BigDecimal("10.00"))
+                    .idempotencyKey(idempotencyKey)
+                    .build();
+
+            // 1er check en memoria no lo ve (ambas peticiones entran a la vez)
+            when(pedidoRepository.findByIdempotencyKey(idempotencyKey))
+                    .thenReturn(Optional.empty()) // primer check
+                    .thenReturn(Optional.of(pedidoGanador)); // segundo check tras DataIntegrityViolationException
+
+            when(pedidoEstadoRepository.findByNombre("PENDIENTE")).thenReturn(Optional.of(estadoPendiente));
+            when(productoRepository.findAllById(Set.of(100L))).thenReturn(List.of(producto));
+            when(pedidoRepository.save(any(Pedido.class))).thenThrow(new org.springframework.dao.DataIntegrityViolationException("duplicate key value violates unique constraint"));
+
+            PedidoDTO resultado = pedidoService.crearPedido(pedidoDTO, sesion, idempotencyKey);
+
+            assertThat(resultado).isNotNull();
+            assertThat(resultado.idPedido()).isEqualTo(105L);
+            verify(eventPublisher, org.mockito.Mockito.never()).publishEvent(any());
+        }
     }
 
     @Nested

@@ -11,6 +11,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,7 +43,9 @@ import com.easyorder.api.backend.repository.SesionEstadoRepository;
 import com.easyorder.api.backend.repository.SesionRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PedidoService {
@@ -59,6 +62,23 @@ public class PedidoService {
 
 	@Transactional
 	public PedidoDTO crearPedido(CrearPedidoDTO dto, Sesion sesion) {
+		return crearPedido(dto, sesion, null);
+	}
+
+	@Transactional
+	public PedidoDTO crearPedido(CrearPedidoDTO dto, Sesion sesion, String idempotencyKey) {
+		String cleanKey = (idempotencyKey != null && !idempotencyKey.isBlank()) ? idempotencyKey.trim() : null;
+
+		// 0. Comprobación de idempotencia preventiva
+		if (cleanKey != null) {
+			Optional<Pedido> pedidoExistente = pedidoRepository.findByIdempotencyKey(cleanKey);
+			if (pedidoExistente.isPresent()) {
+				log.info("Petición idempotente detectada para key={}. Retornando pedido existente id={}",
+						cleanKey, pedidoExistente.get().getId());
+				return toPedidoDTO(pedidoExistente.get());
+			}
+		}
+
 		// 1. Carga de datos necesarios
 		PedidoEstado estadoPendiente = obtenerEstadoPendiente();
 		Map<Long, Modificador> modificadorMap = cargarModificadoresMap(dto.items());
@@ -68,6 +88,7 @@ public class PedidoService {
 
 		// 2. Construcción de ítems y cálculo del total
 		Pedido nuevoPedido = instanciarPedidoBase(sesion, estadoPendiente);
+		nuevoPedido.setIdempotencyKey(cleanKey);
 		List<PedidoItem> items = new ArrayList<>();
 		BigDecimal totalCalculado = BigDecimal.ZERO;
 
@@ -80,10 +101,24 @@ public class PedidoService {
 		// 3. Validación de seguridad
 		validarTotal(dto.total(), totalCalculado);
 
-		// 4. Persistencia en Base de Datos
+		// 4. Persistencia en Base de Datos con resolución transparente de concurrencia
 		nuevoPedido.setTotal(totalCalculado);
-		Pedido pedidoGuardado = pedidoRepository.save(nuevoPedido);
-		pedidoItemRepository.saveAll(items);
+		Pedido pedidoGuardado;
+		try {
+			pedidoGuardado = pedidoRepository.save(nuevoPedido);
+			pedidoItemRepository.saveAll(items);
+			pedidoRepository.flush();
+		} catch (DataIntegrityViolationException ex) {
+			if (cleanKey != null) {
+				Optional<Pedido> pedidoExistente = pedidoRepository.findByIdempotencyKey(cleanKey);
+				if (pedidoExistente.isPresent()) {
+					log.warn("Colisión concurrente resuelta para idempotencyKey={}. Retornando pedido existente id={}",
+							cleanKey, pedidoExistente.get().getId());
+					return toPedidoDTO(pedidoExistente.get());
+				}
+			}
+			throw ex;
+		}
 
 		// 5. Notificación y respuesta
 		notificarCambiosSSE();
@@ -213,16 +248,26 @@ public class PedidoService {
 
 	@Transactional
 	public PedidoDTO crearPedidoCliente(CrearPedidoDTO dto, String sessionCode) {
+		return crearPedidoCliente(dto, sessionCode, null);
+	}
+
+	@Transactional
+	public PedidoDTO crearPedidoCliente(CrearPedidoDTO dto, String sessionCode, String idempotencyKey) {
 		Sesion sesion = sesionRepository.findByQrCodeUrl(sessionCode)
 				.orElseThrow(() -> new NoEncontradoException("Sesión no encontrada para el QR code: " + sessionCode));
-		return crearPedido(dto, sesion);
+		return crearPedido(dto, sesion, idempotencyKey);
 	}
 
 	@Transactional
 	public PedidoDTO crearPedidoAdmin(CrearPedidoDTO dto, Long idMesa) {
+		return crearPedidoAdmin(dto, idMesa, null);
+	}
+
+	@Transactional
+	public PedidoDTO crearPedidoAdmin(CrearPedidoDTO dto, Long idMesa, String idempotencyKey) {
 		Sesion sesion = sesionRepository.findByMesaIdAndEstadoNombre(idMesa, "ACTIVA")
 				.orElseThrow(() -> new NoEncontradoException("Sesión no encontrada para la mesa: " + idMesa));
-		return crearPedido(dto, sesion);
+		return crearPedido(dto, sesion, idempotencyKey);
 	}
 
 	@Transactional(readOnly = true)
@@ -261,6 +306,7 @@ public class PedidoService {
 		}).toList();
 	}
 
+	@Transactional(readOnly = true)
 	public List<PedidoDTO> listarPedidosPorSesion(String sessionCode) {
 		Sesion sesion = sesionRepository.findByQrCodeUrl(sessionCode)
 				.orElseThrow(() -> new NoEncontradoException("Sesión no encontrada para el QR code: " + sessionCode));

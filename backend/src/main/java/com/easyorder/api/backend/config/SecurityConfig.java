@@ -73,7 +73,7 @@ public class SecurityConfig {
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(
                 List.of("Authorization", "Content-Type", "Accept", "X-Requested-With", "X-Session-Code",
-                        "X-Tenant-Slug"));
+                        "X-Tenant-Slug", "Idempotency-Key", "X-Idempotency-Key"));
         configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
 

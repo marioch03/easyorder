@@ -12,7 +12,12 @@ export async function getEstadoMesa() {
 
 export async function crearPedido(order: OrderDTO) {
   try {
-    const response = await clientApi.post("/pedidos", order);
+    const idempotencyKey = crypto.randomUUID();
+    const response = await clientApi.post("/pedidos", order, {
+      headers: {
+        "Idempotency-Key": idempotencyKey,
+      },
+    });
     return response.data;
   } catch (error) {
     throw new Error("Error al crear el pedido");
