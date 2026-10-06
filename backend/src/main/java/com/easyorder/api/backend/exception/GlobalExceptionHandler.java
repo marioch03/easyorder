@@ -14,6 +14,8 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import com.easyorder.api.backend.dto.ErrorResponse;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.OptimisticLockException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import lombok.extern.slf4j.Slf4j;
 
 @ControllerAdvice
@@ -96,5 +98,12 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ErrorResponse> handleProductoNoDisponible(ProductoNoDisponibleException ex) {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 				.body(new ErrorResponse(ex.getMessage()));
+	}
+
+	@ExceptionHandler({ ObjectOptimisticLockingFailureException.class, OptimisticLockException.class })
+	public ResponseEntity<ErrorResponse> handleOptimisticLocking(Exception ex) {
+		log.warn("Conflicto de concurrencia optimista detectado: {}", ex.getMessage());
+		return ResponseEntity.status(HttpStatus.CONFLICT)
+				.body(new ErrorResponse("El recurso ha sido modificado concurrentemente por otro usuario o proceso. Por favor, refresque la información y reintente la acción."));
 	}
 }

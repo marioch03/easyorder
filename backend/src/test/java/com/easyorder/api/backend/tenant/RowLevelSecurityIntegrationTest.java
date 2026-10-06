@@ -146,6 +146,9 @@ class RowLevelSecurityIntegrationTest {
     @Autowired
     private org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
 
+    @Autowired
+    private jakarta.persistence.EntityManager entityManager;
+
     @org.junit.jupiter.api.BeforeEach
     @AfterEach
     void limpiarDatosTemporales() {
@@ -403,5 +406,33 @@ class RowLevelSecurityIntegrationTest {
               }
               assertThat(cause.getMessage()).containsIgnoringCase("idx_pedido_tenant_idempotency");
           });
+    }
+
+    @Test
+    @DisplayName("Bloqueo Optimista (@Version - ORD-02): Previene Lost Updates ante modificaciones concurrentes")
+    void testBloqueoOptimistaMesaYPedido() {
+        TenantContext.set(1L);
+
+        // 1. Cargar una mesa existente (versión inicial en BD = 0)
+        Mesa mesa1 = mesaRepository.findAll().getFirst();
+        Long mesaId = mesa1.getId();
+        assertThat(mesa1.getVersion()).isNotNull();
+
+        // 2. Desacoplar mesa1 del PersistenceContext para simular una entidad en memoria de un cliente HTTP
+        entityManager.detach(mesa1);
+
+        // 3. Simular que OTRA transacción/camarero concurrente carga y modifica la misma mesa
+        Mesa mesa2 = mesaRepository.findById(mesaId).orElseThrow();
+        MesaEstado estadoOcupada = mesaEstadoRepository.findAll().getLast();
+        mesa2.setEstado(estadoOcupada);
+        mesaRepository.saveAndFlush(mesa2); // Sube la versión en BD a 1
+        entityManager.clear();
+
+        // 4. Al intentar guardar la entidad 'mesa1' (cuya versión en memoria está desfasada en 0),
+        // Hibernate/Spring detecta el conflicto optimista y lanza ObjectOptimisticLockingFailureException
+        mesa1.setNumero(777);
+        assertThatThrownBy(() -> {
+            mesaRepository.saveAndFlush(mesa1);
+        }).isInstanceOf(org.springframework.orm.ObjectOptimisticLockingFailureException.class);
     }
 }
