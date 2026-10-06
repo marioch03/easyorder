@@ -19,9 +19,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "mesa", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_mesa_tenant_numero", columnNames = { "id_tenant", "numero" })
-})
+@Table(name = "mesa")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -51,5 +49,9 @@ public class Mesa extends AuditableEntity {
     @Version
     @Column(name = "version", nullable = false)
     private Long version;
+
+    @Column(name = "activo", nullable = false)
+    @Builder.Default
+    private boolean activo = true;
 
 }

@@ -149,6 +149,9 @@ class RowLevelSecurityIntegrationTest {
     @Autowired
     private jakarta.persistence.EntityManager entityManager;
 
+    @Autowired
+    private com.easyorder.api.backend.service.MesaService mesaService;
+
     @org.junit.jupiter.api.BeforeEach
     @AfterEach
     void limpiarDatosTemporales() {
@@ -434,5 +437,76 @@ class RowLevelSecurityIntegrationTest {
         assertThatThrownBy(() -> {
             mesaRepository.saveAndFlush(mesa1);
         }).isInstanceOf(org.springframework.orm.ObjectOptimisticLockingFailureException.class);
+    }
+
+    @Test
+    @DisplayName("Soft-delete de Mesas (ORD-04): Desactiva mesa con sesión histórica y permite recrear el número")
+    void testSoftDeleteMesaYPreservacionHistoricaSesiones() {
+        TenantContext.set(1L);
+        MesaEstado estadoLibre = mesaEstadoRepository.findAll().getFirst();
+        SesionEstado estadoCerrada = sesionEstadoRepository.findById(2L).orElseGet(() -> {
+            SesionEstado se = new SesionEstado();
+            se.setId(2L);
+            se.setNombre("CERRADA");
+            return sesionEstadoRepository.save(se);
+        });
+
+        // 1. Crear mesa número 88 con activo = true
+        Mesa mesa88 = new Mesa();
+        mesa88.setNumero(88);
+        mesa88.setEstado(estadoLibre);
+        mesa88.setTenantId(1L);
+        mesa88.setActivo(true);
+        mesa88 = mesaRepository.saveAndFlush(mesa88);
+
+        // 2. Asociar una sesión histórica (CERRADA) a la mesa 88
+        Sesion sesionHistorica = new Sesion();
+        sesionHistorica.setMesa(mesa88);
+        sesionHistorica.setEstado(estadoCerrada);
+        sesionHistorica.setQrCodeUrl("qr-mesa-88-cerrada");
+        sesionHistorica.setTenantId(1L);
+        sesionRepository.saveAndFlush(sesionHistorica);
+
+        // 3. Eliminar mesa 88 mediante el servicio (soft-delete)
+        mesaService.eliminarMesa(88);
+
+        // 4. Verificar que la mesa sigue existiendo en BD pero con activo = false
+        Mesa mesaDesactivada = mesaRepository.findById(mesa88.getId()).orElseThrow();
+        assertThat(mesaDesactivada.isActivo()).isFalse();
+
+        // 5. La sesión histórica sigue vinculada sin violar integridad referencial
+        Sesion sesionConsultada = sesionRepository.findById(sesionHistorica.getId()).orElseThrow();
+        assertThat(sesionConsultada.getMesa().getId()).isEqualTo(mesa88.getId());
+
+        // 6. listarMesas ya no devuelve la mesa desactivada
+        List<com.easyorder.api.backend.dto.MesaDTO> mesasActivas = mesaService.listarMesas();
+        assertThat(mesasActivas).noneMatch(m -> m.numero() == 88);
+
+        // 7. Crear una NUEVA mesa activa con el MISMO número 88: permitido por el índice condicional
+        Mesa nuevaMesa88 = new Mesa();
+        nuevaMesa88.setNumero(88);
+        nuevaMesa88.setEstado(estadoLibre);
+        nuevaMesa88.setTenantId(1L);
+        nuevaMesa88.setActivo(true);
+        Mesa guardadaNueva = mesaRepository.saveAndFlush(nuevaMesa88);
+        assertThat(guardadaNueva.getId()).isNotEqualTo(mesa88.getId());
+
+        // 8. Intentar crear una OTRA mesa activa con número 88 debe fallar por restricción única parcial
+        Mesa duplicada88 = new Mesa();
+        duplicada88.setNumero(88);
+        duplicada88.setEstado(estadoLibre);
+        duplicada88.setTenantId(1L);
+        duplicada88.setActivo(true);
+
+        assertThatThrownBy(() -> {
+            mesaRepository.saveAndFlush(duplicada88);
+        }).isInstanceOf(Exception.class)
+          .satisfies(e -> {
+              Throwable cause = e;
+              while (cause.getCause() != null) {
+                  cause = cause.getCause();
+              }
+              assertThat(cause.getMessage()).containsIgnoringCase("uk_mesa_tenant_numero_activo");
+          });
     }
 }

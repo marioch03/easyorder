@@ -109,7 +109,7 @@ class MesaServiceTest {
             sesion.setMesa(mesa);
             sesion.setEstado(sesionActivaEstado);
 
-            when(mesaRepository.findAll()).thenReturn(List.of(mesa));
+            when(mesaRepository.findByActivoTrue()).thenReturn(List.of(mesa));
             when(sesionRepository.findByMesaInAndEstadoNombre(List.of(mesa), "ACTIVA"))
                     .thenReturn(List.of(sesion));
 
@@ -129,7 +129,7 @@ class MesaServiceTest {
         @Test
         @DisplayName("Debe listar mesas con sesionActiva null si no tienen sesión activa")
         void listarMesas_sinSesionActiva_retornaSesionActivaNull() {
-            when(mesaRepository.findAll()).thenReturn(List.of(mesa));
+            when(mesaRepository.findByActivoTrue()).thenReturn(List.of(mesa));
             when(sesionRepository.findByMesaInAndEstadoNombre(List.of(mesa), "ACTIVA"))
                     .thenReturn(List.of());
 
@@ -142,7 +142,7 @@ class MesaServiceTest {
         @Test
         @DisplayName("Debe retornar lista vacía si no hay mesas registradas")
         void listarMesas_sinMesas_retornaListaVacia() {
-            when(mesaRepository.findAll()).thenReturn(List.of());
+            when(mesaRepository.findByActivoTrue()).thenReturn(List.of());
             when(sesionRepository.findByMesaInAndEstadoNombre(List.of(), "ACTIVA"))
                     .thenReturn(List.of());
 
@@ -188,7 +188,7 @@ class MesaServiceTest {
         void crearMesa_datosValidos_creaMesaYPublicaEvento() {
             CrearMesaDTO dto = new CrearMesaDTO(5, 10L);
 
-            when(mesaRepository.existsByNumero(5)).thenReturn(false);
+            when(mesaRepository.existsByNumeroAndActivoTrue(5)).thenReturn(false);
             when(mesaEstadoRepository.findByNombre("LIBRE")).thenReturn(Optional.of(estadoLibre));
             when(zonaRepository.findById(10L)).thenReturn(Optional.of(zonaPrincipal));
             when(mesaRepository.save(any(Mesa.class))).thenAnswer(invocation -> {
@@ -211,10 +211,10 @@ class MesaServiceTest {
         }
 
         @Test
-        @DisplayName("Debe lanzar RecursoExistenteException si el número de mesa ya existe")
+        @DisplayName("Debe lanzar RecursoExistenteException si el número de mesa activa ya existe")
         void crearMesa_numeroDuplicado_lanzaRecursoExistenteException() {
             CrearMesaDTO dto = new CrearMesaDTO(5, 10L);
-            when(mesaRepository.existsByNumero(5)).thenReturn(true);
+            when(mesaRepository.existsByNumeroAndActivoTrue(5)).thenReturn(true);
 
             assertThatThrownBy(() -> mesaService.crearMesa(dto))
                     .isInstanceOf(RecursoExistenteException.class)
@@ -228,7 +228,7 @@ class MesaServiceTest {
         @DisplayName("Debe lanzar NoEncontradoException si la zona especificada no existe")
         void crearMesa_zonaNoExiste_lanzaNoEncontradoException() {
             CrearMesaDTO dto = new CrearMesaDTO(5, 999L);
-            when(mesaRepository.existsByNumero(5)).thenReturn(false);
+            when(mesaRepository.existsByNumeroAndActivoTrue(5)).thenReturn(false);
             when(mesaEstadoRepository.findByNombre("LIBRE")).thenReturn(Optional.of(estadoLibre));
             when(zonaRepository.findById(999L)).thenReturn(Optional.empty());
 
@@ -350,26 +350,42 @@ class MesaServiceTest {
     class EliminarMesaTests {
 
         @Test
-        @DisplayName("Debe eliminar la mesa por número y publicar evento SSE cuando existe")
-        void eliminarMesa_cuandoExiste_eliminaMesaYPublicaEvento() {
-            when(mesaRepository.existsByNumero(5)).thenReturn(true);
+        @DisplayName("Debe marcar activo=false (soft-delete) y publicar evento SSE cuando existe sin sesión activa")
+        void eliminarMesa_cuandoExisteSinSesionActiva_desactivaMesaYPublicaEvento() {
+            when(mesaRepository.findByNumeroAndActivoTrue(5)).thenReturn(Optional.of(mesa));
+            when(sesionRepository.findByMesaIdAndEstadoNombre(100L, "ACTIVA")).thenReturn(Optional.empty());
 
             mesaService.eliminarMesa(5);
 
-            verify(mesaRepository).deleteByNumero(5);
+            assertThat(mesa.isActivo()).isFalse();
+            verify(mesaRepository).save(mesa);
             verify(eventPublisher).publishEvent(any(SseTopicEvent.class));
         }
 
         @Test
-        @DisplayName("Debe lanzar NoEncontradoException cuando el número de mesa no existe")
+        @DisplayName("Debe lanzar IllegalStateException cuando la mesa tiene una sesión activa")
+        void eliminarMesa_conSesionActiva_lanzaIllegalStateException() {
+            when(mesaRepository.findByNumeroAndActivoTrue(5)).thenReturn(Optional.of(mesa));
+            when(sesionRepository.findByMesaIdAndEstadoNombre(100L, "ACTIVA")).thenReturn(Optional.of(new Sesion()));
+
+            assertThatThrownBy(() -> mesaService.eliminarMesa(5))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("No se puede eliminar la mesa 5 porque tiene una sesión de clientes activa en curso");
+
+            verify(mesaRepository, never()).save(any());
+            verify(eventPublisher, never()).publishEvent(any());
+        }
+
+        @Test
+        @DisplayName("Debe lanzar NoEncontradoException cuando el número de mesa activa no existe")
         void eliminarMesa_cuandoNoExiste_lanzaNoEncontradoException() {
-            when(mesaRepository.existsByNumero(99)).thenReturn(false);
+            when(mesaRepository.findByNumeroAndActivoTrue(99)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> mesaService.eliminarMesa(99))
                     .isInstanceOf(NoEncontradoException.class)
                     .hasMessageContaining("Mesa no encontrada. Numero: 99");
 
-            verify(mesaRepository, never()).deleteByNumero(99);
+            verify(mesaRepository, never()).save(any());
             verify(eventPublisher, never()).publishEvent(any());
         }
     }

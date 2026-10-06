@@ -39,7 +39,7 @@ public class MesaService {
 
     @Transactional(readOnly = true)
     public List<MesaDTO> listarMesas() {
-        List<Mesa> mesas = mesaRepository.findAll();
+        List<Mesa> mesas = mesaRepository.findByActivoTrue();
 
         Map<Long, Sesion> sesionActivaPorMesa = sesionRepository
                 .findByMesaInAndEstadoNombre(mesas, "ACTIVA")
@@ -66,6 +66,7 @@ public class MesaService {
         Mesa mesa = new Mesa();
         mesa.setNumero(crearMesaDTO.numero());
         mesa.setEstado(getEstadoMesa("LIBRE"));
+        mesa.setActivo(true);
 
         Zona zona = zonaRepository.findById(crearMesaDTO.idZona())
                 .orElseThrow(() -> new NoEncontradoException("Zona no encontrada. Id: " + crearMesaDTO.idZona()));
@@ -109,11 +110,16 @@ public class MesaService {
 
     @Transactional
     public void eliminarMesa(int numero) {
-        if (!existeMesa(numero)) {
-            throw new NoEncontradoException("Mesa no encontrada. Numero: " + numero);
+        Mesa mesa = mesaRepository.findByNumeroAndActivoTrue(numero)
+                .orElseThrow(() -> new NoEncontradoException("Mesa no encontrada. Numero: " + numero));
+
+        boolean tieneSesionActiva = sesionRepository.findByMesaIdAndEstadoNombre(mesa.getId(), "ACTIVA").isPresent();
+        if (tieneSesionActiva) {
+            throw new IllegalStateException("No se puede eliminar la mesa " + numero + " porque tiene una sesión de clientes activa en curso");
         }
 
-        mesaRepository.deleteByNumero(numero);
+        mesa.setActivo(false);
+        save(mesa);
         eventPublisher.publishEvent(SseTopicEvent.of(SseTopic.MESAS));
     }
 
@@ -122,7 +128,7 @@ public class MesaService {
     }
 
     public boolean existeMesa(int numero) {
-        return mesaRepository.existsByNumero(numero);
+        return mesaRepository.existsByNumeroAndActivoTrue(numero);
     }
 
     public MesaEstado getEstadoMesa(String nombre) {

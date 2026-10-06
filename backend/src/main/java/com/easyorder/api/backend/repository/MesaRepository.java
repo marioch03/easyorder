@@ -14,9 +14,14 @@ public interface MesaRepository extends JpaRepository<Mesa, Long> {
     @Override
     List<Mesa> findAll();
 
+    @EntityGraph(attributePaths = { "estado", "zona" })
+    List<Mesa> findByActivoTrue();
+
     Optional<Mesa> findByNumero(int numero);
+
+    Optional<Mesa> findByNumeroAndActivoTrue(int numero);
 
     boolean existsByNumero(int numero);
 
-    void deleteByNumero(int numero);
+    boolean existsByNumeroAndActivoTrue(int numero);
 }
