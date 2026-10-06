@@ -1,5 +1,6 @@
 package com.easyorder.api.backend.controller;
 
+import java.net.URI;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -11,14 +12,16 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.easyorder.api.backend.dto.CrearProductoDTO;
 import com.easyorder.api.backend.dto.EditarProductoDTO;
 import com.easyorder.api.backend.dto.ProductoComandaDTO;
 import com.easyorder.api.backend.dto.ProductoDTO;
 import com.easyorder.api.backend.dto.ProductoTipoDTO;
-import com.easyorder.api.backend.model.Producto;
 import com.easyorder.api.backend.service.ProductoService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -35,21 +38,24 @@ public class ProductoController {
     }
 
     @GetMapping("/admin/productos/{id}")
-    public Producto getProducto(@PathVariable Long id) {
-        return productoService.getProducto(id);
-
+    public ResponseEntity<ProductoDTO> getProducto(@PathVariable Long id) {
+        return ResponseEntity.ok(productoService.getProductoDTO(id));
     }
 
     @PostMapping("/admin/productos")
-    public ResponseEntity<Producto> crearProducto(@RequestBody Producto producto) {
-        Producto nuevo = productoService.save(producto);
-        return ResponseEntity.ok(nuevo);
+    public ResponseEntity<ProductoDTO> crearProducto(@Valid @RequestBody CrearProductoDTO dto) {
+        ProductoDTO nuevo = productoService.crearProducto(dto);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(nuevo.getId())
+                .toUri();
+        return ResponseEntity.created(location).body(nuevo);
     }
 
     @PutMapping("/admin/productos/{id}")
     public ResponseEntity<EditarProductoDTO> editarProducto(
             @PathVariable Long id,
-            @RequestBody EditarProductoDTO dto) {
+            @Valid @RequestBody EditarProductoDTO dto) {
 
         return ResponseEntity.ok(
                 productoService.editarProducto(id, dto));

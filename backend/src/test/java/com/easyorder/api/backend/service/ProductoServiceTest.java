@@ -199,6 +199,21 @@ class ProductoServiceTest {
         }
 
         @Test
+        @DisplayName("Debe retornar el ProductoDTO cuando existe el ID")
+        void getProductoDTO_cuandoExiste_retornaProductoDTO() {
+            when(productoRepository.findById(100L)).thenReturn(Optional.of(producto));
+            when(productoAlergenoRepository.findByProducto_IdIn(List.of(100L))).thenReturn(List.of());
+            when(productoGrupoModificadorRepository.findByProducto_IdIn(List.of(100L))).thenReturn(List.of());
+
+            ProductoDTO resultado = productoService.getProductoDTO(100L);
+
+            assertThat(resultado).isNotNull();
+            assertThat(resultado.getId()).isEqualTo(100L);
+            assertThat(resultado.getNombre()).isEqualTo("Burger Clásica");
+            assertThat(resultado.getPrecio()).isEqualTo(12.50);
+        }
+
+        @Test
         @DisplayName("Debe lanzar NoEncontradoException cuando no existe el ID")
         void getProducto_cuandoNoExiste_lanzaNoEncontradoException() {
             when(productoRepository.findById(999L)).thenReturn(Optional.empty());
@@ -206,6 +221,64 @@ class ProductoServiceTest {
             assertThatThrownBy(() -> productoService.getProducto(999L))
                     .isInstanceOf(NoEncontradoException.class)
                     .hasMessageContaining("Producto no encontrado. ID: 999");
+        }
+    }
+
+    @Nested
+    @DisplayName("Tests para crearProducto")
+    class CrearProductoTests {
+
+        @Test
+        @DisplayName("Debe crear producto a partir de CrearProductoDTO y retornar ProductoDTO")
+        void crearProducto_datosValidos_creaProductoYRetornaDTO() {
+            com.easyorder.api.backend.dto.CrearProductoDTO dto = new com.easyorder.api.backend.dto.CrearProductoDTO(
+                    "Burger BBQ",
+                    "Con cebolla caramelizada",
+                    new BigDecimal("14.00"),
+                    10L,
+                    true,
+                    "bbq.jpg"
+            );
+
+            when(productoTipoRepository.findById(10L)).thenReturn(Optional.of(tipoComida));
+            when(productoRepository.save(any(Producto.class))).thenAnswer(i -> {
+                Producto p = i.getArgument(0);
+                p.setId(200L);
+                return p;
+            });
+            when(productoAlergenoRepository.findByProducto_IdIn(List.of(200L))).thenReturn(List.of());
+            when(productoGrupoModificadorRepository.findByProducto_IdIn(List.of(200L))).thenReturn(List.of());
+
+            ProductoDTO resultado = productoService.crearProducto(dto);
+
+            assertThat(resultado).isNotNull();
+            assertThat(resultado.getId()).isEqualTo(200L);
+            assertThat(resultado.getNombre()).isEqualTo("Burger BBQ");
+            assertThat(resultado.getPrecio()).isEqualTo(14.00);
+            assertThat(resultado.getTipoId()).isEqualTo(10L);
+
+            verify(productoRepository).save(any(Producto.class));
+        }
+
+        @Test
+        @DisplayName("Debe lanzar NoEncontradoException si el tipoId especificado no existe")
+        void crearProducto_tipoNoExiste_lanzaNoEncontradoException() {
+            com.easyorder.api.backend.dto.CrearProductoDTO dto = new com.easyorder.api.backend.dto.CrearProductoDTO(
+                    "Burger BBQ",
+                    "Con salsa",
+                    new BigDecimal("14.00"),
+                    999L,
+                    true,
+                    null
+            );
+
+            when(productoTipoRepository.findById(999L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> productoService.crearProducto(dto))
+                    .isInstanceOf(NoEncontradoException.class)
+                    .hasMessageContaining("ProductoTipo no encontrado. ID: 999");
+
+            verify(productoRepository, org.mockito.Mockito.never()).save(any());
         }
     }
 

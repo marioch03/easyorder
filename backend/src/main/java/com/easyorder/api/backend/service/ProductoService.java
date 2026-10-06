@@ -124,14 +124,57 @@ public class ProductoService {
 				.collect(Collectors.toList());
 	}
 
+	@Transactional(readOnly = true)
+	public ProductoDTO getProductoDTO(Long id) {
+		Producto producto = getProducto(id);
+		return mapearAProductoDTO(producto);
+	}
+
 	public Producto getProducto(Long id) {
 		return productoRepository.findById(id)
 				.orElseThrow(() -> new NoEncontradoException("Producto no encontrado. ID: " + id));
 	}
 
 	@CacheEvict(value = { "productos", "productosSimplificados" }, key = TENANT_KEY)
-	public Producto save(Producto producto) {
-		return productoRepository.save(producto);
+	public ProductoDTO crearProducto(com.easyorder.api.backend.dto.CrearProductoDTO dto) {
+		ProductoTipo tipo = productoTipoRepository.findById(dto.tipoId())
+				.orElseThrow(() -> new NoEncontradoException(
+						"ProductoTipo no encontrado. ID: " + dto.tipoId()));
+
+		Producto producto = Producto.builder()
+				.nombre(dto.nombre())
+				.descripcion(dto.descripcion())
+				.precio(dto.precio())
+				.tipo(tipo)
+				.disponible(dto.disponible() != null ? dto.disponible() : true)
+				.imagen(dto.imagen())
+				.build();
+
+		Producto guardado = productoRepository.save(producto);
+		return mapearAProductoDTO(guardado);
+	}
+
+	private ProductoDTO mapearAProductoDTO(Producto producto) {
+		List<AlergenoDTO> alergenos = productoAlergenoRepository
+				.findByProducto_IdIn(List.of(producto.getId())).stream()
+				.map(pa -> new AlergenoDTO(pa.getAlergeno().getNombre(), pa.getTipo()))
+				.toList();
+
+		List<GrupoModificadorDTO> grupos = producto_GrupoModificadorRepository
+				.findByProducto_IdIn(List.of(producto.getId())).stream()
+				.map(pgm -> mapearAGrupoDTO(pgm.getGrupo()))
+				.toList();
+
+		return new ProductoDTO(
+				producto.getId(),
+				producto.getNombre(),
+				producto.getDescripcion(),
+				producto.getPrecio().doubleValue(),
+				producto.isDisponible(),
+				producto.getImagen(),
+				producto.getTipo().getId(),
+				alergenos,
+				grupos);
 	}
 
 	@CacheEvict(value = { "productos", "productosSimplificados" }, key = TENANT_KEY)

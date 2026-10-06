@@ -110,16 +110,7 @@ class ProductoControllerTest {
         @Test
         @DisplayName("Debe retornar HTTP 200 cuando el producto existe")
         void getProducto_cuandoExiste_retorna200() throws Exception {
-            ProductoTipo tipo = new ProductoTipo("Hamburguesas", "Desc");
-            tipo.setId(10L);
-
-            Producto p = new Producto();
-            p.setId(1L);
-            p.setNombre("Burger Clásica");
-            p.setPrecio(new BigDecimal("12.50"));
-            p.setTipo(tipo);
-
-            when(productoService.getProducto(1L)).thenReturn(p);
+            when(productoService.getProductoDTO(1L)).thenReturn(productoDTO);
 
             mockMvc.perform(get("/admin/productos/1"))
                     .andExpect(status().isOk())
@@ -130,12 +121,98 @@ class ProductoControllerTest {
         @Test
         @DisplayName("Debe retornar HTTP 404 cuando el producto no existe")
         void getProducto_cuandoNoExiste_retorna404() throws Exception {
-            when(productoService.getProducto(999L))
+            when(productoService.getProductoDTO(999L))
                     .thenThrow(new NoEncontradoException("Producto no encontrado. ID: 999"));
 
             mockMvc.perform(get("/admin/productos/999"))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.message").value("Producto no encontrado. ID: 999"));
+        }
+    }
+
+    @Nested
+    @DisplayName("POST /admin/productos")
+    class CrearProductoEndpointTests {
+
+        @Test
+        @DisplayName("Debe retornar HTTP 201 Created y Location header cuando los datos son válidos")
+        void crearProducto_datosValidos_retorna201YLocationHeader() throws Exception {
+            com.easyorder.api.backend.dto.CrearProductoDTO request = new com.easyorder.api.backend.dto.CrearProductoDTO(
+                    "Burger Clásica",
+                    "Con queso",
+                    new BigDecimal("12.50"),
+                    10L,
+                    true,
+                    "burger.jpg"
+            );
+
+            when(productoService.crearProducto(any(com.easyorder.api.backend.dto.CrearProductoDTO.class)))
+                    .thenReturn(productoDTO);
+
+            mockMvc.perform(post("/admin/productos")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isCreated())
+                    .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header().exists("Location"))
+                    .andExpect(jsonPath("$.id").value(1L))
+                    .andExpect(jsonPath("$.nombre").value("Burger Clásica"));
+        }
+
+        @Test
+        @DisplayName("Debe retornar HTTP 400 Bad Request cuando el nombre está vacío")
+        void crearProducto_nombreVacio_retorna400BadRequest() throws Exception {
+            com.easyorder.api.backend.dto.CrearProductoDTO request = new com.easyorder.api.backend.dto.CrearProductoDTO(
+                    "",
+                    "Con queso",
+                    new BigDecimal("12.50"),
+                    10L,
+                    true,
+                    "burger.jpg"
+            );
+
+            mockMvc.perform(post("/admin/productos")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors").isArray());
+        }
+
+        @Test
+        @DisplayName("Debe retornar HTTP 400 Bad Request cuando el precio es negativo")
+        void crearProducto_precioNegativo_retorna400BadRequest() throws Exception {
+            com.easyorder.api.backend.dto.CrearProductoDTO request = new com.easyorder.api.backend.dto.CrearProductoDTO(
+                    "Burger",
+                    "Con queso",
+                    new BigDecimal("-5.00"),
+                    10L,
+                    true,
+                    "burger.jpg"
+            );
+
+            mockMvc.perform(post("/admin/productos")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors").isArray());
+        }
+
+        @Test
+        @DisplayName("Debe retornar HTTP 400 Bad Request cuando el tipoId es nulo")
+        void crearProducto_sinTipoId_retorna400BadRequest() throws Exception {
+            com.easyorder.api.backend.dto.CrearProductoDTO request = new com.easyorder.api.backend.dto.CrearProductoDTO(
+                    "Burger",
+                    "Con queso",
+                    new BigDecimal("12.50"),
+                    null,
+                    true,
+                    "burger.jpg"
+            );
+
+            mockMvc.perform(post("/admin/productos")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors").isArray());
         }
     }
 
@@ -155,6 +232,18 @@ class ProductoControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.nombre").value("Burger Premium"))
                     .andExpect(jsonPath("$.precio").value(16.0));
+        }
+
+        @Test
+        @DisplayName("Debe retornar HTTP 400 si los datos de edición son inválidos (nombre vacío)")
+        void editarProducto_datosInvalidos_retorna400() throws Exception {
+            EditarProductoDTO request = new EditarProductoDTO(1L, "", "Desc", 10.0, 10L, true);
+
+            mockMvc.perform(put("/admin/productos/1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors").isArray());
         }
 
         @Test
