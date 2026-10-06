@@ -17,6 +17,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.easyorder.api.backend.ratelimit.RateLimitFilter;
+
 import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 
@@ -29,6 +31,7 @@ public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final SessionCodeFilter sessionCodeFilter;
     private final TenantFilter tenantFilter;
+    private final RateLimitFilter rateLimitFilter;
     private final AuthenticationProvider authenticationProvider;
 
     @Value("${app.cors.allowed-origins}")
@@ -55,7 +58,8 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(tenantFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(jwtAuthFilter, TenantFilter.class)
-                .addFilterBefore(sessionCodeFilter, TenantFilter.class);
+                .addFilterBefore(sessionCodeFilter, TenantFilter.class)
+                .addFilterBefore(rateLimitFilter, SessionCodeFilter.class);
 
         return http.build();
     }
@@ -74,7 +78,8 @@ public class SecurityConfig {
         configuration.setAllowedHeaders(
                 List.of("Authorization", "Content-Type", "Accept", "X-Requested-With", "X-Session-Code",
                         "X-Tenant-Slug", "Idempotency-Key", "X-Idempotency-Key"));
-        configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setExposedHeaders(List.of("Authorization", "Content-Type", "Retry-After",
+                "X-RateLimit-Limit", "X-RateLimit-Remaining", "X-RateLimit-Reset"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
