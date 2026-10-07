@@ -33,7 +33,11 @@ public class SessionCodeFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
 
-        final String sessionCode = request.getHeader(SESSION_HEADER);
+        String sessionCode = request.getHeader(SESSION_HEADER);
+        if ((sessionCode == null || sessionCode.isBlank())
+                && (request.getServletPath().startsWith("/sse/") || request.getServletPath().startsWith("/api/v1/sse/"))) {
+            sessionCode = request.getParameter("sessionCode");
+        }
 
         if (sessionCode == null || sessionCode.isBlank()) {
             filterChain.doFilter(request, response);
@@ -44,7 +48,15 @@ public class SessionCodeFilter extends OncePerRequestFilter {
         try {
             sesion = sesionService.getSesionActivaParaAutenticacion(sessionCode);
         } catch (NoEncontradoException e) {
-            response.sendError(HttpStatus.UNAUTHORIZED.value(), "Invalid session code");
+            if (request.getHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) != null) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/problem+json");
+            response.getWriter().write("""
+                    {"type":"about:blank","title":"Unauthorized","status":401,"detail":"Invalid session code","message":"Invalid session code"}
+                    """);
             return;
         }
 
@@ -63,6 +75,7 @@ public class SessionCodeFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return !request.getServletPath().startsWith("/api/v1/cliente/");
+        String path = request.getServletPath();
+        return !path.startsWith("/api/v1/cliente/") && !path.startsWith("/sse/") && !path.startsWith("/api/v1/sse/");
     }
 }

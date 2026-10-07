@@ -31,6 +31,7 @@ public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final SessionCodeFilter sessionCodeFilter;
     private final TenantFilter tenantFilter;
+    private final SseTicketFilter sseTicketFilter;
     private final RateLimitFilter rateLimitFilter;
     private final AuthenticationProvider authenticationProvider;
 
@@ -44,12 +45,13 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()
+                        .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/v1/auth/login", "/api/v1/auth/refresh", "/api/v1/auth/logout")
                         .permitAll()
                         .requestMatchers("/api/v1/auth/register").hasAuthority("ADMIN")
                         .requestMatchers("/api/v1/cliente/**").hasRole("CUSTOMER")
                         .requestMatchers("/api/v1/admin/**").hasAnyAuthority("ADMIN", "PERSONAL", "KDS")
-                        .requestMatchers("/api/v1/sse/**").authenticated()
+                        .requestMatchers("/api/v1/sse/**", "/sse/**").authenticated()
                         .requestMatchers("/api/v1/public/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated())
@@ -57,6 +59,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(tenantFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(sseTicketFilter, TenantFilter.class)
                 .addFilterAfter(jwtAuthFilter, TenantFilter.class)
                 .addFilterBefore(sessionCodeFilter, TenantFilter.class)
                 .addFilterBefore(rateLimitFilter, SessionCodeFilter.class);
