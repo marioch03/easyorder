@@ -35,7 +35,7 @@ public class SessionCodeFilter extends OncePerRequestFilter {
 
         String sessionCode = request.getHeader(SESSION_HEADER);
         if ((sessionCode == null || sessionCode.isBlank())
-                && (request.getServletPath().startsWith("/sse/") || request.getServletPath().startsWith("/api/v1/sse/"))) {
+                && request.getServletPath().startsWith("/api/v1/sse/")) {
             sessionCode = request.getParameter("sessionCode");
         }
 
@@ -76,6 +76,6 @@ public class SessionCodeFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
-        return !path.startsWith("/api/v1/cliente/") && !path.startsWith("/sse/") && !path.startsWith("/api/v1/sse/");
+        return !path.startsWith("/api/v1/cliente/") && !path.startsWith("/api/v1/sse/");
     }
 }

@@ -74,7 +74,7 @@ public class SseTicketFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
-        return !path.startsWith("/sse/stream") && !path.startsWith("/api/v1/sse/stream");
+        return !path.startsWith("/api/v1/sse/stream");
     }
 
     @Override

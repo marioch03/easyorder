@@ -16,18 +16,20 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import com.easyorder.api.backend.dto.SseTicketResponse;
 import com.easyorder.api.backend.dto.SseTopic;
 import com.easyorder.api.backend.service.SseNotificationService;
+import com.easyorder.api.backend.service.SseSecurityService;
 import com.easyorder.api.backend.service.SseTicketService;
 import com.easyorder.api.backend.tenant.TenantContext;
 
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping({"/sse", "/api/v1/sse"})
+@RequestMapping("/sse")
 @RequiredArgsConstructor
 public class SseController {
 
   private final SseNotificationService sseNotificationService;
   private final SseTicketService sseTicketService;
+  private final SseSecurityService sseSecurityService;
 
   @PostMapping("/ticket")
   public ResponseEntity<SseTicketResponse> generarTicket(Authentication authentication) {
@@ -44,8 +46,10 @@ public class SseController {
   }
 
   @GetMapping(value = "/stream/{topic}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-  public SseEmitter stream(@PathVariable String topic) {
+  public SseEmitter stream(@PathVariable String topic, Authentication authentication) {
     SseTopic sseTopic = SseTopic.fromValue(topic);
+
+    sseSecurityService.validarAccesoTopic(sseTopic, authentication);
 
     Long tenantId = TenantContext.get();
 

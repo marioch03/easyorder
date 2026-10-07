@@ -46,7 +46,7 @@ class SseTicketFilterTest {
     @DisplayName("Ticket válido en /sse/stream/{topic} establece TenantContext y Authentication y continúa la cadena")
     void doFilterInternal_ticketValido_estableceContextos() throws ServletException, IOException {
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setServletPath("/sse/stream/pedidos");
+        request.setServletPath("/api/v1/sse/stream/pedidos");
         request.setParameter("ticket", "test-valid-ticket");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -75,7 +75,7 @@ class SseTicketFilterTest {
     @DisplayName("Ticket inválido o expirado responde HTTP 401 Unauthorized y no continúa la cadena")
     void doFilterInternal_ticketInvalido_retorna401() throws ServletException, IOException {
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setServletPath("/sse/stream/pedidos");
+        request.setServletPath("/api/v1/sse/stream/pedidos");
         request.setParameter("ticket", "test-invalid-ticket");
         MockHttpServletResponse response = new MockHttpServletResponse();
         MockFilterChain filterChain = new MockFilterChain();
@@ -93,7 +93,7 @@ class SseTicketFilterTest {
     @DisplayName("Petición a /sse/stream sin parámetro ticket continúa la cadena sin autenticar por ticket")
     void doFilterInternal_sinTicket_continuaCadena() throws ServletException, IOException {
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setServletPath("/sse/stream/pedidos");
+        request.setServletPath("/api/v1/sse/stream/pedidos");
         MockHttpServletResponse response = new MockHttpServletResponse();
         MockFilterChain filterChain = new MockFilterChain();
 

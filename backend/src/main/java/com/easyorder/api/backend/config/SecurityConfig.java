@@ -51,7 +51,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/register").hasAuthority("ADMIN")
                         .requestMatchers("/api/v1/cliente/**").hasRole("CUSTOMER")
                         .requestMatchers("/api/v1/admin/**").hasAnyAuthority("ADMIN", "PERSONAL", "KDS")
-                        .requestMatchers("/api/v1/sse/**", "/sse/**").authenticated()
+                        .requestMatchers("/api/v1/sse/**").authenticated()
                         .requestMatchers("/api/v1/public/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated())
