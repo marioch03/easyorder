@@ -79,6 +79,9 @@ export function useSseSubscription({ topic, onRefresh }: SseOptions) {
       return;
     }
 
+    let hasConnectedOnce = false;
+    let lastEventId: string | null = null;
+
     const scheduleRefresh = () => {
       if (refreshTimeoutRef.current !== null) {
         return;
@@ -119,10 +122,30 @@ export function useSseSubscription({ topic, onRefresh }: SseOptions) {
           console.debug(
             `[SSE] Conexión nativa establecida con éxito. topic=${topic}`,
           );
+
+          // [SSE-03] Si es una reconexión tras pérdida de enlace, reconciliar estado inmediatamente
+          if (hasConnectedOnce) {
+            console.info(
+              `[SSE] Reconexión exitosa detectada. Reconciliando estado de la aplicación. topic=${topic}, lastEventId=${lastEventId}`,
+            );
+            scheduleRefresh();
+          }
+          hasConnectedOnce = true;
         };
 
-        es.addEventListener(SSE_REFRESH_EVENT, () => {
-          console.debug(`[SSE] Evento refresh recibido. topic=${topic}`);
+        es.addEventListener("connected", (event: MessageEvent) => {
+          if (event.lastEventId) {
+            lastEventId = event.lastEventId;
+          }
+        });
+
+        es.addEventListener(SSE_REFRESH_EVENT, (event: MessageEvent) => {
+          if (event.lastEventId) {
+            lastEventId = event.lastEventId;
+          }
+          console.debug(
+            `[SSE] Evento refresh recibido. topic=${topic}, eventId=${event.lastEventId}`,
+          );
           scheduleRefresh();
         });
 

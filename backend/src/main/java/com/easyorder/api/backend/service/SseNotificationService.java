@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ public class SseNotificationService {
   private static final String EVENT_REFRESH = "refresh";
   private static final String DATA_REFRESH = "refresh";
 
+  private final AtomicLong eventSequence = new AtomicLong(System.currentTimeMillis());
   private final Map<String, List<SseEmitter>> topicEmitters = new ConcurrentHashMap<>();
 
   private String buildKey(Long tenantId, String topic) {
@@ -54,8 +56,10 @@ public class SseNotificationService {
 
     try {
 
+      String connectEventId = String.valueOf(System.currentTimeMillis());
       emitter.send(
           SseEmitter.event()
+              .id(connectEventId)
               .name("connected")
               .data("Conexión establecida con éxito"));
 
@@ -89,9 +93,12 @@ public class SseNotificationService {
       return;
     }
 
+    String eventId = System.currentTimeMillis() + "-" + eventSequence.incrementAndGet();
+
     log.debug(
-        "Enviando refresh SSE. canal={}, clientes={}",
+        "Enviando refresh SSE. canal={}, eventId={}, clientes={}",
         channelKey,
+        eventId,
         emitters.size());
 
     for (SseEmitter emitter : emitters) {
@@ -100,6 +107,7 @@ public class SseNotificationService {
 
         emitter.send(
             SseEmitter.event()
+                .id(eventId)
                 .name(EVENT_REFRESH)
                 .data(DATA_REFRESH));
 
